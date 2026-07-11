@@ -1,0 +1,13 @@
+{
+  "name": "Caltrack",
+  "short_name": "Caltrack",
+  "description": "Calorías, proteína y déficit sin perder el historial",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0f13",
+  "theme_color": "#0d0f13",
+  "icons": [
+    {"src": "icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable"}
+  ]
+}
