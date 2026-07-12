@@ -1,11 +1,11 @@
 # 🥩 Caltrack
 
-Caltrack es una web móvil instalable para registrar calorías, proteína, peso y entrenamientos. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
+Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
 
 ## Usarla en iPhone
 
 1. Abre la web publicada en Safari.
-2. Completa peso, mantenimiento y objetivo.
+2. Completa tus rangos diarios. Peso y mantenimiento son opcionales.
 3. Pulsa `Instalar` o usa `Compartir > Añadir a pantalla de inicio`.
 4. Ábrela desde el icono de Caltrack como cualquier otra app.
 
@@ -22,7 +22,7 @@ Esto implica que Safari en el iPhone y el navegador del Mac tienen historiales s
 3. Guarda el JSON en iCloud Drive.
 4. Usa `Restaurar copia` en el nuevo dispositivo.
 
-La exportación CSV contiene las comidas y sirve para análisis o una hoja de cálculo. La copia JSON incluye el perfil, comidas, peso, entrenamientos y fotos.
+La exportación CSV contiene las comidas y sirve para análisis o una hoja de cálculo. La copia JSON incluye el perfil, comidas, composición corporal, fuerza, entrenamientos y fotos.
 
 ## Registro rápido
 
@@ -40,10 +40,12 @@ Caltrack reconoce alimentos frecuentes en español e inglés. Si estima valores,
 ## Funciones
 
 - calorías contra objetivo y mantenimiento
-- proteína diaria según peso
+- rangos diarios de calorías y proteína
 - gráficos de siete días
 - historial diario detallado
-- peso y entrenamiento
+- tendencia de grasa corporal, peso y cintura
+- seguimiento de cinco marcas de fuerza
+- objetivo semanal de entrenamientos
 - fotos de comidas
 - análisis de adherencia de 14 días
 - preguntas sobre progreso
@@ -66,4 +68,3 @@ La publicación usa GitHub Pages mediante [pages.yml](.github/workflows/pages.ym
 ## Límite importante
 
 Caltrack organiza estimaciones, no sustituye consejo médico o nutricional. Un déficit concreto puede ser adecuado para una persona y no para otra. El sistema bloquea déficits superiores a 1.000 kcal y señala tendencias agresivas.
-

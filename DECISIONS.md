@@ -14,9 +14,9 @@ La interfaz usa HTML, CSS, JavaScript e IndexedDB nativos. GitHub Pages sirve ar
 
 El catálogo interno cubre alimentos frecuentes en español e inglés. Cada estimación conserva su cantidad asumida. Un alimento desconocido necesita calorías explícitas. Nunca se rellena un valor inventado en silencio.
 
-### Objetivo por día
+### Rangos por día
 
-El mantenimiento base viene del perfil. El gasto de un entrenamiento registrado se suma al mantenimiento del día. El objetivo diario resta el déficit configurado. Un override diario queda previsto en la base para casos especiales.
+Caltrack usa rangos absolutos de calorías y proteína porque son más útiles que recalcularlos desde un peso posiblemente desactualizado. Peso y mantenimiento quedan opcionales. Si falta mantenimiento, la app muestra una referencia derivada del máximo calórico más el déficit configurado.
 
 ### Privacidad y portabilidad
 
@@ -25,3 +25,13 @@ No hay autenticación porque no hay datos remotos. Cada navegador conserva su hi
 ### Diseño
 
 Se replica el sistema visual del tuit: negro cálido, tarjetas carbón, verde para éxito, coral para exceso, azul para proteína, barras semanales y filas densas. La captura rápida se coloca antes del gráfico porque el valor diario empieza por registrar sin fricción.
+
+## 2026-07-12
+
+### Progreso útil para el objetivo físico
+
+La pantalla principal añade tendencia de composición corporal, objetivo semanal de fuerza y cinco ejercicios comparables. El criterio es ver dirección y adherencia, no reaccionar a una medición aislada.
+
+### Importación privada
+
+El historial personal se entrega en un QR local ignorado por Git. El contenido viaja en el fragmento de la URL, no llega a GitHub Pages, se guarda en IndexedDB y el fragmento se elimina de la barra antes de mostrar la confirmación. No se incluyen fármacos, dosis ni recomendaciones médicas.

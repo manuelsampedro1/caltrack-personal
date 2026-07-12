@@ -59,6 +59,11 @@
         <div id="proteinChart" class="chart protein-chart" aria-label="Gráfico de proteína"></div>
       </section>
 
+      <section class="progress-grid" aria-label="Progreso físico">
+        <article id="bodyCard" class="metric-card card" aria-live="polite"></article>
+        <article id="strengthCard" class="metric-card card" aria-live="polite"></article>
+      </section>
+
       <section id="todayCard" class="day-card card" aria-live="polite"></section>
 
       <section class="coach card" aria-labelledby="coachTitle">
@@ -91,13 +96,20 @@
 
   <dialog id="settingsDialog" class="dialog">
     <form method="dialog" class="dialog-head"><div><p class="eyebrow">TU PLAN</p><h2>Objetivos</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></form>
-    <p class="muted dialog-intro">Configura tu base. El entrenamiento del día se suma al mantenimiento y el objetivo conserva el déficit elegido.</p>
+    <p class="muted dialog-intro">Configura rangos realistas. Caltrack premiará la constancia, no comer cada vez menos.</p>
     <form id="settingsForm" class="settings-form">
       <label>Tu nombre<input name="name" autocomplete="name" placeholder="Manuel"></label>
-      <label>Peso actual, kg<input name="weight_kg" type="number" min="35" max="250" step="0.1" required></label>
-      <label>Mantenimiento base, kcal<input name="maintenance_kcal" type="number" min="1200" max="6000" step="10" required></label>
+      <label>Peso actual, kg, opcional<input name="weight_kg" type="number" min="35" max="250" step="0.1"></label>
+      <label>Mantenimiento base, kcal, opcional<input name="maintenance_kcal" type="number" min="1200" max="6000" step="10"></label>
       <label>Déficit diario, kcal<input name="deficit_kcal" type="number" min="100" max="1000" step="50" required></label>
-      <label>Proteína, g por kg<input name="protein_g_per_kg" type="number" min="1" max="3" step="0.1" required></label>
+      <label>Calorías mínimas<input name="calorie_goal_min" type="number" min="1000" max="6000" step="50" required></label>
+      <label>Calorías máximas<input name="calorie_goal_max" type="number" min="1000" max="6000" step="50" required></label>
+      <label>Proteína mínima, g<input name="protein_goal_min" type="number" min="40" max="400" step="5" required></label>
+      <label>Proteína máxima, g<input name="protein_goal_max" type="number" min="40" max="400" step="5" required></label>
+      <label>Objetivo de grasa, %<input name="body_fat_goal" type="number" min="5" max="50" step="0.5" required></label>
+      <label>Meta ambiciosa, %<input name="body_fat_stretch_goal" type="number" min="5" max="50" step="0.5" required></label>
+      <label>Días de fuerza por semana<input name="training_days_goal" type="number" min="1" max="7" step="1" required></label>
+      <input name="protein_g_per_kg" type="hidden" value="2">
       <div class="plan-preview" id="planPreview"></div>
       <button class="primary full" type="submit">Guardar mi plan</button>
     </form>
@@ -109,18 +121,25 @@
   </dialog>
 
   <dialog id="toolsDialog" class="dialog compact-dialog">
-    <form method="dialog" class="dialog-head"><div><p class="eyebrow">AÑADIR AL DÍA</p><h2 id="toolsTitle">Peso o entrenamiento</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></form>
+    <form method="dialog" class="dialog-head"><div><p class="eyebrow">AÑADIR AL DÍA</p><h2 id="toolsTitle">Medición o entrenamiento</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></form>
     <div class="tool-panels">
-      <form id="weightForm" class="tool-form">
-        <h3>⚖ Peso</h3>
-        <label>Kilogramos<input name="weight_kg" type="number" min="35" max="250" step="0.01" required></label>
-        <button class="secondary" type="submit">Registrar peso</button>
+      <form id="bodyForm" class="tool-form">
+        <h3>⚖ Composición</h3>
+        <div class="two-fields"><label>Peso, kg<input name="weight_kg" type="number" min="35" max="250" step="0.01"></label><label>Grasa, %<input name="body_fat_pct" type="number" min="3" max="70" step="0.1"></label></div>
+        <label>Cintura, cm<input name="waist_cm" type="number" min="40" max="200" step="0.1"></label>
+        <button class="secondary" type="submit">Guardar medición</button>
       </form>
       <form id="exerciseForm" class="tool-form">
         <h3>🏋 Entrenamiento</h3>
         <label>Tipo<input name="name" placeholder="Fuerza, torso" required></label>
         <div class="two-fields"><label>Minutos<input name="duration_min" type="number" min="0" step="5" value="60"></label><label>kcal estimadas<input name="calories_burned" type="number" min="0" step="10" value="250"></label></div>
         <button class="secondary" type="submit">Registrar entrenamiento</button>
+      </form>
+      <form id="strengthForm" class="tool-form">
+        <h3>↗ Marca de fuerza</h3>
+        <label>Ejercicio<select name="exercise"><option>Press banca</option><option>Press inclinado en máquina</option><option>Jalón al pecho</option><option>Hack squat</option><option>Remo con pecho apoyado</option></select></label>
+        <div class="two-fields"><label>Peso, kg<input name="weight_kg" type="number" min="1" max="500" step="0.5" required></label><label>Repeticiones<input name="reps" type="number" min="1" max="100" step="1" required></label></div>
+        <button class="secondary" type="submit">Guardar marca</button>
       </form>
     </div>
   </dialog>

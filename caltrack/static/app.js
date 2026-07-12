@@ -20,7 +20,7 @@ function toast(message, error = false) {
   el.hidden = false;
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { el.hidden = true; }, 3500);
-  if (navigator.vibrate) navigator.vibrate(error ? [35, 45, 35] : 25);
+  if (navigator.vibrate && navigator.userActivation?.hasBeenActive) navigator.vibrate(error ? [35, 45, 35] : 25);
 }
 
 function setBusy(form, busy) {
@@ -41,16 +41,34 @@ async function load() {
 }
 
 function render() {
-  const {settings, days, today, analysis} = state.data;
-  const goal = Math.round(settings.maintenance_kcal - settings.deficit_kcal);
-  $("#goalLine").textContent = `objetivo ${number(goal)} kcal · ${number(settings.weight_kg * settings.protein_g_per_kg)} g proteína`;
+  const {settings, days, today, analysis, body, strength, training} = state.data;
+  $("#goalLine").textContent = `${number(settings.calorie_goal_min)}-${number(settings.calorie_goal_max)} kcal · ${number(settings.protein_goal_min)}-${number(settings.protein_goal_max)} g proteína`;
   renderChart($("#calorieChart"), days, "calories", "maintenance_kcal", "target_kcal", false);
   renderChart($("#proteinChart"), days, "protein_g", "protein_goal_g", "protein_goal_g", true);
+  renderBody(body, training);
+  renderStrength(strength);
   $("#todayCard").innerHTML = dayCard(today, true);
   wireEntryActions($("#todayCard"));
   renderCoach(analysis);
   $("#history").innerHTML = days.slice(0, -1).reverse().map(historyDay).join("");
   populateSettings(settings);
+}
+
+function renderBody(body, training) {
+  const latest = body.latest_fat;
+  const entries = body.entries.filter(item => item.body_fat_pct != null).slice(-8);
+  const max = Math.max(30, ...entries.map(item => item.body_fat_pct));
+  const points = entries.map(item => `<div class="body-point"><strong>${number(item.body_fat_pct, 1)}%</strong><i style="height:${Math.max(6,item.body_fat_pct/max*80)}%"></i><span>${new Intl.DateTimeFormat("es-ES",{day:"numeric",month:"short"}).format(new Date(`${item.measured_at.slice(0,10)}T12:00:00`))}</span></div>`).join("");
+  $("#bodyCard").innerHTML = `<div class="metric-head"><div><p class="eyebrow">COMPOSICIÓN CORPORAL</p><h2>La tendencia, no un pesaje</h2></div><div class="goal-stack">objetivo ${number(body.goal_pct,1)}%<br>meta ${number(body.stretch_goal_pct,1)}%</div></div>
+    ${latest ? `<div class="metric-big">${number(latest.body_fat_pct,1)}<small>% grasa</small></div><div class="body-timeline">${points}</div><div class="metric-footer"><span>${body.change_pct < 0 ? "↓" : ""} ${number(Math.abs(body.change_pct || 0),1)} puntos desde el primer registro</span><span class="training-chip">🏋 ${training.days}/${training.goal} días esta semana</span></div>` : `<div class="empty">Añade tu primera medición de grasa corporal. Las básculas fluctúan, la tendencia mensual importa más.</div>`}
+    <div class="day-tools"><button class="secondary" data-open-tools>+ nueva medición</button></div>`;
+  $("#bodyCard [data-open-tools]")?.addEventListener("click", () => $("#toolsDialog").showModal());
+}
+
+function renderStrength(strength) {
+  const rows = strength.focus.map(item => `<div class="strength-row"><div><strong>${esc(item.exercise)}</strong><br><span>${item.count ? `${item.count} registros` : "sin registros"}</span></div><strong>${item.best ? `${number(item.best.weight_kg,1)} kg × ${number(item.best.reps)}` : "-"}</strong></div>`).join("");
+  $("#strengthCard").innerHTML = `<div class="metric-head"><div><p class="eyebrow">FUERZA</p><h2>Cinco marcas clave</h2></div><span class="training-chip">mejor serie</span></div><div class="strength-list">${rows}</div><div class="day-tools"><button class="secondary" data-open-tools>+ registrar marca</button></div>`;
+  $("#strengthCard [data-open-tools]")?.addEventListener("click", () => $("#toolsDialog").showModal());
 }
 
 function renderChart(container, days, valueKey, maxKey, targetKey, protein) {
@@ -83,13 +101,13 @@ function dayCard(day, expanded) {
   const exercises = day.exercises.map(exercise => `<div class="workout"><strong>🏋 ${esc(exercise.name)} · ${number(exercise.duration_min)} min · ~${number(exercise.calories_burned)} kcal</strong><span>${esc(exercise.note || "Entrenamiento añadido al mantenimiento del día")}</span></div>`).join("");
   const photos = day.entries.filter(entry => entry.photo_path).map(entry => `<img src="${esc(photoUrl(entry.photo_path))}" alt="${esc(entry.name)}" loading="lazy">`).join("");
   return `<div class="day-head">
-      <div class="day-title"><h2>${esc(dayName(day.day, true))}</h2><span class="pill">${day.exercises.length ? "ENTRENO" : "DÍA BASE"}</span><span class="muted">⚖ ${number(day.weight_kg, 2)} kg</span></div>
-      <div class="day-total"><strong class="${over ? "over" : ""}">${number(day.calories)}</strong> / ${number(day.target_kcal)} kcal<small>objetivo ${number(day.target_kcal)}</small></div>
+      <div class="day-title"><h2>${esc(dayName(day.day, true))}</h2><span class="pill">${day.exercises.length ? "ENTRENO" : "DÍA BASE"}</span>${day.weight_kg != null ? `<span class="muted">⚖ ${number(day.weight_kg, 2)} kg</span>` : ""}</div>
+      <div class="day-total"><strong class="${over ? "over" : ""}">${number(day.calories)}</strong> / ${number(day.target_kcal)} kcal<small>rango ${number(day.calorie_floor_kcal)}-${number(day.target_kcal)}</small></div>
     </div>
     <div class="progress-wrap"><div class="progress"><span class="${over ? "over" : ""}" style="width:${caloriePercent}%"></span></div><i class="target-marker" style="left:${targetPercent}%"></i></div>
     <div class="progress-labels"><span>${number(day.calories)} comido</span><span>mantenimiento ${number(day.maintenance_kcal)}</span></div>
     <div class="progress slim"><span class="blue" style="width:${proteinPercent}%"></span></div>
-    <div class="progress-labels"><span>${number(day.protein_g, 1)} g proteína</span><span>objetivo ${number(day.protein_goal_g)} g ${day.protein_hit ? "✓" : ""}</span></div>
+    <div class="progress-labels"><span>${number(day.protein_g, 1)} g proteína</span><span>rango ${number(day.protein_goal_g)}-${number(day.protein_goal_max_g)} g ${day.protein_hit ? "✓" : ""}</span></div>
     <p class="summary-line">${day.items} ${day.items === 1 ? "entrada" : "entradas"} · <span class="${deficitClass}">déficit ${number(day.deficit_kcal)} kcal ${day.deficit_kcal >= state.data.settings.deficit_kcal ? "✓" : ""}</span></p>
     ${exercises}
     <div class="entries">${day.entries.length ? day.entries.map(entry => entryRow(entry, day.target_kcal, expanded)).join("") : `<div class="empty">Tu día empieza aquí. Registra lo primero que comas o bebas.</div>`}</div>
@@ -138,16 +156,15 @@ function wireEntryActions(root) {
 
 function populateSettings(settings) {
   const form = $("#settingsForm");
-  ["name","weight_kg","maintenance_kcal","deficit_kcal","protein_g_per_kg"].forEach(key => { form.elements[key].value = settings[key]; });
+  ["name","weight_kg","maintenance_kcal","deficit_kcal","protein_g_per_kg","calorie_goal_min","calorie_goal_max","protein_goal_min","protein_goal_max","body_fat_goal","body_fat_stretch_goal","training_days_goal"].forEach(key => { form.elements[key].value = settings[key] ?? ""; });
   previewPlan();
 }
 
 function previewPlan() {
   const form = $("#settingsForm");
-  const maintenance = Number(form.elements.maintenance_kcal.value || 0);
-  const deficit = Number(form.elements.deficit_kcal.value || 0);
-  const protein = Number(form.elements.weight_kg.value || 0) * Number(form.elements.protein_g_per_kg.value || 0);
-  $("#planPreview").innerHTML = `Día base: <strong>${number(maintenance - deficit)} kcal</strong> · mantenimiento ${number(maintenance)} · <strong>${number(protein)} g proteína</strong>`;
+  const kcalMin = Number(form.elements.calorie_goal_min.value || 0), kcalMax = Number(form.elements.calorie_goal_max.value || 0);
+  const proteinMin = Number(form.elements.protein_goal_min.value || 0), proteinMax = Number(form.elements.protein_goal_max.value || 0);
+  $("#planPreview").innerHTML = `Rango diario: <strong>${number(kcalMin)}-${number(kcalMax)} kcal</strong> · <strong>${number(proteinMin)}-${number(proteinMax)} g proteína</strong> · meta ${number(form.elements.body_fat_goal.value,1)}% grasa`;
 }
 
 $("#quickAddForm").addEventListener("submit", async event => {
@@ -186,16 +203,18 @@ $("#settingsForm").addEventListener("submit", async event => {
   event.preventDefault();
   const form = event.currentTarget;
   const data = Object.fromEntries(new FormData(form));
-  ["weight_kg","maintenance_kcal","deficit_kcal","protein_g_per_kg"].forEach(key => data[key] = Number(data[key]));
+  ["deficit_kcal","protein_g_per_kg","calorie_goal_min","calorie_goal_max","protein_goal_min","protein_goal_max","body_fat_goal","body_fat_stretch_goal","training_days_goal"].forEach(key => data[key] = Number(data[key]));
+  ["weight_kg","maintenance_kcal"].forEach(key => data[key] = data[key] === "" ? null : Number(data[key]));
   setBusy(form, true);
   try { await api("/api/settings", {method:"POST", body:JSON.stringify(data)}); $("#settingsDialog").close(); toast("Plan guardado"); await load(); }
   catch (error) { toast(error.message, true); }
   finally { setBusy(form, false); }
 });
 
-$("#weightForm").addEventListener("submit", async event => {
+$("#bodyForm").addEventListener("submit", async event => {
   event.preventDefault(); const form = event.currentTarget;
-  try { await api("/api/weight", {method:"POST", body:JSON.stringify({weight_kg:Number(form.elements.weight_kg.value)})}); $("#toolsDialog").close(); form.reset(); toast("Peso guardado"); await load(); }
+  const body = Object.fromEntries(new FormData(form));
+  try { await api("/api/body", {method:"POST", body:JSON.stringify(body)}); $("#toolsDialog").close(); form.reset(); toast("Medición guardada"); await load(); }
   catch (error) { toast(error.message, true); }
 });
 
@@ -203,6 +222,13 @@ $("#exerciseForm").addEventListener("submit", async event => {
   event.preventDefault(); const form = event.currentTarget;
   const body = {name:form.elements.name.value, duration_min:Number(form.elements.duration_min.value), calories_burned:Number(form.elements.calories_burned.value)};
   try { await api("/api/exercise", {method:"POST", body:JSON.stringify(body)}); $("#toolsDialog").close(); form.reset(); toast("Entrenamiento guardado"); await load(); }
+  catch (error) { toast(error.message, true); }
+});
+
+$("#strengthForm").addEventListener("submit", async event => {
+  event.preventDefault(); const form = event.currentTarget;
+  const body = {exercise:form.elements.exercise.value, weight_kg:Number(form.elements.weight_kg.value), reps:Number(form.elements.reps.value)};
+  try { await api("/api/strength", {method:"POST", body:JSON.stringify(body)}); $("#toolsDialog").close(); form.reset(); toast("Marca guardada"); await load(); }
   catch (error) { toast(error.message, true); }
 });
 
@@ -264,4 +290,19 @@ $("#installButton").addEventListener("click", async () => {
 });
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js", {scope:"./"}).catch(() => {});
-load();
+
+async function importPrivateSetup() {
+  const encoded = new URLSearchParams(location.hash.slice(1)).get("setup");
+  if (!encoded) return;
+  history.replaceState(null, "", `${location.pathname}${location.search}`);
+  try {
+    const base64 = encoded.replace(/-/g, "+").replace(/_/g, "/");
+    const bytes = Uint8Array.from(atob(base64), char => char.charCodeAt(0));
+    const data = JSON.parse(new TextDecoder().decode(bytes));
+    if (!confirm("¿Importar tu configuración privada y el historial de progreso en este dispositivo?")) return;
+    await window.localCaltrack.applySetup(data);
+    toast("Datos privados importados");
+  } catch (error) { toast(error.message || "No se pudo importar la configuración", true); }
+}
+
+importPrivateSetup().then(load);

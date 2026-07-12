@@ -1,4 +1,4 @@
-const CACHE = "caltrack-mobile-v2";
+const CACHE = "caltrack-mobile-v3";
 const SHELL = ["./", "styles.css", "local-store.js", "app.js", "icon.svg", "icon.png", "apple-touch-icon.png", "manifest.webmanifest"];
 self.addEventListener("install", event => event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL))));
 self.addEventListener("activate", event => event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== CACHE).map(key => caches.delete(key))))));

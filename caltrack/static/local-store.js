@@ -1,11 +1,13 @@
 class LocalCaltrackStore {
   constructor() {
     this.name = "caltrack-mobile";
-    this.version = 1;
+    this.version = 2;
     this.defaults = {
-      name: "", weight_kg: 75, maintenance_kcal: 2300, deficit_kcal: 500,
+      name: "", weight_kg: null, maintenance_kcal: null, deficit_kcal: 500,
       protein_g_per_kg: 2, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      locale: "es", configured: false
+      locale: "es", configured: false, calorie_goal_min: 1800, calorie_goal_max: 2000,
+      protein_goal_min: 160, protein_goal_max: 190, body_fat_goal: 15,
+      body_fat_stretch_goal: 13, training_days_goal: 4
     };
     this.foods = [
       ["chicken breast", ["chicken breast","chicken","pechuga de pollo","pechuga","pollo"], 165, 31, 150],
@@ -48,6 +50,8 @@ class LocalCaltrackStore {
         if (!db.objectStoreNames.contains("food")) db.createObjectStore("food", {keyPath:"id", autoIncrement:true});
         if (!db.objectStoreNames.contains("exercise")) db.createObjectStore("exercise", {keyPath:"id", autoIncrement:true});
         if (!db.objectStoreNames.contains("weights")) db.createObjectStore("weights", {keyPath:"id", autoIncrement:true});
+        if (!db.objectStoreNames.contains("body")) db.createObjectStore("body", {keyPath:"id", autoIncrement:true});
+        if (!db.objectStoreNames.contains("strength")) db.createObjectStore("strength", {keyPath:"id", autoIncrement:true});
       };
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
@@ -92,11 +96,14 @@ class LocalCaltrackStore {
   async configure(values) {
     const current = await this.settings();
     const next = {...current, ...values, id:"settings", configured:true};
-    for (const key of ["weight_kg","maintenance_kcal","deficit_kcal","protein_g_per_kg"]) {
+    for (const key of ["deficit_kcal","protein_g_per_kg","calorie_goal_min","calorie_goal_max","protein_goal_min","protein_goal_max","body_fat_goal","body_fat_stretch_goal","training_days_goal"]) {
       next[key] = Number(next[key]);
       if (!(next[key] > 0)) throw new Error(`${key} debe ser mayor que cero`);
     }
+    for (const key of ["weight_kg","maintenance_kcal"]) next[key] = next[key] == null || next[key] === "" ? null : Number(next[key]);
     if (next.deficit_kcal > 1000) throw new Error("Un déficit superior a 1.000 kcal requiere supervisión profesional");
+    if (next.calorie_goal_min > next.calorie_goal_max) throw new Error("El mínimo de calorías no puede superar al máximo");
+    if (next.protein_goal_min > next.protein_goal_max) throw new Error("El mínimo de proteína no puede superar al máximo");
     await this.put("meta", next);
     return next;
   }
@@ -193,6 +200,57 @@ class LocalCaltrackStore {
     return item;
   }
 
+  async addBody(body) {
+    const item = {
+      measured_at:body.measured_at || this.localNow(),
+      weight_kg:body.weight_kg === "" || body.weight_kg == null ? null : Number(body.weight_kg),
+      body_fat_pct:body.body_fat_pct === "" || body.body_fat_pct == null ? null : Number(body.body_fat_pct),
+      waist_cm:body.waist_cm === "" || body.waist_cm == null ? null : Number(body.waist_cm),
+      source:body.source || "manual", note:body.note || ""
+    };
+    if (item.weight_kg == null && item.body_fat_pct == null && item.waist_cm == null) throw new Error("Añade al menos peso, grasa corporal o cintura");
+    if (item.body_fat_pct != null && !(item.body_fat_pct > 2 && item.body_fat_pct < 70)) throw new Error("El porcentaje de grasa no parece válido");
+    item.id = await this.add("body", item);
+    if (item.weight_kg != null) {
+      const settings = await this.settings();
+      await this.configure({...settings, weight_kg:item.weight_kg});
+    }
+    return item;
+  }
+
+  async addStrength(body) {
+    const item = {
+      performed_at:body.performed_at || this.localNow(), exercise:String(body.exercise || "").trim(),
+      weight_kg:Number(body.weight_kg), reps:Number(body.reps), note:body.note || ""
+    };
+    if (!item.exercise || !(item.weight_kg > 0) || !(item.reps > 0)) throw new Error("Ejercicio, peso y repeticiones son obligatorios");
+    item.estimated_1rm = Math.round(item.weight_kg * (1 + item.reps / 30) * 10) / 10;
+    item.id = await this.add("strength", item);
+    return item;
+  }
+
+  bodySummary(entries, settings) {
+    const sorted = [...entries].sort((a,b) => a.measured_at.localeCompare(b.measured_at));
+    const withFat = sorted.filter(item => item.body_fat_pct != null);
+    const latest = sorted[sorted.length - 1] || null;
+    const latestFat = withFat[withFat.length - 1] || null;
+    const firstFat = withFat[0] || null;
+    const change = latestFat && firstFat ? Math.round((latestFat.body_fat_pct - firstFat.body_fat_pct) * 10) / 10 : null;
+    return {entries:sorted,latest,latest_fat:latestFat,first_fat:firstFat,change_pct:change,goal_pct:Number(settings.body_fat_goal),stretch_goal_pct:Number(settings.body_fat_stretch_goal)};
+  }
+
+  strengthSummary(entries) {
+    const focus = ["Press banca","Press inclinado en máquina","Jalón al pecho","Hack squat","Remo con pecho apoyado"];
+    const normalized = value => this.normalize(value);
+    const items = focus.map(exercise => {
+      const matches = entries.filter(item => normalized(item.exercise) === normalized(exercise)).sort((a,b) => a.performed_at.localeCompare(b.performed_at));
+      const best = matches.reduce((result,item) => !result || item.estimated_1rm > result.estimated_1rm ? item : result, null);
+      const latest = matches[matches.length - 1] || null;
+      return {exercise,best,latest,count:matches.length};
+    });
+    return {focus:items,entries:[...entries].sort((a,b)=>b.performed_at.localeCompare(a.performed_at))};
+  }
+
   async daySummary(day, collections = null) {
     const [settings, foods, exercises, weights] = collections || await Promise.all([this.settings(),this.getAll("food"),this.getAll("exercise"),this.getAll("weights")]);
     const entries = foods.filter(item => item.eaten_at.slice(0,10) === day).sort((a,b) => a.eaten_at.localeCompare(b.eaten_at));
@@ -201,10 +259,13 @@ class LocalCaltrackStore {
     const weight = knownWeights[0]?.weight_kg || settings.weight_kg;
     const calories = entries.reduce((sum,item) => sum + Number(item.calories), 0);
     const protein = entries.reduce((sum,item) => sum + Number(item.protein_g), 0);
-    const maintenance = Number(settings.maintenance_kcal) + training.reduce((sum,item) => sum + Number(item.calories_burned), 0);
-    const target = maintenance - Number(settings.deficit_kcal);
-    const proteinGoal = weight * Number(settings.protein_g_per_kg);
-    return {day,calories:Math.round(calories),protein_g:Math.round(protein*10)/10,maintenance_kcal:Math.round(maintenance),target_kcal:Math.round(target),protein_goal_g:Math.round(proteinGoal),deficit_kcal:Math.round(maintenance-calories),remaining_kcal:Math.round(target-calories),items:entries.length,entries,exercises:training,weight_kg:Math.round(weight*100)/100,target_hit:calories<=target,protein_hit:protein>=proteinGoal,complete:day<this.localDay()};
+    const baseMaintenance = Number(settings.maintenance_kcal) || Number(settings.calorie_goal_max) + Number(settings.deficit_kcal);
+    const maintenance = baseMaintenance + training.reduce((sum,item) => sum + Number(item.calories_burned), 0);
+    const target = Number(settings.calorie_goal_max || maintenance - Number(settings.deficit_kcal));
+    const calorieFloor = Number(settings.calorie_goal_min || target);
+    const proteinGoal = Number(settings.protein_goal_min || (weight || 0) * Number(settings.protein_g_per_kg));
+    const proteinMax = Number(settings.protein_goal_max || proteinGoal);
+    return {day,calories:Math.round(calories),protein_g:Math.round(protein*10)/10,maintenance_kcal:Math.round(maintenance),target_kcal:Math.round(target),calorie_floor_kcal:Math.round(calorieFloor),protein_goal_g:Math.round(proteinGoal),protein_goal_max_g:Math.round(proteinMax),deficit_kcal:Math.round(maintenance-calories),remaining_kcal:Math.round(target-calories),items:entries.length,entries,exercises:training,weight_kg:weight == null ? null : Math.round(weight*100)/100,target_hit:calories>=calorieFloor&&calories<=target,protein_hit:protein>=proteinGoal,complete:day<this.localDay()};
   }
 
   dateMinus(day, offset) { const d = new Date(`${day}T12:00:00`); d.setDate(d.getDate()-offset); return this.localDay(d); }
@@ -229,10 +290,13 @@ class LocalCaltrackStore {
 
   async dashboard(count = 7) {
     const collections = await Promise.all([this.settings(),this.getAll("food"),this.getAll("exercise"),this.getAll("weights")]);
+    const [body,strength] = await Promise.all([this.getAll("body"),this.getAll("strength")]);
     const today = this.localDay();
     const days = await Promise.all(Array.from({length:count},(_,i)=>this.daySummary(this.dateMinus(today,count-1-i),collections)));
     const analysisDays = await Promise.all(Array.from({length:14},(_,i)=>this.daySummary(this.dateMinus(today,13-i),collections)));
-    return {settings:collections[0],days,today:days[days.length-1],analysis:this.analysisFrom(analysisDays,14)};
+    const weekStart = this.dateMinus(today,6);
+    const trainingDays = new Set(collections[2].filter(item=>item.performed_at.slice(0,10)>=weekStart).map(item=>item.performed_at.slice(0,10))).size;
+    return {settings:collections[0],days,today:days[days.length-1],analysis:this.analysisFrom(analysisDays,14),body:this.bodySummary(body,collections[0]),strength:this.strengthSummary(strength),training:{days:trainingDays,goal:Number(collections[0].training_days_goal)}};
   }
 
   async answer(question) {
@@ -244,19 +308,34 @@ class LocalCaltrackStore {
     return `${a.headline}. ${a.summary} ${a.observations.join(" ")}`;
   }
 
+  async applySetup(data) {
+    if (data?.format !== "caltrack-setup" || data.version !== 1) throw new Error("La configuración privada no es válida");
+    const current = await this.settings();
+    await this.configure({...current,...(data.settings || {})});
+    const existingBody = await this.getAll("body"), existingStrength = await this.getAll("strength");
+    for (const item of data.body || []) {
+      if (!existingBody.some(saved => saved.measured_at === item.measured_at && saved.body_fat_pct === item.body_fat_pct)) await this.add("body", item);
+    }
+    for (const item of data.strength || []) {
+      if (!existingStrength.some(saved => saved.performed_at === item.performed_at && saved.exercise === item.exercise && saved.weight_kg === item.weight_kg && saved.reps === item.reps)) await this.add("strength", item);
+    }
+  }
+
   async backup() {
-    const [settings, food, exercise, weights] = await Promise.all([this.settings(),this.getAll("food"),this.getAll("exercise"),this.getAll("weights")]);
-    return {format:"caltrack-backup",version:1,exported_at:new Date().toISOString(),settings,food,exercise,weights};
+    const [settings, food, exercise, weights, body, strength] = await Promise.all([this.settings(),this.getAll("food"),this.getAll("exercise"),this.getAll("weights"),this.getAll("body"),this.getAll("strength")]);
+    return {format:"caltrack-backup",version:2,exported_at:new Date().toISOString(),settings,food,exercise,weights,body,strength};
   }
 
   async restore(data) {
-    if (data?.format !== "caltrack-backup" || data.version !== 1) throw new Error("Esta copia no tiene un formato válido de Caltrack");
+    if (data?.format !== "caltrack-backup" || ![1,2].includes(data.version)) throw new Error("Esta copia no tiene un formato válido de Caltrack");
     const db = await this.open();
-    for (const storeName of ["meta","food","exercise","weights"]) await new Promise((resolve,reject)=>{const tx=db.transaction(storeName,"readwrite"),request=tx.objectStore(storeName).clear();request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error);});
+    for (const storeName of ["meta","food","exercise","weights","body","strength"]) await new Promise((resolve,reject)=>{const tx=db.transaction(storeName,"readwrite"),request=tx.objectStore(storeName).clear();request.onsuccess=()=>resolve();request.onerror=()=>reject(request.error);});
     await this.put("meta", {...this.defaults,...data.settings,id:"settings"});
     for (const item of data.food || []) await this.put("food", item);
     for (const item of data.exercise || []) await this.put("exercise", item);
     for (const item of data.weights || []) await this.put("weights", item);
+    for (const item of data.body || []) await this.put("body", item);
+    for (const item of data.strength || []) await this.put("strength", item);
   }
 
   async exportCSV() {
@@ -272,6 +351,8 @@ class LocalCaltrackStore {
     if (path === "/api/food" && method === "POST") return {ok:true,entry:await this.addFood(body)};
     if (path === "/api/exercise" && method === "POST") return {ok:true,exercise:await this.addExercise(body)};
     if (path === "/api/weight" && method === "POST") return {ok:true,weight:await this.addWeight(body)};
+    if (path === "/api/body" && method === "POST") return {ok:true,body:await this.addBody(body)};
+    if (path === "/api/strength" && method === "POST") return {ok:true,strength:await this.addStrength(body)};
     if (path === "/api/ask" && method === "POST") return {ok:true,answer:await this.answer(body.question)};
     if (path === "/api/photo" && method === "POST") { await this.updateFood(body.entry_id,{photo_path:body.data_url}); return {ok:true,path:body.data_url}; }
     const remove = path.match(/^\/api\/food\/(\d+)$/);
@@ -281,4 +362,3 @@ class LocalCaltrackStore {
 }
 
 window.localCaltrack = new LocalCaltrackStore();
-
