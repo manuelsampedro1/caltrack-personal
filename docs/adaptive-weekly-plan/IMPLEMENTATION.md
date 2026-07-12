@@ -41,4 +41,4 @@ La recomendación se entiende en menos de diez segundos y distingue falta de dat
 - [x] Añadir fixtures, unit tests y un recorrido de interfaz dentro de la suite completa.
 - [x] Verificar visualmente tamaño normal y hojas en pantalla compacta.
 - [x] Actualizar README, privacidad, decisiones y TODO.
-- [ ] Publicar v1.7 y verificar el SHA exacto.
+- [x] Publicar v1.7 y verificar el SHA exacto.

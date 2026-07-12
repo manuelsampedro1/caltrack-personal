@@ -1,6 +1,6 @@
 # Progreso del plan semanal adaptativo
 
-## Estado: implementación y migración validadas, pendiente de publicación
+## Estado: v1.7 validada y publicada
 
 ## Decisiones
 
@@ -36,6 +36,8 @@
 - `ios/Caltrack/BackupService.swift`
 - tests y documentación
 
-## Pendiente de release
+## Evidencia de release
 
-- Publicación y comprobación del SHA exacto.
+- Commit funcional: `63afd77a36f9797a78401c2321168f2e07845240`.
+- GitHub Pages run `29211586252` completado correctamente para ese SHA.
+- URL pública comprobada con HTTP 200.
