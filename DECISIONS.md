@@ -93,3 +93,11 @@ Caltrack no lee nutrición. La escritura está desactivada por defecto y usa una
 Los productos con código se leen con AVFoundation y se consultan en Open Food Facts v3. Esto evita gastar una llamada de Grok y prioriza los valores declarados del envase. No se añade SDK, cuenta, clave ni backend.
 
 Los datos colaborativos nunca se guardan automáticamente. La hoja muestra valores por 100 g, ración, atribución y aviso, y permite corregir nombre, cantidad y todos los macros. Si falta información, Caltrack ofrece registro manual y no inventa valores.
+
+### Check-in corporal independiente de Salud
+
+Salud sigue siendo la fuente automática, pero no todas las básculas escriben grasa y cintura. Progreso permite un check-in manual con campos opcionales y una foto. Los registros manuales se pueden editar; las muestras de Salud permanecen separadas y de solo lectura.
+
+PhotosPicker concede acceso únicamente a la imagen elegida. Caltrack la redimensiona a 1600 píxeles, la comprime localmente y la guarda con `externalStorage`. No se analiza con IA. La copia mantiene versión 1 con `photoData` opcional para restaurar copias anteriores sin migraciones de formato.
+
+La gráfica fusiona solo la representación de métricas del mismo día y conserva los objetos originales. Así evita segmentos verticales cuando coinciden Salud y un check-in, sin perder procedencia ni capacidad de edición.

@@ -49,14 +49,24 @@ final class BodyMeasurement {
     var weight: Double?
     var bodyFat: Double?
     var waist: Double?
+    @Attribute(.externalStorage) var photoData: Data?
     var source: String
 
-    init(id: UUID = UUID(), date: Date = .now, weight: Double? = nil, bodyFat: Double? = nil, waist: Double? = nil, source: String = "manual") {
+    init(
+        id: UUID = UUID(),
+        date: Date = .now,
+        weight: Double? = nil,
+        bodyFat: Double? = nil,
+        waist: Double? = nil,
+        photoData: Data? = nil,
+        source: String = "manual"
+    ) {
         self.id = id
         self.date = date
         self.weight = weight
         self.bodyFat = bodyFat
         self.waist = waist
+        self.photoData = photoData
         self.source = source
     }
 }

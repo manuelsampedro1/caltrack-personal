@@ -64,8 +64,9 @@ struct OpenFoodFactsService {
         request.timeoutInterval = 25
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         request.setValue("es", forHTTPHeaderField: "Accept-Language")
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "unknown"
         request.setValue(
-            "Caltrack - iOS - Version 1.3 - https://github.com/manuelsampedro1/caltrack-personal - scan",
+            "Caltrack - iOS - Version \(version) - https://github.com/manuelsampedro1/caltrack-personal - scan",
             forHTTPHeaderField: "User-Agent"
         )
 

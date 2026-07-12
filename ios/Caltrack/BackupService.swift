@@ -24,7 +24,33 @@ struct CaltrackBackup: Codable, Sendable {
         let weight: Double?
         let bodyFat: Double?
         let waist: Double?
+        let photoData: Data?
         let source: String
+
+        init(id: UUID, date: Date, weight: Double?, bodyFat: Double?, waist: Double?, photoData: Data? = nil, source: String) {
+            self.id = id
+            self.date = date
+            self.weight = weight
+            self.bodyFat = bodyFat
+            self.waist = waist
+            self.photoData = photoData
+            self.source = source
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case id, date, weight, bodyFat, waist, photoData, source
+        }
+
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            id = try container.decode(UUID.self, forKey: .id)
+            date = try container.decode(Date.self, forKey: .date)
+            weight = try container.decodeIfPresent(Double.self, forKey: .weight)
+            bodyFat = try container.decodeIfPresent(Double.self, forKey: .bodyFat)
+            waist = try container.decodeIfPresent(Double.self, forKey: .waist)
+            photoData = try container.decodeIfPresent(Data.self, forKey: .photoData)
+            source = try container.decode(String.self, forKey: .source)
+        }
     }
 
     struct Exercise: Codable, Sendable {
@@ -162,7 +188,7 @@ enum BackupService {
                 )
             },
             measurements: measurements.map {
-                .init(id: $0.id, date: $0.date, weight: $0.weight, bodyFat: $0.bodyFat, waist: $0.waist, source: $0.source)
+                .init(id: $0.id, date: $0.date, weight: $0.weight, bodyFat: $0.bodyFat, waist: $0.waist, photoData: $0.photoData, source: $0.source)
             },
             activities: activities.map {
                 .init(id: $0.id, externalID: $0.externalID, date: $0.date, activeEnergy: $0.activeEnergy, restingEnergy: $0.restingEnergy, steps: $0.steps, source: $0.source)
@@ -227,7 +253,7 @@ enum BackupService {
             inserted += 1
         }
         for item in backup.measurements where bodyIDs.insert(item.id).inserted {
-            context.insert(BodyMeasurement(id: item.id, date: item.date, weight: item.weight, bodyFat: item.bodyFat, waist: item.waist, source: item.source))
+            context.insert(BodyMeasurement(id: item.id, date: item.date, weight: item.weight, bodyFat: item.bodyFat, waist: item.waist, photoData: item.photoData, source: item.source))
             inserted += 1
         }
         for item in backup.activities where activityIDs.insert(item.externalID).inserted {

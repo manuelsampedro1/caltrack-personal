@@ -1,6 +1,7 @@
 import XCTest
 import SwiftData
 import HealthKit
+import UIKit
 @testable import Caltrack
 
 final class GrokServiceTests: XCTestCase {
@@ -216,5 +217,51 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertThrowsError(try OpenFoodFactsService.decodeProduct(Data(fixture.utf8))) { error in
             XCTAssertEqual(error as? OpenFoodFactsError, .incompleteNutrition)
         }
+    }
+
+    func testBodyCheckInValidationAcceptsPartialDataAndRejectsUnsafeValues() {
+        var draft = BodyCheckInDraft()
+        XCTAssertFalse(draft.isValid)
+
+        draft.weight = "78,9"
+        XCTAssertTrue(draft.isValid)
+        XCTAssertEqual(draft.weightValue, 78.9)
+
+        draft.bodyFat = "90"
+        XCTAssertFalse(draft.isValid)
+        XCTAssertEqual(draft.validationMessage, "La grasa debe estar entre 1 y 75 %.")
+    }
+
+    func testProgressPhotoCompressionLimitsDimensions() throws {
+        let source = UIGraphicsImageRenderer(size: CGSize(width: 2_400, height: 1_200)).image { context in
+            UIColor.systemBlue.setFill()
+            context.fill(CGRect(x: 0, y: 0, width: 2_400, height: 1_200))
+        }
+        let png = try XCTUnwrap(source.pngData())
+        let compressed = try XCTUnwrap(ProgressPhotoProcessor.compressedJPEG(from: png))
+        let result = try XCTUnwrap(UIImage(data: compressed))
+
+        XCTAssertEqual(max(result.size.width, result.size.height), 1_600, accuracy: 1)
+        XCTAssertLessThan(compressed.count, png.count)
+    }
+
+    @MainActor
+    func testBodyPhotoBackupRestoresAndOldBackupWithoutPhotoDecodes() throws {
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, WorkoutEntry.self, CoachMessage.self])
+        let source = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        let photo = Data([1, 2, 3, 4])
+        source.mainContext.insert(BodyMeasurement(weight: 78.9, waist: 80.5, photoData: photo, source: "manual"))
+        try source.mainContext.save()
+        let backup = BackupService.make(meals: [], measurements: try source.mainContext.fetch(FetchDescriptor<BodyMeasurement>()), activities: [], workouts: [], messages: [])
+
+        let destination = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        XCTAssertEqual(try BackupService.restore(backup, into: destination.mainContext), 1)
+        XCTAssertEqual(try destination.mainContext.fetch(FetchDescriptor<BodyMeasurement>()).first?.photoData, photo)
+
+        let id = UUID()
+        let legacy = #"{"version":1,"exportedAt":"2026-07-12T12:00:00Z","meals":[],"measurements":[{"id":"\#(id.uuidString)","date":"2026-07-12T12:00:00Z","weight":80,"bodyFat":null,"waist":82,"source":"manual"}],"activities":[],"workouts":[],"messages":[]}"#
+        let decoded = try BackupService.decode(Data(legacy.utf8))
+        XCTAssertEqual(decoded.measurements.first?.id, id)
+        XCTAssertNil(decoded.measurements.first?.photoData)
     }
 }

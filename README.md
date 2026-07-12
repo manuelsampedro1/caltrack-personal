@@ -83,11 +83,17 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 ### Áreas de la app
 
 - `Hoy`: foto, fototeca, código de barras, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
-- `Progreso`: gráficos de 14 días, composición corporal, gasto de Salud, búsqueda del historial de comidas y carga de entrenamiento.
+- `Progreso`: gráficos de 14 días, composición corporal, check-ins manuales con foto privada opcional, gasto de Salud, búsqueda del historial de comidas y carga de entrenamiento.
 - `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
 - `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local y copia o restauración JSON.
 
 La primera apertura incluye una introducción breve que se puede omitir. No solicita Salud, notificaciones ni claves automáticamente.
+
+### Check-ins corporales
+
+`Progreso > Check-in` permite registrar peso, grasa corporal y cintura aunque esas métricas no estén en Apple Salud. También admite una foto de progreso opcional elegida con el selector privado de Apple. La imagen se reduce localmente a un máximo de 1600 píxeles, se puede ampliar en el visor y queda relacionada con las métricas de ese día.
+
+Los check-ins manuales se pueden editar o eliminar. Las muestras importadas de Salud permanecen separadas y son de solo lectura. Las fotos no se envían a Grok ni a Open Food Facts y se incluyen en la copia JSON privada.
 
 ### Productos con código de barras
 

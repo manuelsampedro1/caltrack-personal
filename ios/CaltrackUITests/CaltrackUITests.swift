@@ -179,6 +179,64 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Nutella · Ferrero"].waitForExistence(timeout: 4))
     }
 
+    func testBodyCheckInCanBeSavedAndEditedAtAccessibilityTextSize() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-body-photo-fixture",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityExtraLarge"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Comidas frecuentes"].waitForExistence(timeout: 8))
+        app.tabBars.buttons["Progreso"].tap()
+        let addButton = app.buttons["addBodyCheckIn"]
+        for _ in 0..<6 where !addButton.isHittable { app.swipeUp() }
+        XCTAssertTrue(addButton.waitForExistence(timeout: 4))
+        addButton.tap()
+
+        let weight = app.textFields["checkInWeight"]
+        XCTAssertTrue(weight.waitForExistence(timeout: 4))
+        let formScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        formScreenshot.name = "Caltrack body check-in form"
+        formScreenshot.lifetime = .keepAlways
+        add(formScreenshot)
+        weight.tap()
+        weight.typeText("78.9")
+        app.buttons["saveBodyCheckIn"].tap()
+
+        let value = app.staticTexts["manualCheckInValue"]
+        XCTAssertTrue(value.waitForExistence(timeout: 5))
+        XCTAssertTrue(value.label.contains("78"))
+        app.buttons["Opciones del check-in"].tap()
+        app.buttons["Editar"].tap()
+
+        let waist = app.textFields["checkInWaist"]
+        XCTAssertTrue(waist.waitForExistence(timeout: 4))
+        waist.tap()
+        waist.typeText("80.5")
+        app.buttons["saveBodyCheckIn"].tap()
+        XCTAssertTrue(app.staticTexts["manualCheckInValue"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["manualCheckInValue"].label.contains("80"))
+
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Caltrack body check-in"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        let photo = app.buttons.matching(NSPredicate(format: "label BEGINSWITH 'Foto de progreso del'")).firstMatch
+        for _ in 0..<3 where !photo.isHittable { app.swipeUp() }
+        XCTAssertTrue(photo.waitForExistence(timeout: 4))
+        photo.tap()
+        XCTAssertTrue(app.images["Foto de progreso ampliable"].waitForExistence(timeout: 4))
+        let viewerScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        viewerScreenshot.name = "Caltrack progress photo viewer"
+        viewerScreenshot.lifetime = .keepAlways
+        add(viewerScreenshot)
+        app.buttons["Cerrar"].tap()
+    }
+
     func testCriticalActionsAtAccessibilityTextSize() {
         let app = XCUIApplication()
         app.launchArguments = [
