@@ -1,6 +1,6 @@
 # Progreso de revisión precisa por foto
 
-## Estado: fase 4 en curso
+## Estado: completado
 
 ## Decisiones
 
@@ -32,7 +32,6 @@
 - Build Release firmado para iPhone: app y widget v1.9 build 10, firma válida, HealthKit y App Group comprobados.
 - Generador ejecutado dos veces con el mismo SHA-1 de proyecto.
 - Auditoría sin warnings del cambio, sin claves en el repositorio y sin guiones Unicode prohibidos.
-
-## Evidencia pendiente
-
-- Publicación.
+- Commit funcional `91e0111` publicado en `main`.
+- GitHub Pages ejecutó el SHA exacto en el run `29214230772` y terminó correctamente.
+- La URL pública respondió HTTP 200 después del despliegue.

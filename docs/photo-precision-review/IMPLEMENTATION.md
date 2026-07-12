@@ -43,7 +43,7 @@ La revisión mantiene la foto, el contexto y una sola acción Guardar, con los d
 - [x] Ejecutar suite completa y build firmado.
 - [x] Validar migración v1.8 a v1.9.
 - [x] Actualizar documentación.
-- [ ] Publicar.
+- [x] Publicar.
 
 ### Criterio
 
