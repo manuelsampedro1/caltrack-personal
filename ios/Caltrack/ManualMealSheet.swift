@@ -7,10 +7,12 @@ struct ManualMealSheet: View {
     @Environment(\.dismiss) private var dismiss
     @State private var editable: EditableMeal
     @State private var date: Date
+    private let showsComponentsEditor: Bool
 
     init(title: String = "Registrar manualmente", initial: EditableMeal = EditableMeal(), date: Date = .now, onSave: @escaping (EditableMeal, Date) -> Void) {
         self.title = title
         self.onSave = onSave
+        self.showsComponentsEditor = !initial.components.isEmpty
         _editable = State(initialValue: initial)
         _date = State(initialValue: date)
     }
@@ -21,15 +23,21 @@ struct ManualMealSheet: View {
                 CaltrackTheme.canvas.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 14) {
-                        Card {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Eyebrow(text: "Entrada exacta")
-                                Text("Añade lo que ya conoces")
-                                    .font(.title2.weight(.bold))
-                                Text("Ideal para etiquetas, recetas pesadas o una corrección rápida.")
-                                    .font(.subheadline)
-                                    .foregroundStyle(CaltrackTheme.muted)
+                        if !showsComponentsEditor {
+                            Card {
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Eyebrow(text: "Entrada exacta")
+                                    Text("Añade lo que ya conoces")
+                                        .font(.title2.weight(.bold))
+                                    Text("Ideal para etiquetas, recetas pesadas o una corrección rápida.")
+                                        .font(.subheadline)
+                                        .foregroundStyle(CaltrackTheme.muted)
+                                }
                             }
+                        }
+
+                        if showsComponentsEditor {
+                            MealComponentsEditor(meal: $editable, startsExpanded: false)
                         }
 
                         Card {

@@ -13,9 +13,38 @@ struct CaltrackBackup: Codable, Sendable {
         let carbohydrates: Double
         let fat: Double
         let photoData: Data?
+        let components: [MealComponent]?
         let source: String
         let confidence: Double
         let assumption: String
+
+        init(
+            id: UUID,
+            date: Date,
+            name: String,
+            calories: Double,
+            protein: Double,
+            carbohydrates: Double,
+            fat: Double,
+            photoData: Data?,
+            components: [MealComponent]? = nil,
+            source: String,
+            confidence: Double,
+            assumption: String
+        ) {
+            self.id = id
+            self.date = date
+            self.name = name
+            self.calories = calories
+            self.protein = protein
+            self.carbohydrates = carbohydrates
+            self.fat = fat
+            self.photoData = photoData
+            self.components = components
+            self.source = source
+            self.confidence = confidence
+            self.assumption = assumption
+        }
     }
 
     struct Body: Codable, Sendable {
@@ -230,6 +259,7 @@ enum BackupService {
                     carbohydrates: $0.carbohydrates,
                     fat: $0.fat,
                     photoData: $0.photoData,
+                    components: $0.components.isEmpty ? nil : $0.components,
                     source: $0.source,
                     confidence: $0.confidence,
                     assumption: $0.assumption
@@ -323,6 +353,7 @@ enum BackupService {
                 carbohydrates: item.carbohydrates,
                 fat: item.fat,
                 photoData: item.photoData,
+                components: item.components ?? [],
                 source: item.source,
                 confidence: item.confidence,
                 assumption: item.assumption

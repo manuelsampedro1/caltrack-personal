@@ -15,6 +15,8 @@ struct RootView: View {
 #if DEBUG
         if ProcessInfo.processInfo.arguments.contains("-preview-widgets") {
             WidgetPreviewGallery()
+        } else if ProcessInfo.processInfo.arguments.contains("-preview-meal-analysis") {
+            MealAnalysisSheet(image: MealAnalysisFixture.image) { _, _ in }
         } else {
             mainContent
         }

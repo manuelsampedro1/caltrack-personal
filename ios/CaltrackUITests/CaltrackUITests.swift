@@ -115,6 +115,91 @@ final class CaltrackUITests: XCTestCase {
         add(coachScreenshot)
     }
 
+    func testDetectedMealComponentsCanBeCorrectedAndPersisted() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-seed-superapp", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launch()
+
+        let options = app.buttons["Opciones de Pollo con arroz"].firstMatch
+        for _ in 0..<6 where !options.isHittable { app.swipeUp() }
+        XCTAssertTrue(options.waitForExistence(timeout: 5))
+        options.tap()
+        app.buttons["Editar"].tap()
+
+        XCTAssertTrue(app.navigationBars["Editar comida"].waitForExistence(timeout: 4))
+        app.staticTexts["Componentes del plato"].tap()
+        let chickenCalories = app.textFields["mealComponentCalories-00000000-0000-0000-0000-000000000101"]
+        XCTAssertTrue(chickenCalories.waitForExistence(timeout: 4))
+        replaceText(in: chickenCalories, with: "400")
+
+        app.staticTexts["Componentes del plato"].tap()
+        app.staticTexts["Componentes del plato"].tap()
+        XCTAssertEqual(chickenCalories.value as? String, "400")
+        let editorScreenshot = XCTAttachment(screenshot: app.screenshot())
+        editorScreenshot.name = "Caltrack editable meal components"
+        editorScreenshot.lifetime = .keepAlways
+        add(editorScreenshot)
+
+        app.staticTexts["Componentes del plato"].tap()
+        let totalCalories = app.textFields["Kcal"]
+        for _ in 0..<4 where !totalCalories.isHittable { app.swipeUp() }
+        XCTAssertTrue(totalCalories.waitForExistence(timeout: 4))
+        XCTAssertEqual(totalCalories.value as? String, "790")
+        app.buttons["Guardar comida"].tap()
+        XCTAssertTrue(app.staticTexts["790 kcal"].waitForExistence(timeout: 5))
+
+        let editedOptions = app.buttons["Opciones de Pollo con arroz"].firstMatch
+        XCTAssertTrue(editedOptions.waitForExistence(timeout: 4))
+        editedOptions.tap()
+        app.buttons["Editar"].tap()
+        app.staticTexts["Componentes del plato"].tap()
+        XCTAssertEqual(app.textFields["mealComponentCalories-00000000-0000-0000-0000-000000000101"].value as? String, "400")
+
+        let componentNames = app.textFields.matching(NSPredicate(format: "identifier BEGINSWITH 'mealComponentName-'"))
+        XCTAssertEqual(componentNames.count, 3)
+        let addComponent = app.buttons["addMealComponent"]
+        for _ in 0..<6 where !addComponent.isHittable { app.swipeUp() }
+        XCTAssertTrue(addComponent.isHittable)
+        addComponent.tap()
+        XCTAssertEqual(componentNames.count, 4)
+        let deleteButtons = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'deleteMealComponent-'"))
+        deleteButtons.element(boundBy: 3).tap()
+        XCTAssertEqual(componentNames.count, 3)
+        for _ in 0..<6 { app.swipeDown() }
+        for _ in 0..<3 { deleteButtons.firstMatch.tap() }
+        XCTAssertTrue(app.staticTexts["Sin componentes"].waitForExistence(timeout: 3))
+        let emptyScreenshot = XCTAttachment(screenshot: app.screenshot())
+        emptyScreenshot.name = "Caltrack empty meal components"
+        emptyScreenshot.lifetime = .keepAlways
+        add(emptyScreenshot)
+    }
+
+    func testPhotoAnalysisFixtureShowsEditableBreakdownWithoutAPI() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-preview-meal-analysis",
+            "-grok-analysis-fixture",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["ESTIMACIÓN DE GROK"].waitForExistence(timeout: 6))
+        XCTAssertTrue(app.staticTexts["4 componentes detectados"].exists)
+        XCTAssertTrue(app.staticTexts["4 componentes · 810 kcal · 67 g P"].exists)
+        let componentNames = app.textFields.matching(NSPredicate(format: "identifier BEGINSWITH 'mealComponentName-'"))
+        XCTAssertEqual(componentNames.count, 4)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Caltrack Grok photo precision review"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        let save = app.buttons["Guardar en el día"]
+        for _ in 0..<8 where !save.isHittable { app.swipeUp() }
+        XCTAssertTrue(save.waitForExistence(timeout: 4))
+        XCTAssertTrue(save.isEnabled)
+    }
+
     func testFrequentMealsAndSearch() {
         let app = XCUIApplication()
         app.launchArguments = ["-seed-superapp", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
@@ -366,6 +451,13 @@ final class CaltrackUITests: XCTestCase {
         screenshot.name = "Caltrack recovery trends"
         screenshot.lifetime = .keepAlways
         add(screenshot)
+    }
+
+    private func replaceText(in field: XCUIElement, with value: String) {
+        field.tap()
+        let current = field.value as? String ?? ""
+        field.typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count))
+        field.typeText(value)
     }
 
     func testAdaptivePlanClosesDayAndAppliesOnlyAfterConfirmation() {

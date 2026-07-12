@@ -84,17 +84,12 @@ struct MealAnalysisSheet: View {
                         Spacer()
                         MetricPill(text: "\(Int(analysis.confidence * 100))% confianza", color: analysis.confidence >= 0.75 ? CaltrackTheme.green.opacity(0.22) : CaltrackTheme.coral.opacity(0.2))
                     }
-                    ForEach(analysis.items) { item in
-                        HStack(alignment: .firstTextBaseline) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(item.name).font(.subheadline.weight(.semibold))
-                                Text(item.portion).font(.caption).foregroundStyle(CaltrackTheme.muted)
-                            }
-                            Spacer()
-                            Text("\(Int(item.calories)) kcal").font(.subheadline.weight(.bold))
-                        }
-                        Divider().overlay(CaltrackTheme.line)
-                    }
+                    Label(
+                        analysis.items.count == 1 ? "1 componente detectado" : "\(analysis.items.count) componentes detectados",
+                        systemImage: "viewfinder.circle.fill"
+                    )
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(CaltrackTheme.green)
                     if !analysis.warning.isEmpty {
                         Label(analysis.warning, systemImage: "exclamationmark.triangle.fill")
                             .font(.caption)
@@ -102,6 +97,7 @@ struct MealAnalysisSheet: View {
                     }
                 }
             }
+            MealComponentsEditor(meal: $editable, startsExpanded: true)
             editor
         }
     }
@@ -109,7 +105,7 @@ struct MealAnalysisSheet: View {
     private var editor: some View {
         Card {
             VStack(alignment: .leading, spacing: 14) {
-                Eyebrow(text: "Confirma antes de guardar")
+                Eyebrow(text: "Total final")
                 TextField("Nombre", text: $editable.name)
                     .textInputAutocapitalization(.sentences)
                     .fieldStyle()
@@ -188,6 +184,14 @@ struct MealAnalysisSheet: View {
     }
 
     private func analyze() async {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-grok-analysis-fixture") {
+            let analysis = MealAnalysisFixture.analysis
+            editable = EditableMeal(analysis: analysis)
+            phase = .result(analysis)
+            return
+        }
+#endif
         do {
             guard let apiKey = KeychainStore.read(account: GrokService.apiKeyAccount) else { throw GrokError.missingAPIKey }
             let analysis = try await GrokService().analyze(image: image, apiKey: apiKey)
@@ -200,6 +204,48 @@ struct MealAnalysisSheet: View {
         }
     }
 }
+
+#if DEBUG
+enum MealAnalysisFixture {
+    static let analysis = FoodAnalysis(
+        title: "Pollo, arroz y verduras",
+        items: [
+            .init(name: "Pechuga de pollo", portion: "220 g", calories: 330, proteinG: 55, carbsG: 0, fatG: 8),
+            .init(name: "Arroz cocido", portion: "250 g", calories: 330, proteinG: 7, carbsG: 74, fatG: 2),
+            .init(name: "Brócoli y zanahoria", portion: "180 g", calories: 90, proteinG: 5, carbsG: 15, fatG: 1),
+            .init(name: "Aceite de oliva", portion: "7 g", calories: 60, proteinG: 0, carbsG: 0, fatG: 7)
+        ],
+        calories: 810,
+        proteinG: 67,
+        carbsG: 89,
+        fatG: 18,
+        confidence: 0.86,
+        assumptions: ["Arroz cocido", "Una cucharada pequeña de aceite"],
+        warning: "Comprueba el aceite y la cantidad de arroz."
+    )
+
+    static var image: UIImage {
+        let size = CGSize(width: 900, height: 700)
+        return UIGraphicsImageRenderer(size: size).image { context in
+            UIColor(red: 0.06, green: 0.07, blue: 0.09, alpha: 1).setFill()
+            context.fill(CGRect(origin: .zero, size: size))
+            UIColor(red: 0.88, green: 0.86, blue: 0.80, alpha: 1).setFill()
+            context.cgContext.fillEllipse(in: CGRect(x: 125, y: 25, width: 650, height: 650))
+            UIColor(red: 0.83, green: 0.69, blue: 0.45, alpha: 1).setFill()
+            context.cgContext.fillEllipse(in: CGRect(x: 190, y: 110, width: 300, height: 250))
+            UIColor(red: 0.64, green: 0.31, blue: 0.18, alpha: 1).setFill()
+            context.cgContext.fill(CGRect(x: 450, y: 135, width: 230, height: 95))
+            context.cgContext.fill(CGRect(x: 430, y: 250, width: 250, height: 90))
+            UIColor(red: 0.23, green: 0.55, blue: 0.26, alpha: 1).setFill()
+            for origin in [CGPoint(x: 250, y: 400), CGPoint(x: 370, y: 430), CGPoint(x: 520, y: 405), CGPoint(x: 610, y: 465)] {
+                context.cgContext.fillEllipse(in: CGRect(origin: origin, size: CGSize(width: 110, height: 100)))
+            }
+            UIColor(red: 0.91, green: 0.46, blue: 0.16, alpha: 1).setFill()
+            context.cgContext.fillEllipse(in: CGRect(x: 440, y: 500, width: 150, height: 55))
+        }
+    }
+}
+#endif
 
 private extension View {
     func fieldStyle() -> some View {

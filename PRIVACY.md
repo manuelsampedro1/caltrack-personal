@@ -12,6 +12,8 @@ La PWA guarda sus datos por separado en IndexedDB dentro del navegador.
 
 Una foto se envía a la API de xAI únicamente cuando el usuario decide analizarla. La petición solicita a xAI que no conserve historial mediante `store: false`. Caltrack no usa un servidor propio y no envía datos de Apple Salud junto con la foto.
 
+La respuesta de xAI incluye una estimación por componentes. Caltrack permite corregir nombre, porción y macros de cada componente en el iPhone. El recálculo posterior es local y no genera otra petición a xAI.
+
 El entrenador funciona localmente por defecto. Solo cuando el usuario envía una pregunta, Caltrack manda a xAI un resumen limitado de hasta 30 días con totales nutricionales, medidas, actividad, objetivo del plan y promedios agregados de hambre y energía. No incluye el detalle diario de esos cierres, fotos, claves, identificadores de muestras o identificadores de aplicaciones de Salud. La conversación se guarda localmente.
 
 ## Fotos de progreso
@@ -60,7 +62,7 @@ Caltrack no solicita credenciales de Strava. Strava comparte sus actividades con
 
 ## Copias y recordatorios
 
-La exportación JSON puede contener comidas, fotos de platos, fotos de progreso, medidas, actividad, recuperación, cierres diarios, configuración del plan, entrenamientos y conversación. Las claves de Keychain nunca se exportan. El archivo queda bajo control del usuario en el selector de documentos de iOS.
+La exportación JSON puede contener comidas, sus componentes nutricionales confirmados, fotos de platos, fotos de progreso, medidas, actividad, recuperación, cierres diarios, configuración del plan, entrenamientos y conversación. Las claves de Keychain nunca se exportan. El archivo queda bajo control del usuario en el selector de documentos de iOS.
 
 Los recordatorios son notificaciones locales programadas por el propio iPhone. No se usa servidor, publicidad ni seguimiento.
 

@@ -851,6 +851,7 @@ struct DashboardView: View {
             carbohydrates: editable.number(editable.carbohydrates),
             fat: editable.number(editable.fat),
             photoData: imageData,
+            components: editable.persistedComponents,
             source: source,
             confidence: editable.confidence,
             assumption: editable.assumption
@@ -870,6 +871,7 @@ struct DashboardView: View {
         meal.fat = editable.number(editable.fat)
         meal.confidence = editable.confidence
         meal.assumption = editable.assumption
+        meal.updateComponents(editable.persistedComponents)
         try? modelContext.save()
         syncNutritionIfEnabled(meal)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -881,21 +883,23 @@ struct DashboardView: View {
             calories: suggestion.calories,
             protein: suggestion.protein,
             carbohydrates: suggestion.carbohydrates,
-            fat: suggestion.fat
+            fat: suggestion.fat,
+            components: suggestion.components
         )
     }
 
     private func repeatMeal(_ meal: MealEntry) {
-        insertRepeatedMeal(name: meal.name, calories: meal.calories, protein: meal.protein, carbohydrates: meal.carbohydrates, fat: meal.fat)
+        insertRepeatedMeal(name: meal.name, calories: meal.calories, protein: meal.protein, carbohydrates: meal.carbohydrates, fat: meal.fat, components: meal.components)
     }
 
-    private func insertRepeatedMeal(name: String, calories: Double, protein: Double, carbohydrates: Double, fat: Double) {
+    private func insertRepeatedMeal(name: String, calories: Double, protein: Double, carbohydrates: Double, fat: Double, components: [MealComponent] = []) {
         let meal = MealEntry(
             name: name,
             calories: calories,
             protein: protein,
             carbohydrates: carbohydrates,
             fat: fat,
+            components: components,
             source: "repeated",
             assumption: "Repetida desde el historial"
         )
@@ -1197,7 +1201,21 @@ struct DashboardView: View {
             let day = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
             let variation = Double((offset % 4) * 45)
             modelContext.insert(MealEntry(date: day.addingTimeInterval(28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
-            modelContext.insert(MealEntry(date: day.addingTimeInterval(43_200), name: "Pollo con arroz", calories: 720, protein: 62, carbohydrates: 74, fat: 18, source: "Grok Vision", confidence: 0.91))
+            modelContext.insert(MealEntry(
+                date: day.addingTimeInterval(43_200),
+                name: "Pollo con arroz",
+                calories: 720,
+                protein: 62,
+                carbohydrates: 74,
+                fat: 18,
+                components: [
+                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000101")!, name: "Pechuga de pollo", portion: "220 g", calories: 330, protein: 55, carbohydrates: 0, fat: 8),
+                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000102")!, name: "Arroz cocido", portion: "250 g", calories: 330, protein: 7, carbohydrates: 74, fat: 2),
+                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000103")!, name: "Aceite de oliva", portion: "7 g", calories: 60, protein: 0, carbohydrates: 0, fat: 8)
+                ],
+                source: "Grok Vision",
+                confidence: 0.91
+            ))
             modelContext.insert(MealEntry(date: day.addingTimeInterval(64_800), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
         }
         for index in 0..<9 {
@@ -1302,6 +1320,7 @@ private struct MealRow: View {
             } label: {
                 Image(systemName: "ellipsis").frame(width: 30, height: 40)
             }
+            .accessibilityLabel("Opciones de \(meal.name)")
         }
     }
 }

@@ -137,3 +137,11 @@ La extensión no abre SwiftData. La app calcula un `WidgetSnapshot` con las mét
 ### Privacidad y acciones en WidgetKit
 
 Los valores, el recuento de comidas y el estado del plan se marcan como sensibles. En redacción privada el progreso se neutraliza para que el anillo no revele el consumo. Los botones reutilizan los App Intents existentes y escriben una ruta de un solo uso en el mismo App Group, sin añadir backend, SDK o API.
+
+### Corrección por ingrediente antes y después de guardar
+
+La estimación de una foto deja de ser una lista informativa. Cada componente detectado conserva nombre, porción y cuatro macros, y se puede corregir, añadir o borrar. El total se suma localmente en cada cambio y también admite una corrección final cuando el usuario conoce una cifra más precisa.
+
+El mismo editor aparece abierto en el análisis fotográfico y mediante divulgación progresiva al editar una comida guardada. Esto mantiene una sola acción principal y evita una pantalla nueva. Los componentes se guardan como JSON Codable con almacenamiento externo dentro de `MealEntry`, una ampliación opcional y ligera que no introduce otra tabla ni una llamada adicional a Grok.
+
+La copia JSON mantiene su versión actual y añade `components` como campo opcional. Las copias y bases anteriores se interpretan como comidas sin desglose. Una migración v1.8 a v1.9 en simulador confirmó que todos los registros previos permanecen intactos.

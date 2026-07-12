@@ -17,6 +17,44 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(result.calories, 510)
         XCTAssertEqual(result.proteinG, 60)
         XCTAssertEqual(result.items.first?.portion, "180 g")
+        XCTAssertEqual(EditableMeal(analysis: result).components.first?.name, "Pechuga de pollo")
+    }
+
+    func testEditableMealComponentsRecalculateAndPersist() throws {
+        var meal = EditableMeal()
+        meal.name = "Pollo con arroz"
+        var chicken = EditableMealComponent()
+        chicken.name = "Pechuga de pollo"
+        chicken.portion = "220 g"
+        chicken.calories = "330"
+        chicken.protein = "55"
+        chicken.fat = "8"
+        var rice = EditableMealComponent()
+        rice.name = "Arroz cocido"
+        rice.portion = "250 g"
+        rice.calories = "330"
+        rice.protein = "7"
+        rice.carbohydrates = "74"
+        rice.fat = "2"
+        meal.components = [chicken, rice]
+        meal.recalculateFromComponents()
+
+        XCTAssertEqual(meal.number(meal.calories), 660)
+        XCTAssertEqual(meal.number(meal.protein), 62)
+        XCTAssertEqual(meal.number(meal.carbohydrates), 74)
+        XCTAssertEqual(meal.number(meal.fat), 10)
+        XCTAssertTrue(meal.isValid)
+
+        let entry = MealEntry(
+            name: meal.name,
+            calories: meal.number(meal.calories),
+            protein: meal.number(meal.protein),
+            carbohydrates: meal.number(meal.carbohydrates),
+            fat: meal.number(meal.fat),
+            components: meal.persistedComponents
+        )
+        XCTAssertEqual(entry.components.map(\.name), ["Pechuga de pollo", "Arroz cocido"])
+        XCTAssertEqual(EditableMeal(meal: entry).components.count, 2)
     }
 
     func testAdherenceRewardsConfiguredRanges() {
@@ -145,16 +183,40 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertThrowsError(try BackupService.decode(encoder.encode(future)))
     }
 
+    func testLegacyMealBackupWithoutComponentsDecodes() throws {
+        let meal = CaltrackBackup.Meal(
+            id: UUID(),
+            date: .now,
+            name: "Comida antigua",
+            calories: 500,
+            protein: 40,
+            carbohydrates: 45,
+            fat: 15,
+            photoData: nil,
+            source: "manual",
+            confidence: 1,
+            assumption: ""
+        )
+        let backup = CaltrackBackup(version: 1, exportedAt: .now, meals: [meal], measurements: [], workouts: [], messages: [])
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        let data = try encoder.encode(backup)
+
+        XCTAssertFalse(String(decoding: data, as: UTF8.self).contains("components"))
+        XCTAssertNil(try BackupService.decode(data).meals.first?.components)
+    }
+
     @MainActor
     func testBackupRestoreMergesWithoutDuplicates() throws {
         let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, DailyPlanCheckIn.self, WorkoutEntry.self, CoachMessage.self])
         let container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         let mealID = UUID()
+        let component = MealComponent(name: "Arroz cocido", portion: "250 g", calories: 330, protein: 7, carbohydrates: 74, fat: 2)
         let backup = CaltrackBackup(
             version: 1,
             exportedAt: .now,
             meals: [
-                .init(id: mealID, date: .now, name: "Comida restaurada", calories: 600, protein: 50, carbohydrates: 60, fat: 18, photoData: nil, source: "manual", confidence: 1, assumption: "")
+                .init(id: mealID, date: .now, name: "Comida restaurada", calories: 600, protein: 50, carbohydrates: 60, fat: 18, photoData: nil, components: [component], source: "manual", confidence: 1, assumption: "")
             ],
             measurements: [],
             activities: [],
@@ -164,7 +226,9 @@ final class GrokServiceTests: XCTestCase {
 
         XCTAssertEqual(try BackupService.restore(backup, into: container.mainContext), 1)
         XCTAssertEqual(try BackupService.restore(backup, into: container.mainContext), 0)
-        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<MealEntry>()).map(\.id), [mealID])
+        let restored = try container.mainContext.fetch(FetchDescriptor<MealEntry>())
+        XCTAssertEqual(restored.map(\.id), [mealID])
+        XCTAssertEqual(restored.first?.components, [component])
     }
 
     func testActivityTotalEnergyCombinesActiveAndResting() {

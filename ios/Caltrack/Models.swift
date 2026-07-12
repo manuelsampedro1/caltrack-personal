@@ -1,6 +1,34 @@
 import Foundation
 import SwiftData
 
+struct MealComponent: Codable, Equatable, Identifiable, Sendable {
+    let id: UUID
+    let name: String
+    let portion: String
+    let calories: Double
+    let protein: Double
+    let carbohydrates: Double
+    let fat: Double
+
+    init(
+        id: UUID = UUID(),
+        name: String,
+        portion: String,
+        calories: Double,
+        protein: Double,
+        carbohydrates: Double,
+        fat: Double
+    ) {
+        self.id = id
+        self.name = name
+        self.portion = portion
+        self.calories = calories
+        self.protein = protein
+        self.carbohydrates = carbohydrates
+        self.fat = fat
+    }
+}
+
 @Model
 final class MealEntry {
     var id: UUID
@@ -11,6 +39,7 @@ final class MealEntry {
     var carbohydrates: Double
     var fat: Double
     @Attribute(.externalStorage) var photoData: Data?
+    @Attribute(.externalStorage) var componentData: Data?
     var source: String
     var confidence: Double
     var assumption: String
@@ -24,6 +53,7 @@ final class MealEntry {
         carbohydrates: Double = 0,
         fat: Double = 0,
         photoData: Data? = nil,
+        components: [MealComponent] = [],
         source: String = "manual",
         confidence: Double = 1,
         assumption: String = ""
@@ -36,9 +66,19 @@ final class MealEntry {
         self.carbohydrates = carbohydrates
         self.fat = fat
         self.photoData = photoData
+        self.componentData = components.isEmpty ? nil : try? JSONEncoder().encode(components)
         self.source = source
         self.confidence = confidence
         self.assumption = assumption
+    }
+
+    var components: [MealComponent] {
+        guard let componentData else { return [] }
+        return (try? JSONDecoder().decode([MealComponent].self, from: componentData)) ?? []
+    }
+
+    func updateComponents(_ components: [MealComponent]) {
+        componentData = components.isEmpty ? nil : try? JSONEncoder().encode(components)
     }
 }
 
@@ -292,6 +332,51 @@ struct FoodAnalysis: Codable, Equatable {
     }
 }
 
+struct EditableMealComponent: Identifiable, Equatable {
+    var id = UUID()
+    var name = ""
+    var portion = ""
+    var calories = ""
+    var protein = ""
+    var carbohydrates = ""
+    var fat = ""
+
+    init() {}
+
+    init(item: FoodAnalysis.Item) {
+        name = item.name
+        portion = item.portion
+        calories = EditableMeal.format(item.calories)
+        protein = EditableMeal.format(item.proteinG)
+        carbohydrates = EditableMeal.format(item.carbsG)
+        fat = EditableMeal.format(item.fatG)
+    }
+
+    init(component: MealComponent) {
+        id = component.id
+        name = component.name
+        portion = component.portion
+        calories = EditableMeal.format(component.calories)
+        protein = EditableMeal.format(component.protein)
+        carbohydrates = EditableMeal.format(component.carbohydrates)
+        fat = EditableMeal.format(component.fat)
+    }
+
+    var persisted: MealComponent? {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty else { return nil }
+        return MealComponent(
+            id: id,
+            name: trimmedName,
+            portion: portion.trimmingCharacters(in: .whitespacesAndNewlines),
+            calories: EditableMeal.number(calories),
+            protein: EditableMeal.number(protein),
+            carbohydrates: EditableMeal.number(carbohydrates),
+            fat: EditableMeal.number(fat)
+        )
+    }
+}
+
 struct EditableMeal {
     var name = ""
     var calories = ""
@@ -300,6 +385,7 @@ struct EditableMeal {
     var fat = ""
     var confidence = 0.0
     var assumption = ""
+    var components = [EditableMealComponent]()
 
     init() {}
 
@@ -311,6 +397,7 @@ struct EditableMeal {
         fat = Self.format(analysis.fatG)
         confidence = analysis.confidence
         assumption = analysis.assumptions.joined(separator: " · ")
+        components = analysis.items.map(EditableMealComponent.init)
     }
 
     init(meal: MealEntry) {
@@ -321,17 +408,43 @@ struct EditableMeal {
         fat = Self.format(meal.fat)
         confidence = meal.confidence
         assumption = meal.assumption
+        components = meal.components.map(EditableMealComponent.init)
     }
 
     var isValid: Bool {
-        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && number(calories) >= 0 && number(protein) >= 0
+        !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && Self.number(calories) >= 0
+            && Self.number(protein) >= 0
+            && components.allSatisfy { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     }
 
     func number(_ value: String) -> Double {
+        Self.number(value)
+    }
+
+    var persistedComponents: [MealComponent] {
+        components.compactMap(\.persisted)
+    }
+
+    mutating func recalculateFromComponents() {
+        guard !components.isEmpty else {
+            calories = "0"
+            protein = "0"
+            carbohydrates = "0"
+            fat = "0"
+            return
+        }
+        calories = Self.format(components.reduce(0) { $0 + Self.number($1.calories) })
+        protein = Self.format(components.reduce(0) { $0 + Self.number($1.protein) })
+        carbohydrates = Self.format(components.reduce(0) { $0 + Self.number($1.carbohydrates) })
+        fat = Self.format(components.reduce(0) { $0 + Self.number($1.fat) })
+    }
+
+    static func number(_ value: String) -> Double {
         Double(value.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
 
-    private static func format(_ value: Double) -> String {
+    static func format(_ value: Double) -> String {
         value.formatted(.number.precision(.fractionLength(0...1)))
     }
 }

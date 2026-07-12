@@ -76,7 +76,7 @@ El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posteri
 3. Ejecuta Caltrack y acepta únicamente los datos de Salud que quieras compartir.
 4. En la primera tarjeta, toca `Salud` para mostrar el permiso de Apple.
 5. En Ajustes de Caltrack, valida y guarda una clave de xAI. Se conserva en Keychain y nunca se añade a Git.
-6. Pulsa `Fotografiar comida`, revisa la estimación y confirma los macros.
+6. Pulsa `Fotografiar comida`, corrige ingredientes, porciones o macros y guarda el resultado.
 
 La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La PWA no muestra una conexión falsa: Safari no puede acceder a HealthKit.
 
@@ -88,6 +88,12 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 - `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local, App Shortcuts y copia o restauración JSON con el plan adaptativo.
 
 La primera apertura incluye una introducción breve que se puede omitir. No solicita Salud, notificaciones ni claves automáticamente.
+
+### Revisión precisa de una foto
+
+Grok propone el nombre del plato, confianza, supuestos y un desglose por componentes. Cada componente conserva nombre, porción, calorías, proteína, carbohidratos y grasa. Se puede corregir, añadir o borrar antes de guardar, y Caltrack recalcula el total de forma local e inmediata.
+
+El desglose queda unido a la comida y vuelve a aparecer al editarla desde Hoy o Progreso. También se conserva al repetir una comida y en la copia JSON privada. Los registros de versiones anteriores siguen abriendo normalmente, solo aparecen sin desglose.
 
 ### Plan semanal adaptativo
 
@@ -157,4 +163,4 @@ No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Gr
 
 Caltrack organiza estimaciones, no sustituye consejo médico o nutricional. Un déficit concreto puede ser adecuado para una persona y no para otra. El sistema bloquea déficits superiores a 1.000 kcal y señala tendencias agresivas.
 
-Una foto no permite medir porciones, aceites o ingredientes ocultos con precisión. Grok propone una estimación que debe revisarse antes de guardarla.
+Una foto no permite medir porciones, aceites o ingredientes ocultos con precisión. Grok propone una estimación editable por ingrediente que debe revisarse antes de guardarla.

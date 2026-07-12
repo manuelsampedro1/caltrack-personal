@@ -24,8 +24,10 @@
 - [x] Añadir tendencias privadas de sueño, frecuencia cardiaca en reposo y HRV desde Apple Salud, sin score opaco.
 - [x] Añadir cierre diario y plan semanal adaptativo con evidencia, cambios de 100 kcal y confirmación explícita.
 - [x] Añadir widgets de inicio y bloqueo con calorías, proteína, privacidad y accesos rápidos.
+- [x] Añadir corrección por ingrediente para comidas analizadas con foto, con persistencia y backup compatible.
 - [ ] Regenerar la clave de Hevy compartida en el chat y pegar la nueva directamente en Caltrack desde el iPhone.
 - [ ] Probar una comida real, corregir porciones y comparar la estimación con la etiqueta o receta.
+- [ ] En un iPhone firmado, analizar una comida con varios ingredientes y comprobar que el desglose sigue editable tras cerrar y abrir la app.
 - [ ] En un iPhone firmado, activar la escritura nutricional y comprobar una comida real en Salud.
 - [ ] En un iPhone firmado, escanear un envase real y contrastar los macros con su etiqueta.
 - [ ] En un iPhone firmado, seleccionar una foto de progreso real y comprobar su restauración desde una copia.

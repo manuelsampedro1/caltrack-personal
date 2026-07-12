@@ -117,6 +117,7 @@ struct ProgressDashboardView: View {
                         meal.fat = editable.number(editable.fat)
                         meal.confidence = editable.confidence
                         meal.assumption = editable.assumption
+                        meal.updateComponents(editable.persistedComponents)
                         try? modelContext.save()
                         syncNutritionIfEnabled(meal)
                     }
@@ -712,6 +713,7 @@ struct ProgressDashboardView: View {
             protein: meal.protein,
             carbohydrates: meal.carbohydrates,
             fat: meal.fat,
+            components: meal.components,
             source: "repeated",
             assumption: "Repetida desde el historial"
         )
