@@ -22,6 +22,26 @@ struct HealthWorkoutSnapshot: Equatable {
     let sourceBundle: String
 }
 
+struct DailyActivitySnapshot: Equatable {
+    let externalID: String
+    let date: Date
+    let activeEnergy: Double
+    let restingEnergy: Double
+    let steps: Double
+}
+
+private struct DatedHealthQuantity {
+    let date: Date
+    let value: Double
+}
+
+private struct BodyDayAccumulator {
+    var date: Date
+    var weight: Double?
+    var bodyFat: Double?
+    var waist: Double?
+}
+
 @MainActor
 @Observable
 final class HealthKitService {
@@ -43,6 +63,8 @@ final class HealthKitService {
     private let store = HKHealthStore()
     var state: State = .idle
     var snapshot: HealthSnapshot?
+    var measurementHistory: [HealthSnapshot] = []
+    var activityHistory: [DailyActivitySnapshot] = []
     var workouts: [HealthWorkoutSnapshot] = []
 
     var isAvailable: Bool { HKHealthStore.isHealthDataAvailable() }
@@ -60,6 +82,8 @@ final class HealthKitService {
                 HKQuantityType(.waistCircumference),
                 HKObjectType.workoutType(),
                 HKQuantityType(.activeEnergyBurned),
+                HKQuantityType(.basalEnergyBurned),
+                HKQuantityType(.stepCount),
                 HKQuantityType(.distanceWalkingRunning),
                 HKQuantityType(.distanceCycling),
                 HKQuantityType(.distanceSwimming)
@@ -81,7 +105,9 @@ final class HealthKitService {
         async let bodyFat = latest(.bodyFatPercentage, unit: .percent(), multiplier: 100)
         async let waist = latest(.waistCircumference, unit: .meterUnit(with: .centi), multiplier: 1)
         async let recentWorkouts = loadRecentWorkouts()
-        let values = try await (weight, bodyFat, waist, recentWorkouts)
+        async let recentMeasurements = loadMeasurementHistory()
+        async let recentActivity = loadActivityHistory()
+        let values = try await (weight, bodyFat, waist, recentWorkouts, recentMeasurements, recentActivity)
         let dates = [values.0?.date, values.1?.date, values.2?.date].compactMap { $0 }
         snapshot = HealthSnapshot(
             date: dates.max() ?? .now,
@@ -90,7 +116,50 @@ final class HealthKitService {
             waist: values.2?.value
         )
         workouts = values.3
+        measurementHistory = values.4
+        activityHistory = values.5
         state = .ready
+    }
+
+    private func loadActivityHistory() async throws -> [DailyActivitySnapshot] {
+        async let active = dailySums(.activeEnergyBurned, unit: .kilocalorie(), days: 30)
+        async let resting = dailySums(.basalEnergyBurned, unit: .kilocalorie(), days: 30)
+        async let steps = dailySums(.stepCount, unit: .count(), days: 30)
+        let values = try await (active, resting, steps)
+        let dates = Set(values.0.keys).union(values.1.keys).union(values.2.keys)
+        return dates.sorted(by: >).map { date in
+            DailyActivitySnapshot(
+                externalID: "health-activity:\(Int(date.timeIntervalSince1970))",
+                date: date,
+                activeEnergy: values.0[date] ?? 0,
+                restingEnergy: values.1[date] ?? 0,
+                steps: values.2[date] ?? 0
+            )
+        }
+    }
+
+    private func loadMeasurementHistory() async throws -> [HealthSnapshot] {
+        async let weights = recent(.bodyMass, unit: .gramUnit(with: .kilo), multiplier: 1)
+        async let bodyFat = recent(.bodyFatPercentage, unit: .percent(), multiplier: 100)
+        async let waists = recent(.waistCircumference, unit: .meterUnit(with: .centi), multiplier: 1)
+        let values = try await (weights, bodyFat, waists)
+        let calendar = Calendar.current
+        var days = [Date: BodyDayAccumulator]()
+
+        func insert(_ item: DatedHealthQuantity, keyPath: WritableKeyPath<BodyDayAccumulator, Double?>) {
+            let day = calendar.startOfDay(for: item.date)
+            var value = days[day] ?? BodyDayAccumulator(date: item.date)
+            value.date = max(value.date, item.date)
+            if value[keyPath: keyPath] == nil { value[keyPath: keyPath] = item.value }
+            days[day] = value
+        }
+
+        values.0.forEach { insert($0, keyPath: \.weight) }
+        values.1.forEach { insert($0, keyPath: \.bodyFat) }
+        values.2.forEach { insert($0, keyPath: \.waist) }
+        return days.values
+            .sorted { $0.date > $1.date }
+            .map { HealthSnapshot(date: $0.date, weight: $0.weight, bodyFat: $0.bodyFat, waist: $0.waist) }
     }
 
     private func loadRecentWorkouts() async throws -> [HealthWorkoutSnapshot] {
@@ -164,6 +233,59 @@ final class HealthKitService {
                     return
                 }
                 continuation.resume(returning: (sample.quantity.doubleValue(for: unit) * multiplier, sample.endDate))
+            }
+            store.execute(query)
+        }
+    }
+
+    private func recent(_ identifier: HKQuantityTypeIdentifier, unit: HKUnit, multiplier: Double) async throws -> [DatedHealthQuantity] {
+        let type = HKQuantityType(identifier)
+        let start = Calendar.current.date(byAdding: .day, value: -180, to: .now)
+        let predicate = start.map { HKQuery.predicateForSamples(withStart: $0, end: nil, options: .strictStartDate) }
+        let sort = NSSortDescriptor(key: HKSampleSortIdentifierEndDate, ascending: false)
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: 200, sortDescriptors: [sort]) { _, samples, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                let values = samples?.compactMap { sample -> DatedHealthQuantity? in
+                    guard let sample = sample as? HKQuantitySample else { return nil }
+                    return DatedHealthQuantity(date: sample.endDate, value: sample.quantity.doubleValue(for: unit) * multiplier)
+                } ?? []
+                continuation.resume(returning: values)
+            }
+            store.execute(query)
+        }
+    }
+
+    private func dailySums(_ identifier: HKQuantityTypeIdentifier, unit: HKUnit, days: Int) async throws -> [Date: Double] {
+        let type = HKQuantityType(identifier)
+        let calendar = Calendar.current
+        let end = Date.now
+        let start = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -(days - 1), to: end) ?? end)
+        var interval = DateComponents()
+        interval.day = 1
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKStatisticsCollectionQuery(
+                quantityType: type,
+                quantitySamplePredicate: HKQuery.predicateForSamples(withStart: start, end: end),
+                options: .cumulativeSum,
+                anchorDate: start,
+                intervalComponents: interval
+            )
+            query.initialResultsHandler = { _, collection, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                var result = [Date: Double]()
+                collection?.enumerateStatistics(from: start, to: end) { statistics, _ in
+                    if let sum = statistics.sumQuantity() {
+                        result[calendar.startOfDay(for: statistics.startDate)] = sum.doubleValue(for: unit)
+                    }
+                }
+                continuation.resume(returning: result)
             }
             store.execute(query)
         }

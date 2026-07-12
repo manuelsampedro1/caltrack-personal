@@ -61,6 +61,37 @@ final class BodyMeasurement {
     }
 }
 
+@Model
+final class ActivityDay {
+    var id: UUID
+    @Attribute(.unique) var externalID: String
+    var date: Date
+    var activeEnergy: Double
+    var restingEnergy: Double
+    var steps: Double
+    var source: String
+
+    init(
+        id: UUID = UUID(),
+        externalID: String,
+        date: Date,
+        activeEnergy: Double = 0,
+        restingEnergy: Double = 0,
+        steps: Double = 0,
+        source: String = "HealthKit"
+    ) {
+        self.id = id
+        self.externalID = externalID
+        self.date = date
+        self.activeEnergy = activeEnergy
+        self.restingEnergy = restingEnergy
+        self.steps = steps
+        self.source = source
+    }
+
+    var totalEnergy: Double { activeEnergy + restingEnergy }
+}
+
 struct WorkoutExerciseSummary: Codable, Equatable, Identifiable {
     var id: String { name }
     let name: String
@@ -117,9 +148,9 @@ final class WorkoutEntry {
         self.distanceKm = distanceKm
         self.source = source
         self.sourceBundle = sourceBundle
-        self.exerciseCount = exerciseCount
-        self.setCount = setCount
-        self.totalVolumeKg = totalVolumeKg
+        self.exerciseCount = exerciseCount == 0 && !exercises.isEmpty ? exercises.count : exerciseCount
+        self.setCount = setCount == 0 && !exercises.isEmpty ? exercises.reduce(0) { $0 + $1.setCount } : setCount
+        self.totalVolumeKg = totalVolumeKg == 0 && !exercises.isEmpty ? exercises.reduce(0) { $0 + $1.volumeKg } : totalVolumeKg
         self.exerciseData = try? JSONEncoder().encode(exercises)
     }
 
@@ -133,6 +164,21 @@ final class WorkoutEntry {
         exerciseCount = exercises.count
         setCount = exercises.reduce(0) { $0 + $1.setCount }
         totalVolumeKg = exercises.reduce(0) { $0 + $1.volumeKg }
+    }
+}
+
+@Model
+final class CoachMessage {
+    var id: UUID
+    var date: Date
+    var role: String
+    var content: String
+
+    init(id: UUID = UUID(), date: Date = .now, role: String, content: String) {
+        self.id = id
+        self.date = date
+        self.role = role
+        self.content = content
     }
 }
 
@@ -191,6 +237,16 @@ struct EditableMeal {
         fat = Self.format(analysis.fatG)
         confidence = analysis.confidence
         assumption = analysis.assumptions.joined(separator: " · ")
+    }
+
+    init(meal: MealEntry) {
+        name = meal.name
+        calories = Self.format(meal.calories)
+        protein = Self.format(meal.protein)
+        carbohydrates = Self.format(meal.carbohydrates)
+        fat = Self.format(meal.fat)
+        confidence = meal.confidence
+        assumption = meal.assumption
     }
 
     var isValid: Bool {

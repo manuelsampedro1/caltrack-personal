@@ -1,4 +1,5 @@
 import XCTest
+import SwiftData
 @testable import Caltrack
 
 final class GrokServiceTests: XCTestCase {
@@ -48,5 +49,117 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertFalse(HealthKitService.State.ready.isFailure)
         XCTAssertTrue(HealthKitService.State.unavailable.isFailure)
         XCTAssertTrue(HealthKitService.State.failed("Sin permiso").isFailure)
+    }
+
+    func testInsightReportUsesOnlyDaysWithLoggedFood() {
+        let calendar = Calendar(identifier: .gregorian)
+        let now = Date(timeIntervalSince1970: 1_788_739_200)
+        let yesterday = calendar.date(byAdding: .day, value: -1, to: now)!
+        let meals = [
+            MealEntry(date: now, name: "Día uno", calories: 1_900, protein: 170),
+            MealEntry(date: yesterday, name: "Día dos", calories: 1_850, protein: 165)
+        ]
+        let report = InsightEngine.report(
+            meals: meals,
+            measurements: [],
+            workouts: [],
+            calorieRange: 1_800...2_000,
+            proteinRange: 160...190,
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertGreaterThan(report.score, 80)
+        XCTAssertTrue(report.summary.contains("2 días"))
+        XCTAssertTrue(report.observations.contains { $0.contains("dentro del rango") })
+    }
+
+    func testCoachContextContainsAggregatesWithoutPhotosOrHealthIdentifiers() {
+        let meal = MealEntry(name: "Pollo", calories: 500, protein: 55, photoData: Data("private-photo".utf8))
+        let workout = WorkoutEntry(
+            externalID: "health:secret-identifier",
+            startDate: .now.addingTimeInterval(-3_600),
+            endDate: .now,
+            title: "Torso",
+            activityType: "Fuerza",
+            durationMinutes: 60,
+            source: "HealthKit",
+            sourceBundle: "private.bundle"
+        )
+        let context = CoachContextBuilder.build(
+            meals: [meal],
+            measurements: [],
+            workouts: [workout],
+            calorieRange: 1_800...2_000,
+            proteinRange: 160...190
+        )
+
+        XCTAssertTrue(context.contains("500 kcal"))
+        XCTAssertTrue(context.contains("Torso"))
+        XCTAssertFalse(context.contains("private-photo"))
+        XCTAssertFalse(context.contains("secret-identifier"))
+        XCTAssertFalse(context.contains("private.bundle"))
+    }
+
+    func testCoachDecodesTextResponse() throws {
+        let payload = #"{"output":[{"content":[{"type":"output_text","text":"Mantén la proteína y planifica la cena."}]}]}"#
+        XCTAssertEqual(try CoachService.decodeText(Data(payload.utf8)), "Mantén la proteína y planifica la cena.")
+    }
+
+    func testWorkoutDerivesTotalsFromExerciseSummaries() {
+        let workout = WorkoutEntry(
+            externalID: "test:derived",
+            startDate: .now.addingTimeInterval(-3_600),
+            endDate: .now,
+            title: "Torso",
+            activityType: "Fuerza",
+            durationMinutes: 60,
+            source: "Test",
+            exercises: [
+                WorkoutExerciseSummary(name: "Press", setCount: 3, bestWeight: 70, bestReps: 8, volumeKg: 1_400, rpe: 8),
+                WorkoutExerciseSummary(name: "Remo", setCount: 4, bestWeight: 60, bestReps: 10, volumeKg: 1_800, rpe: 8)
+            ]
+        )
+
+        XCTAssertEqual(workout.exerciseCount, 2)
+        XCTAssertEqual(workout.setCount, 7)
+        XCTAssertEqual(workout.totalVolumeKg, 3_200)
+    }
+
+    func testBackupDecoderAcceptsCurrentVersionAndRejectsFutureVersion() throws {
+        let current = CaltrackBackup(version: 1, exportedAt: .now, meals: [], measurements: [], workouts: [], messages: [])
+        let future = CaltrackBackup(version: 2, exportedAt: .now, meals: [], measurements: [], workouts: [], messages: [])
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+
+        XCTAssertEqual(try BackupService.decode(encoder.encode(current)).version, 1)
+        XCTAssertThrowsError(try BackupService.decode(encoder.encode(future)))
+    }
+
+    @MainActor
+    func testBackupRestoreMergesWithoutDuplicates() throws {
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, WorkoutEntry.self, CoachMessage.self])
+        let container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        let mealID = UUID()
+        let backup = CaltrackBackup(
+            version: 1,
+            exportedAt: .now,
+            meals: [
+                .init(id: mealID, date: .now, name: "Comida restaurada", calories: 600, protein: 50, carbohydrates: 60, fat: 18, photoData: nil, source: "manual", confidence: 1, assumption: "")
+            ],
+            measurements: [],
+            activities: [],
+            workouts: [],
+            messages: []
+        )
+
+        XCTAssertEqual(try BackupService.restore(backup, into: container.mainContext), 1)
+        XCTAssertEqual(try BackupService.restore(backup, into: container.mainContext), 0)
+        XCTAssertEqual(try container.mainContext.fetch(FetchDescriptor<MealEntry>()).map(\.id), [mealID])
+    }
+
+    func testActivityTotalEnergyCombinesActiveAndResting() {
+        let activity = ActivityDay(externalID: "test:activity", date: .now, activeEnergy: 650, restingEnergy: 1_850, steps: 10_000)
+        XCTAssertEqual(activity.totalEnergy, 2_500)
     }
 }

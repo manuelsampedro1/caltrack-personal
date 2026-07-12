@@ -13,7 +13,7 @@
 - La sincronización evita duplicar el resumen de Salud y el entrenamiento detallado de Hevy.
 - El dashboard muestra entrenamientos semanales, fuente, métricas principales y detalle de fuerza.
 - La clave de Hevy se guarda en Keychain y no entra en SwiftData ni en el repositorio.
-- Pasan 5 tests unitarios y 1 test de interfaz, con 0 fallos.
+- La suite actual pasa 12 tests unitarios y 2 tests de interfaz, con 0 fallos.
 - La tarjeta poblada fue inspeccionada visualmente en un simulador iPhone 16.
 - La API real respondió con 10 entrenamientos y la interfaz mostró correctamente las sesiones recientes, ejercicios, series, cargas y volumen.
 

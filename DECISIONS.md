@@ -59,3 +59,15 @@ Caltrack usa xAI Grok para imagen y salida nutricional estructurada. OpenAI no s
 ### Conexiones visibles y estados veraces
 
 Salud, Hevy y Grok aparecen en un panel compacto antes de la cámara. Salud solo se marca como preparada si HealthKit termina el flujo correctamente. Como Apple no revela si se denegó cada tipo de lectura, la interfaz no afirma acceso total. Hevy y xAI validan la clave antes de guardarla.
+
+### Tres contextos nativos
+
+La app usa tabs Hoy, Progreso y Entrenador. Hoy mantiene captura y decisiones inmediatas. Progreso reúne nutrición, composición, gasto e historial. Entrenador separa reglas locales de preguntas voluntarias a Grok. Esta división evita convertir una única pantalla en un dashboard interminable.
+
+### Balance energético con cautela
+
+Caltrack suma energía activa y basal leídas de Salud y la compara con comidas registradas. Se etiqueta siempre como estimación porque relojes, fórmulas y etiquetas tienen error. La tendencia del peso tiene más peso interpretativo que un balance diario aislado.
+
+### Portabilidad sin cuenta
+
+La app nativa exporta y fusiona un JSON con comidas, fotos, cuerpo, actividad, entrenamientos y conversación. La restauración usa identificadores estables para no duplicar. Keychain queda fuera. Los recordatorios son locales y están desactivados por defecto.

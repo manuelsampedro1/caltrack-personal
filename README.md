@@ -80,6 +80,13 @@ El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posteri
 
 La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La PWA no muestra una conexión falsa: Safari no puede acceder a HealthKit.
 
+### Áreas de la app
+
+- `Hoy`: foto, fototeca, entrada manual, edición, objetivos, balance estimado y entrenamientos.
+- `Progreso`: gráficos de 14 días, composición corporal, gasto de Salud, historial de comidas y carga de entrenamiento.
+- `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
+- `Ajustes`: claves validadas, objetivos, recordatorio local y copia o restauración JSON.
+
 ### Entrenamientos de Hevy y Strava
 
 - Strava: activa `Ajustes > Gestionar apps y dispositivos > Salud > Enviar a Salud`. Caltrack importará tipo de actividad, duración, distancia, calorías y fuente desde HealthKit.
@@ -98,7 +105,7 @@ ruby ios/scripts/generate_project.rb
 
 La foto elegida se envía directamente a `api.x.ai` para el análisis. Los datos de Salud no se envían a xAI. Consulta [PRIVACY.md](PRIVACY.md).
 
-No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Grok, para visión y salida nutricional estructurada. El cálculo de objetivos, adherencia y avisos básicos se ejecuta localmente.
+No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Grok, para visión, salida nutricional estructurada y preguntas voluntarias al entrenador. El cálculo de objetivos, adherencia, tendencias y avisos básicos se ejecuta localmente.
 
 ## Límite importante
 

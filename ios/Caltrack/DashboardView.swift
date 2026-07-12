@@ -8,6 +8,7 @@ struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
+    @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
@@ -23,6 +24,8 @@ struct DashboardView: View {
     @State private var showingCamera = false
     @State private var showingSettings = false
     @State private var showingAnalysis = false
+    @State private var showingManualEntry = false
+    @State private var editingMeal: MealEntry?
     @State private var healthMessage: String?
     @State private var workoutMessage: String?
     @State private var workoutSyncing = false
@@ -78,6 +81,16 @@ struct DashboardView: View {
             .sheet(isPresented: $showingSettings) {
                 SettingsView()
             }
+            .sheet(isPresented: $showingManualEntry) {
+                ManualMealSheet { editable, date in
+                    saveMeal(editable, imageData: nil, date: date)
+                }
+            }
+            .sheet(item: $editingMeal) { meal in
+                ManualMealSheet(title: "Editar comida", initial: EditableMeal(meal: meal), date: meal.date) { editable, date in
+                    updateMeal(meal, with: editable, date: date)
+                }
+            }
             .onChange(of: photoItem) { _, item in load(item) }
             .onChange(of: showingSettings) { _, showing in
                 guard !showing else { return }
@@ -89,6 +102,7 @@ struct DashboardView: View {
                     do {
                         try await health.refresh()
                         persistHealthSnapshot()
+                        persistHealthActivity()
                         persistHealthWorkouts()
                     } catch {
                         healthMessage = "No se pudo sincronizar Salud: \(error.localizedDescription)"
@@ -161,12 +175,21 @@ struct DashboardView: View {
                 }
                 .sensoryFeedback(.impact(weight: .medium), trigger: showingCamera)
 
-                PhotosPicker(selection: $photoItem, matching: .images) {
-                    Label("Elegir una foto", systemImage: "photo.on.rectangle")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 44)
-                        .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                HStack(spacing: 10) {
+                    PhotosPicker(selection: $photoItem, matching: .images) {
+                        Label("Fototeca", systemImage: "photo.on.rectangle")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    }
+                    Button { showingManualEntry = true } label: {
+                        Label("Manual", systemImage: "square.and.pencil")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    }
                 }
             }
         }
@@ -356,6 +379,17 @@ struct DashboardView: View {
                 .font(.caption)
                 .foregroundStyle(CaltrackTheme.muted)
 
+                if let activity = activityDays.first(where: { Calendar.current.isDateInToday($0.date) }), activity.totalEnergy > 0 {
+                    let balance = todayTotals.calories - activity.totalEnergy
+                    HStack {
+                        Label("Gasto estimado \(Int(activity.totalEnergy)) kcal", systemImage: "flame.fill")
+                        Spacer()
+                        Text("Balance \(balance > 0 ? "+" : "")\(Int(balance)) kcal")
+                            .foregroundStyle(balance <= 0 && balance >= -1_000 ? CaltrackTheme.green : CaltrackTheme.coral)
+                    }
+                    .font(.caption.weight(.semibold))
+                }
+
                 if todayMeals.isEmpty {
                     ContentUnavailableView("Nada registrado", systemImage: "fork.knife", description: Text("La primera foto del día aparecerá aquí."))
                         .frame(maxWidth: .infinity)
@@ -363,6 +397,8 @@ struct DashboardView: View {
                 } else {
                     ForEach(todayMeals) { meal in
                         MealRow(meal: meal) {
+                            editingMeal = meal
+                        } delete: {
                             modelContext.delete(meal)
                             try? modelContext.save()
                         }
@@ -430,8 +466,9 @@ struct DashboardView: View {
         }
     }
 
-    private func saveMeal(_ editable: EditableMeal, imageData: Data?) {
+    private func saveMeal(_ editable: EditableMeal, imageData: Data?, date: Date = .now) {
         let meal = MealEntry(
+            date: date,
             name: editable.name,
             calories: editable.number(editable.calories),
             protein: editable.number(editable.protein),
@@ -447,15 +484,35 @@ struct DashboardView: View {
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
+    private func updateMeal(_ meal: MealEntry, with editable: EditableMeal, date: Date) {
+        meal.date = date
+        meal.name = editable.name
+        meal.calories = editable.number(editable.calories)
+        meal.protein = editable.number(editable.protein)
+        meal.carbohydrates = editable.number(editable.carbohydrates)
+        meal.fat = editable.number(editable.fat)
+        meal.confidence = editable.confidence
+        meal.assumption = editable.assumption
+        try? modelContext.save()
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     private func persistHealthSnapshot() {
-        guard let snapshot = health.snapshot,
-              snapshot.weight != nil || snapshot.bodyFat != nil || snapshot.waist != nil else { return }
-        if let existing = measurements.first(where: { $0.source == "HealthKit" && abs($0.date.timeIntervalSince(snapshot.date)) < 1 }) {
-            existing.weight = snapshot.weight
-            existing.bodyFat = snapshot.bodyFat
-            existing.waist = snapshot.waist
-        } else {
-            modelContext.insert(BodyMeasurement(date: snapshot.date, weight: snapshot.weight, bodyFat: snapshot.bodyFat, waist: snapshot.waist, source: "HealthKit"))
+        let snapshots = health.measurementHistory.isEmpty ? [health.snapshot].compactMap { $0 } : health.measurementHistory
+        guard !snapshots.isEmpty else { return }
+        let calendar = Calendar.current
+        var stored = (try? modelContext.fetch(FetchDescriptor<BodyMeasurement>())) ?? measurements
+        for snapshot in snapshots where snapshot.weight != nil || snapshot.bodyFat != nil || snapshot.waist != nil {
+            if let existing = stored.first(where: { $0.source == "HealthKit" && calendar.isDate($0.date, inSameDayAs: snapshot.date) }) {
+                if let weight = snapshot.weight { existing.weight = weight }
+                if let bodyFat = snapshot.bodyFat { existing.bodyFat = bodyFat }
+                if let waist = snapshot.waist { existing.waist = waist }
+                existing.date = max(existing.date, snapshot.date)
+            } else {
+                let entry = BodyMeasurement(date: snapshot.date, weight: snapshot.weight, bodyFat: snapshot.bodyFat, waist: snapshot.waist, source: "HealthKit")
+                modelContext.insert(entry)
+                stored.append(entry)
+            }
         }
         try? modelContext.save()
     }
@@ -489,6 +546,29 @@ struct DashboardView: View {
         try? modelContext.save()
     }
 
+    private func persistHealthActivity() {
+        var stored = (try? modelContext.fetch(FetchDescriptor<ActivityDay>())) ?? activityDays
+        for snapshot in health.activityHistory {
+            if let existing = stored.first(where: { $0.externalID == snapshot.externalID }) {
+                existing.date = snapshot.date
+                existing.activeEnergy = snapshot.activeEnergy
+                existing.restingEnergy = snapshot.restingEnergy
+                existing.steps = snapshot.steps
+            } else {
+                let entry = ActivityDay(
+                    externalID: snapshot.externalID,
+                    date: snapshot.date,
+                    activeEnergy: snapshot.activeEnergy,
+                    restingEnergy: snapshot.restingEnergy,
+                    steps: snapshot.steps
+                )
+                modelContext.insert(entry)
+                stored.append(entry)
+            }
+        }
+        try? modelContext.save()
+    }
+
     private func syncAllWorkouts() async {
         workoutSyncing = true
         defer { workoutSyncing = false }
@@ -496,6 +576,7 @@ struct DashboardView: View {
             if healthConnected {
                 try await health.refresh()
                 persistHealthSnapshot()
+                persistHealthActivity()
                 persistHealthWorkouts()
             }
             if await syncHevy() { workoutMessage = "Actualizado ahora" }
@@ -522,6 +603,7 @@ struct DashboardView: View {
                 healthConnected = true
                 healthMessage = "Salud preparada. Importaremos únicamente los datos que autorices."
                 persistHealthSnapshot()
+                persistHealthActivity()
                 persistHealthWorkouts()
                 _ = await syncHevy()
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -604,7 +686,12 @@ struct DashboardView: View {
 
     private func seedTestingDataIfNeeded() {
 #if DEBUG
-        guard ProcessInfo.processInfo.arguments.contains("-seed-workouts"), workouts.isEmpty else { return }
+        let arguments = ProcessInfo.processInfo.arguments
+        if arguments.contains("-seed-superapp") {
+            seedSuperAppTestingData()
+            return
+        }
+        guard arguments.contains("-seed-workouts"), workouts.isEmpty else { return }
         modelContext.insert(WorkoutEntry(
             externalID: "hevy:ui-test",
             startDate: .now.addingTimeInterval(-3_600),
@@ -626,6 +713,64 @@ struct DashboardView: View {
         try? modelContext.save()
 #endif
     }
+
+#if DEBUG
+    private func seedSuperAppTestingData() {
+        let calendar = Calendar.current
+        if meals.isEmpty {
+            for offset in 0..<14 {
+                let day = calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now
+                let variation = Double((offset % 4) * 45)
+                modelContext.insert(MealEntry(date: day.addingTimeInterval(-28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
+                modelContext.insert(MealEntry(date: day.addingTimeInterval(-14_400), name: "Pollo con arroz", calories: 720, protein: 62, carbohydrates: 74, fat: 18, source: "Grok Vision", confidence: 0.91))
+                modelContext.insert(MealEntry(date: day.addingTimeInterval(-3_600), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
+            }
+        }
+        if measurements.isEmpty {
+            for index in 0..<6 {
+                let date = calendar.date(byAdding: .day, value: -(index * 7), to: .now) ?? .now
+                modelContext.insert(BodyMeasurement(date: date, weight: 79.4 + Double(index) * 0.35, bodyFat: 14.2 + Double(index) * 0.22, waist: 81.0 + Double(index) * 0.45, source: "HealthKit"))
+            }
+        }
+        if activityDays.isEmpty {
+            for offset in 0..<14 {
+                let date = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now)
+                modelContext.insert(ActivityDay(
+                    externalID: "health-activity:super-ui-\(offset)",
+                    date: date,
+                    activeEnergy: 520 + Double((offset % 5) * 35),
+                    restingEnergy: 1_860,
+                    steps: 7_800 + Double((offset % 4) * 900)
+                ))
+            }
+        }
+        if workouts.isEmpty {
+            for index in 0..<4 {
+                let start = calendar.date(byAdding: .day, value: -(index * 2), to: .now) ?? .now
+                modelContext.insert(WorkoutEntry(
+                    externalID: "hevy:super-ui-\(index)",
+                    startDate: start.addingTimeInterval(-4_200),
+                    endDate: start,
+                    title: ["Upper B", "Lower A", "Upper A", "Delts y brazos"][index],
+                    activityType: "Fuerza",
+                    durationMinutes: Double([67, 55, 72, 48][index]),
+                    source: "Hevy",
+                    sourceBundle: "com.hevyapp.hevy",
+                    exercises: [
+                        WorkoutExerciseSummary(name: "Press de pecho", setCount: 4, bestWeight: 55 + Double(index) * 5, bestReps: 8, volumeKg: 1_760, rpe: 8),
+                        WorkoutExerciseSummary(name: "Jalón al pecho", setCount: 4, bestWeight: 60, bestReps: 10, volumeKg: 2_000, rpe: 8)
+                    ]
+                ))
+            }
+        }
+        let existingMessages = (try? modelContext.fetch(FetchDescriptor<CoachMessage>())) ?? []
+        if existingMessages.isEmpty {
+            modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-120), role: "user", content: "¿Qué patrón debería mejorar esta semana?"))
+            modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-60), role: "assistant", content: "Tu proteína es consistente y el entrenamiento está cubierto. La principal mejora es reducir la variación de calorías entre días. Acción para esta semana: deja planificada la cena antes de las 18:00."))
+        }
+        try? modelContext.save()
+    }
+#endif
 }
 
 private struct DayTotal: Identifiable {
@@ -637,6 +782,7 @@ private struct DayTotal: Identifiable {
 
 private struct MealRow: View {
     let meal: MealEntry
+    let edit: () -> Void
     let delete: () -> Void
 
     var body: some View {
@@ -659,6 +805,7 @@ private struct MealRow: View {
             Spacer()
             Text("\(Int(meal.calories)) kcal").font(.subheadline.weight(.bold))
             Menu {
+                Button("Editar", systemImage: "pencil", action: edit)
                 Button("Eliminar", systemImage: "trash", role: .destructive, action: delete)
             } label: {
                 Image(systemName: "ellipsis").frame(width: 30, height: 40)

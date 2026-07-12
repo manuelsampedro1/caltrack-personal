@@ -1,20 +1,36 @@
+import SwiftData
 import SwiftUI
 import UIKit
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
+    @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
+    @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
+    @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
+    @Query(sort: \CoachMessage.date) private var messages: [CoachMessage]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
     @AppStorage("hevyConnected") private var hevyConnected = false
     @AppStorage("grokConnected") private var grokConnected = false
+    @AppStorage("reminderEnabled") private var reminderEnabled = false
+    @AppStorage("reminderHour") private var reminderHour = 21
+    @AppStorage("reminderMinute") private var reminderMinute = 0
     @State private var apiKey = ""
     @State private var hevyKey = ""
     @State private var validatingGrok = false
     @State private var validatingHevy = false
     @State private var grokMessage: String?
     @State private var hevyMessage: String?
+    @State private var reminderMessage: String?
+    @State private var backupMessage: String?
+    @State private var backupDocument: CaltrackBackupDocument?
+    @State private var showingExporter = false
+    @State private var showingImporter = false
 
     var body: some View {
         NavigationStack {
@@ -106,6 +122,42 @@ struct SettingsView: View {
                     numberRow("Proteína máxima", value: $proteinMax, step: 5)
                 }
 
+                Section {
+                    Toggle("Recordatorio diario", isOn: $reminderEnabled)
+                        .onChange(of: reminderEnabled) { _, enabled in
+                            Task { await updateReminder(enabled: enabled) }
+                        }
+                    if reminderEnabled {
+                        DatePicker("Hora", selection: reminderTime, displayedComponents: .hourAndMinute)
+                    }
+                    if let reminderMessage {
+                        Text(reminderMessage).font(.caption).foregroundStyle(reminderEnabled ? .secondary : CaltrackTheme.coral)
+                    }
+                } header: {
+                    Text("Recordatorio")
+                } footer: {
+                    Text("Se programa en el iPhone. No usa servidor, seguimiento ni notificaciones comerciales.")
+                }
+
+                Section {
+                    Button {
+                        backupDocument = CaltrackBackupDocument(backup: BackupService.make(meals: meals, measurements: measurements, activities: activityDays, workouts: workouts, messages: messages))
+                        showingExporter = true
+                    } label: {
+                        Label("Exportar copia privada", systemImage: "square.and.arrow.up")
+                    }
+                    Button { showingImporter = true } label: {
+                        Label("Restaurar o fusionar copia", systemImage: "square.and.arrow.down")
+                    }
+                    if let backupMessage {
+                        Text(backupMessage).font(.caption).foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Tus datos")
+                } footer: {
+                    Text("El JSON incluye comidas, fotos, medidas, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
+                }
+
                 Section("Privacidad") {
                     Label("Comidas, fotos y entrenamientos se guardan en este iPhone", systemImage: "iphone.gen3")
                     Label("Salud requiere permiso explícito", systemImage: "heart.text.square")
@@ -120,6 +172,35 @@ struct SettingsView: View {
             .onAppear {
                 grokConnected = KeychainStore.read(account: GrokService.apiKeyAccount) != nil
                 hevyConnected = KeychainStore.read(account: HevyService.apiKeyAccount) != nil
+            }
+        }
+        .fileExporter(
+            isPresented: $showingExporter,
+            document: backupDocument,
+            contentTypes: [.json],
+            defaultFilename: "Caltrack-\(Date.now.formatted(.iso8601.year().month().day()))"
+        ) { result in
+            switch result {
+            case .success:
+                backupMessage = "Copia exportada correctamente"
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            case .failure(let error):
+                backupMessage = "No se pudo exportar: \(error.localizedDescription)"
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            }
+        }
+        .fileImporter(isPresented: $showingImporter, allowedContentTypes: [.json]) { result in
+            do {
+                let url = try result.get()
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+                let backup = try BackupService.decode(Data(contentsOf: url))
+                let count = try BackupService.restore(backup, into: modelContext)
+                backupMessage = count == 0 ? "La copia ya estaba completamente restaurada" : "Restaurados \(count) registros"
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            } catch {
+                backupMessage = "No se pudo restaurar: \(error.localizedDescription)"
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
             }
         }
     }
@@ -155,6 +236,36 @@ struct SettingsView: View {
                 Spacer()
                 Text(Int(value.wrappedValue).formatted()).foregroundStyle(.secondary)
             }
+        }
+    }
+
+    private var reminderTime: Binding<Date> {
+        Binding {
+            Calendar.current.date(bySettingHour: reminderHour, minute: reminderMinute, second: 0, of: .now) ?? .now
+        } set: { date in
+            let components = Calendar.current.dateComponents([.hour, .minute], from: date)
+            reminderHour = components.hour ?? 21
+            reminderMinute = components.minute ?? 0
+            guard reminderEnabled else { return }
+            Task { await updateReminder(enabled: true) }
+        }
+    }
+
+    @MainActor
+    private func updateReminder(enabled: Bool) async {
+        if !enabled {
+            ReminderService.cancel()
+            reminderMessage = "Recordatorio desactivado"
+            return
+        }
+        do {
+            try await ReminderService.scheduleDaily(hour: reminderHour, minute: reminderMinute)
+            reminderMessage = "Te avisaremos cada día a las \(String(format: "%02d:%02d", reminderHour, reminderMinute))"
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            reminderEnabled = false
+            reminderMessage = error.localizedDescription
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }
 

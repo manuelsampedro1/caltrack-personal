@@ -18,7 +18,7 @@ Estado: completada en código. HealthKit lee peso, grasa corporal y cintura. La 
 
 ### Fase 4: Calidad y entrega
 
-Estado: completada salvo dispositivo real. Build de simulador correcto, cinco tests unitarios y un test de interfaz pasan. La pantalla completa fue inspeccionada visualmente en iPhone 16.
+Estado: completada salvo dispositivo real. Build de simulador correcto, doce tests unitarios y dos tests de interfaz pasan. Las áreas principales fueron inspeccionadas visualmente en iPhone 16.
 
 ## Decisiones
 
@@ -41,5 +41,5 @@ Estado: completada salvo dispositivo real. Build de simulador correcto, cinco te
 - Se eligió la arquitectura nativa sin VPS.
 - Se implementó el proyecto iOS completo.
 - Build de simulador correcto y sin warnings propios.
-- Tests: 5 unitarios y 1 de interfaz, 0 fallos.
+- Tests: 12 unitarios y 2 de interfaz, 0 fallos.
 - Revisión visual a pantalla completa completada.
