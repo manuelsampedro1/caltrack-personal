@@ -111,3 +111,9 @@ Cada intent escribe solo una ruta local de un solo uso. RootView la conserva dur
 La cámara configura `cameraCaptureMode` únicamente cuando el hardware está disponible. En simulador y otros entornos sin cámara usa Fototeca sin llamar APIs exclusivas de captura.
 
 El generador del proyecto usa identificadores deterministas. Regenerarlo dos veces produce exactamente los mismos archivos, de modo que una versión futura no reescribe el proyecto completo por UUID aleatorios.
+
+### Recuperación sin score opaco
+
+Caltrack lee sueño, frecuencia cardiaca en reposo y HRV SDNN desde Apple Salud solo después del permiso en contexto. Las muestra como tendencias personales junto a dieta, cuerpo y entrenamiento, sin convertirlas en una orden para entrenar o descansar y sin aplicar umbrales clínicos universales.
+
+El cálculo cuenta solo intervalos dormidos, une solapamientos, atribuye la noche al día de despertar y conserva una fuente por noche. Esto evita sumar tiempo en cama junto a las fases o duplicar una noche registrada por varias aplicaciones. La caché diaria es local, restaurable desde la copia JSON y compatible con copias anteriores que no contienen recuperación.

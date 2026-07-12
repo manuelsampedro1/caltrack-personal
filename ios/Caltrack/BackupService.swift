@@ -72,6 +72,19 @@ struct CaltrackBackup: Codable, Sendable {
         let source: String
     }
 
+    struct Recovery: Codable, Sendable {
+        let id: UUID
+        let externalID: String
+        let date: Date
+        let sleepMinutes: Double
+        let coreMinutes: Double
+        let deepMinutes: Double
+        let remMinutes: Double
+        let restingHeartRate: Double?
+        let hrvSDNN: Double?
+        let source: String
+    }
+
     struct Workout: Codable, Sendable {
         let id: UUID
         let externalID: String
@@ -99,21 +112,23 @@ struct CaltrackBackup: Codable, Sendable {
     let meals: [Meal]
     let measurements: [Body]
     let activities: [Activity]
+    let recovery: [Recovery]
     let workouts: [Workout]
     let messages: [Message]
 
-    init(version: Int, exportedAt: Date, meals: [Meal], measurements: [Body], activities: [Activity] = [], workouts: [Workout], messages: [Message]) {
+    init(version: Int, exportedAt: Date, meals: [Meal], measurements: [Body], activities: [Activity] = [], recovery: [Recovery] = [], workouts: [Workout], messages: [Message]) {
         self.version = version
         self.exportedAt = exportedAt
         self.meals = meals
         self.measurements = measurements
         self.activities = activities
+        self.recovery = recovery
         self.workouts = workouts
         self.messages = messages
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, exportedAt, meals, measurements, activities, workouts, messages
+        case version, exportedAt, meals, measurements, activities, recovery, workouts, messages
     }
 
     init(from decoder: Decoder) throws {
@@ -123,6 +138,7 @@ struct CaltrackBackup: Codable, Sendable {
         meals = try container.decode([Meal].self, forKey: .meals)
         measurements = try container.decode([Body].self, forKey: .measurements)
         activities = try container.decodeIfPresent([Activity].self, forKey: .activities) ?? []
+        recovery = try container.decodeIfPresent([Recovery].self, forKey: .recovery) ?? []
         workouts = try container.decode([Workout].self, forKey: .workouts)
         messages = try container.decode([Message].self, forKey: .messages)
     }
@@ -134,6 +150,7 @@ struct CaltrackBackup: Codable, Sendable {
         try container.encode(meals, forKey: .meals)
         try container.encode(measurements, forKey: .measurements)
         try container.encode(activities, forKey: .activities)
+        try container.encode(recovery, forKey: .recovery)
         try container.encode(workouts, forKey: .workouts)
         try container.encode(messages, forKey: .messages)
     }
@@ -166,6 +183,7 @@ enum BackupService {
         meals: [MealEntry],
         measurements: [BodyMeasurement],
         activities: [ActivityDay],
+        recovery: [RecoveryDay] = [],
         workouts: [WorkoutEntry],
         messages: [CoachMessage]
     ) -> CaltrackBackup {
@@ -192,6 +210,20 @@ enum BackupService {
             },
             activities: activities.map {
                 .init(id: $0.id, externalID: $0.externalID, date: $0.date, activeEnergy: $0.activeEnergy, restingEnergy: $0.restingEnergy, steps: $0.steps, source: $0.source)
+            },
+            recovery: recovery.map {
+                .init(
+                    id: $0.id,
+                    externalID: $0.externalID,
+                    date: $0.date,
+                    sleepMinutes: $0.sleepMinutes,
+                    coreMinutes: $0.coreMinutes,
+                    deepMinutes: $0.deepMinutes,
+                    remMinutes: $0.remMinutes,
+                    restingHeartRate: $0.restingHeartRate,
+                    hrvSDNN: $0.hrvSDNN,
+                    source: $0.source
+                )
             },
             workouts: workouts.map { workout in
                 .init(
@@ -227,11 +259,13 @@ enum BackupService {
         let existingMeals = try context.fetch(FetchDescriptor<MealEntry>())
         let existingBodies = try context.fetch(FetchDescriptor<BodyMeasurement>())
         let existingActivities = try context.fetch(FetchDescriptor<ActivityDay>())
+        let existingRecovery = try context.fetch(FetchDescriptor<RecoveryDay>())
         let existingWorkouts = try context.fetch(FetchDescriptor<WorkoutEntry>())
         let existingMessages = try context.fetch(FetchDescriptor<CoachMessage>())
         var mealIDs = Set(existingMeals.map(\.id))
         var bodyIDs = Set(existingBodies.map(\.id))
         var activityIDs = Set(existingActivities.map(\.externalID))
+        var recoveryIDs = Set(existingRecovery.map(\.externalID))
         var workoutIDs = Set(existingWorkouts.map(\.externalID))
         var messageIDs = Set(existingMessages.map(\.id))
         var inserted = 0
@@ -264,6 +298,21 @@ enum BackupService {
                 activeEnergy: item.activeEnergy,
                 restingEnergy: item.restingEnergy,
                 steps: item.steps,
+                source: item.source
+            ))
+            inserted += 1
+        }
+        for item in backup.recovery where recoveryIDs.insert(item.externalID).inserted {
+            context.insert(RecoveryDay(
+                id: item.id,
+                externalID: item.externalID,
+                date: item.date,
+                sleepMinutes: item.sleepMinutes,
+                coreMinutes: item.coreMinutes,
+                deepMinutes: item.deepMinutes,
+                remMinutes: item.remMinutes,
+                restingHeartRate: item.restingHeartRate,
+                hrvSDNN: item.hrvSDNN,
                 source: item.source
             ))
             inserted += 1

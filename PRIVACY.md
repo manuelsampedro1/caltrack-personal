@@ -4,7 +4,7 @@ Caltrack es una herramienta personal y local-first.
 
 ## Datos guardados en el dispositivo
 
-La app iOS guarda comidas, macros, fotos confirmadas de platos, check-ins corporales, fotos de progreso opcionales, medidas y entrenamientos importados en el almacenamiento local del iPhone. Las claves de xAI y Hevy se guardan en Keychain con acceso limitado al dispositivo.
+La app iOS guarda comidas, macros, fotos confirmadas de platos, check-ins corporales, fotos de progreso opcionales, medidas, recuperación y entrenamientos importados en el almacenamiento local del iPhone. Las claves de xAI y Hevy se guardan en Keychain con acceso limitado al dispositivo.
 
 La PWA guarda sus datos por separado en IndexedDB dentro del navegador.
 
@@ -35,8 +35,13 @@ Caltrack solicita acceso de lectura a:
 - circunferencia de cintura
 - entrenamientos, energía activa y distancia
 - energía basal y pasos
+- análisis de sueño
+- frecuencia cardiaca en reposo
+- variabilidad cardiaca HRV SDNN
 
 El usuario elige qué permisos concede y puede cambiarlos en Salud o Ajustes. Caltrack no vende, comparte ni usa estos datos para publicidad.
+
+Sueño, frecuencia cardiaca en reposo y HRV se usan únicamente para mostrar tendencias personales de recuperación. Caltrack no calcula un diagnóstico o score clínico, y no envía estas métricas a xAI al analizar una foto o consultar un producto.
 
 De forma separada y desactivada por defecto, el usuario puede permitir que Caltrack escriba las comidas que confirma. Cada comida se guarda como una correlación de Salud con:
 
@@ -55,7 +60,7 @@ Caltrack no solicita credenciales de Strava. Strava comparte sus actividades con
 
 ## Copias y recordatorios
 
-La exportación JSON puede contener comidas, fotos de platos, fotos de progreso, medidas, actividad, entrenamientos y conversación. Las claves de Keychain nunca se exportan. El archivo queda bajo control del usuario en el selector de documentos de iOS.
+La exportación JSON puede contener comidas, fotos de platos, fotos de progreso, medidas, actividad, recuperación, entrenamientos y conversación. Las claves de Keychain nunca se exportan. El archivo queda bajo control del usuario en el selector de documentos de iOS.
 
 Los recordatorios son notificaciones locales programadas por el propio iPhone. No se usa servidor, publicidad ni seguimiento.
 

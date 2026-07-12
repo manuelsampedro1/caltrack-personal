@@ -28,7 +28,7 @@ struct OnboardingView: View {
 
                     VStack(spacing: 12) {
                         feature(icon: "camera.fill", color: CaltrackTheme.green, title: "Foto y listo", text: "Grok estima el plato. Tú revisas y confirmas.")
-                        feature(icon: "heart.fill", color: .red, title: "Salud y Hevy", text: "Peso, gasto, pasos y entrenamientos en un mismo sitio.")
+                        feature(icon: "heart.fill", color: .red, title: "Salud y Hevy", text: "Peso, sueño, recuperación y entrenamientos en un mismo sitio.")
                         feature(icon: "chart.xyaxis.line", color: CaltrackTheme.blue, title: "Tendencias útiles", text: "Progreso, balance y entrenador basados en datos acumulados.")
                     }
 

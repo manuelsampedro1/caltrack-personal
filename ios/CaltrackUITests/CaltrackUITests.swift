@@ -307,4 +307,30 @@ final class CaltrackUITests: XCTestCase {
         screenshot.lifetime = .keepAlways
         add(screenshot)
     }
+
+    func testRecoveryTrendsAreVisibleWithoutOpaqueScore() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.tabBars.buttons["Progreso"].waitForExistence(timeout: 8))
+        app.tabBars.buttons["Progreso"].tap()
+        let card = app.otherElements["recoveryCard"]
+        for _ in 0..<6 where !card.isHittable { app.swipeUp() }
+        XCTAssertTrue(card.waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["Recuperación"].exists)
+        XCTAssertTrue(app.buttons["Sueño"].exists)
+        XCTAssertTrue(app.buttons["FC reposo"].exists)
+        XCTAssertTrue(app.buttons["HRV"].exists)
+        XCTAssertFalse(app.staticTexts.matching(NSPredicate(format: "label CONTAINS[c] 'readiness score'")).firstMatch.exists)
+
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Caltrack recovery trends"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
 }

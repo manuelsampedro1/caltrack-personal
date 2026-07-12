@@ -29,6 +29,7 @@ struct ProgressDashboardView: View {
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
     @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
+    @Query(sort: \RecoveryDay.date, order: .reverse) private var recoveryDays: [RecoveryDay]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
@@ -36,6 +37,7 @@ struct ProgressDashboardView: View {
     @AppStorage("proteinMax") private var proteinMax = 190.0
     @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
     @State private var nutritionMetric = "Calorías"
+    @State private var recoveryMetric: RecoveryMetric = .sleep
     @State private var activeSheet: ProgressSheet?
     @State private var selectedProgressPhoto: BodyMeasurement?
     @State private var searchText = ""
@@ -80,6 +82,7 @@ struct ProgressDashboardView: View {
                             summaryCard
                             nutritionCard
                             energyCard
+                            recoveryCard
                             bodyCard
                             trainingCard
                             historyCard
@@ -362,6 +365,96 @@ struct ProgressDashboardView: View {
         }
     }
 
+    private var recoveryCard: some View {
+        let days = recoveryDays
+            .filter { $0.date >= (Calendar.current.date(byAdding: .day, value: -13, to: Calendar.current.startOfDay(for: .now)) ?? .distantPast) }
+            .sorted { $0.date < $1.date }
+        let latest = days.last(where: { $0.sleepMinutes > 0 || $0.restingHeartRate != nil || $0.hrvSDNN != nil })
+        return Card {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Eyebrow(text: "Apple Salud")
+                        Text("Recuperación").font(.title3.weight(.bold))
+                    }
+                    Spacer()
+                    Image(systemName: "moon.stars.fill").foregroundStyle(CaltrackTheme.blue)
+                }
+                if let latest {
+                    HStack(spacing: 8) {
+                        progressMetric(latest.sleepMinutes > 0 ? formatSleep(latest.sleepMinutes) : "-", label: "sueño")
+                        progressMetric(latest.restingHeartRate.map { "\(Int($0.rounded()))" } ?? "-", label: "lpm reposo")
+                        progressMetric(latest.hrvSDNN.map { "\(Int($0.rounded()))" } ?? "-", label: "ms HRV")
+                    }
+
+                    Picker("Métrica de recuperación", selection: $recoveryMetric) {
+                        ForEach(RecoveryMetric.allCases) { metric in
+                            Text(metric.title).tag(metric)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    Chart(days) { day in
+                        switch recoveryMetric {
+                        case .sleep:
+                            if day.sleepMinutes > 0 {
+                                BarMark(
+                                    x: .value("Día", day.date, unit: .day),
+                                    y: .value("Horas", day.sleepMinutes / 60)
+                                )
+                                .foregroundStyle(CaltrackTheme.blue)
+                                .cornerRadius(4)
+                            }
+                        case .restingHeartRate:
+                            if let value = day.restingHeartRate {
+                                LineMark(x: .value("Día", day.date, unit: .day), y: .value("Lpm", value))
+                                    .foregroundStyle(CaltrackTheme.coral)
+                                    .interpolationMethod(.catmullRom)
+                                PointMark(x: .value("Día", day.date, unit: .day), y: .value("Lpm", value))
+                                    .foregroundStyle(CaltrackTheme.coral)
+                            }
+                        case .hrv:
+                            if let value = day.hrvSDNN {
+                                LineMark(x: .value("Día", day.date, unit: .day), y: .value("Milisegundos", value))
+                                    .foregroundStyle(CaltrackTheme.green)
+                                    .interpolationMethod(.catmullRom)
+                                PointMark(x: .value("Día", day.date, unit: .day), y: .value("Milisegundos", value))
+                                    .foregroundStyle(CaltrackTheme.green)
+                            }
+                        }
+                    }
+                    .chartXAxis(.hidden)
+                    .chartYAxis {
+                        AxisMarks(position: .leading) { _ in
+                            AxisGridLine().foregroundStyle(CaltrackTheme.line)
+                            AxisValueLabel().foregroundStyle(CaltrackTheme.muted)
+                        }
+                    }
+                    .frame(height: 140)
+                    .accessibilityIdentifier("recoveryChart")
+
+                    if let comparison = recoveryComparison(days: days, latest: latest) {
+                        Text(comparison)
+                            .font(.caption)
+                            .foregroundStyle(CaltrackTheme.muted)
+                    }
+                    if latest.sleepMinutes > 0 {
+                        Text(sleepStageSummary(latest))
+                            .font(.caption2)
+                            .foregroundStyle(CaltrackTheme.muted)
+                    }
+                    Text("Son tendencias personales, no un diagnóstico ni una orden para entrenar.")
+                        .font(.caption2)
+                        .foregroundStyle(CaltrackTheme.muted)
+                } else {
+                    ContentUnavailableView("Sin recuperación", systemImage: "moon.zzz", description: Text("Conecta Salud y autoriza sueño, frecuencia en reposo o HRV."))
+                        .foregroundStyle(CaltrackTheme.muted)
+                }
+            }
+        }
+        .accessibilityIdentifier("recoveryCard")
+    }
+
     private var trainingCard: some View {
         let duration = recentWorkouts.reduce(0) { $0 + $1.durationMinutes }
         let volume = recentWorkouts.reduce(0) { $0 + $1.totalVolumeKg }
@@ -551,6 +644,47 @@ struct ProgressDashboardView: View {
         .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
+    private func recoveryComparison(days: [RecoveryDay], latest: RecoveryDay) -> String? {
+        let previous = days.filter { $0.id != latest.id }
+        switch recoveryMetric {
+        case .sleep:
+            guard latest.sleepMinutes > 0 else { return nil }
+            return RecoveryMath.personalComparison(
+                latest: latest.sleepMinutes / 60,
+                history: previous.filter { $0.sleepMinutes > 0 }.map { $0.sleepMinutes / 60 },
+                unit: "h"
+            )
+        case .restingHeartRate:
+            guard let value = latest.restingHeartRate else { return nil }
+            return RecoveryMath.personalComparison(
+                latest: value,
+                history: previous.compactMap(\.restingHeartRate),
+                unit: "lpm"
+            )
+        case .hrv:
+            guard let value = latest.hrvSDNN else { return nil }
+            return RecoveryMath.personalComparison(
+                latest: value,
+                history: previous.compactMap(\.hrvSDNN),
+                unit: "ms"
+            )
+        }
+    }
+
+    private func formatSleep(_ minutes: Double) -> String {
+        let total = max(0, Int(minutes.rounded()))
+        return "\(total / 60)h \(total % 60)m"
+    }
+
+    private func sleepStageSummary(_ day: RecoveryDay) -> String {
+        let values = [
+            day.coreMinutes > 0 ? "Esencial \(formatSleep(day.coreMinutes))" : nil,
+            day.deepMinutes > 0 ? "Profundo \(formatSleep(day.deepMinutes))" : nil,
+            day.remMinutes > 0 ? "REM \(formatSleep(day.remMinutes))" : nil
+        ].compactMap { $0 }
+        return values.isEmpty ? "Sin fases detalladas para esta noche." : values.joined(separator: " · ")
+    }
+
     private func bodyTrendPoints() -> [BodyTrendPoint] {
         let calendar = Calendar.current
         var days = [Date: BodyTrendPoint]()
@@ -625,4 +759,19 @@ private struct EnergyBalancePoint: Identifiable {
     let date: Date
     let balance: Double
     var id: Date { date }
+}
+
+private enum RecoveryMetric: String, CaseIterable, Identifiable {
+    case sleep
+    case restingHeartRate
+    case hrv
+
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .sleep: "Sueño"
+        case .restingHeartRate: "FC reposo"
+        case .hrv: "HRV"
+        }
+    }
 }

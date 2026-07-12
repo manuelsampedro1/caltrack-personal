@@ -2,7 +2,7 @@
 
 Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
 
-El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision, escáner de productos envasados, lectura autorizada de peso, grasa corporal y cintura desde Apple Salud, y entrenamientos de Hevy o Strava.
+El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision, escáner de productos envasados, lectura autorizada de composición y recuperación desde Apple Salud, y entrenamientos de Hevy o Strava.
 
 ## Usarla en iPhone
 
@@ -83,7 +83,7 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 ### Áreas de la app
 
 - `Hoy`: foto, fototeca, código de barras, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
-- `Progreso`: gráficos de 14 días, composición corporal, check-ins manuales con foto privada opcional, gasto de Salud, búsqueda del historial de comidas y carga de entrenamiento.
+- `Progreso`: gráficos de 14 días, composición corporal, check-ins manuales con foto privada opcional, gasto, sueño, frecuencia cardiaca en reposo, HRV, búsqueda del historial y carga de entrenamiento.
 - `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
 - `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local, App Shortcuts y copia o restauración JSON.
 
@@ -110,6 +110,12 @@ No requiere cuenta, clave, SDK ni servidor. Si la cámara no está disponible, s
 ### Nutrición en Apple Salud
 
 En `Ajustes > Apple Salud` se puede activar `Guardar nutrición en Salud`. Caltrack solicita ese permiso en contexto y guarda cada comida confirmada con calorías, proteína, carbohidratos y grasa. La opción está desactivada por defecto, no lee la dieta creada por otras apps y permite sincronizar el historial solo mediante una acción explícita.
+
+### Recuperación en Apple Salud
+
+Al conectar Salud, Caltrack puede leer los últimos 30 días de sueño, frecuencia cardiaca en reposo y HRV SDNN. La tarjeta `Progreso > Recuperación` muestra las tres métricas, una gráfica seleccionable de 14 días y una comparación con la media personal reciente.
+
+El sueño se atribuye al día de despertar, une intervalos solapados y elige una sola fuente por noche para no duplicar minutos. No crea un score opaco, no aplica umbrales clínicos y no recomienda entrenar o descansar. Los datos se guardan localmente, forman parte de la copia privada y no se envían a xAI.
 
 ### Entrenamientos de Hevy y Strava
 

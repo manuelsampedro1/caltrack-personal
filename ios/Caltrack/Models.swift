@@ -102,6 +102,44 @@ final class ActivityDay {
     var totalEnergy: Double { activeEnergy + restingEnergy }
 }
 
+@Model
+final class RecoveryDay {
+    var id: UUID
+    @Attribute(.unique) var externalID: String
+    var date: Date
+    var sleepMinutes: Double
+    var coreMinutes: Double
+    var deepMinutes: Double
+    var remMinutes: Double
+    var restingHeartRate: Double?
+    var hrvSDNN: Double?
+    var source: String
+
+    init(
+        id: UUID = UUID(),
+        externalID: String,
+        date: Date,
+        sleepMinutes: Double = 0,
+        coreMinutes: Double = 0,
+        deepMinutes: Double = 0,
+        remMinutes: Double = 0,
+        restingHeartRate: Double? = nil,
+        hrvSDNN: Double? = nil,
+        source: String = "HealthKit"
+    ) {
+        self.id = id
+        self.externalID = externalID
+        self.date = date
+        self.sleepMinutes = sleepMinutes
+        self.coreMinutes = coreMinutes
+        self.deepMinutes = deepMinutes
+        self.remMinutes = remMinutes
+        self.restingHeartRate = restingHeartRate
+        self.hrvSDNN = hrvSDNN
+        self.source = source
+    }
+}
+
 struct WorkoutExerciseSummary: Codable, Equatable, Identifiable {
     var id: String { name }
     let name: String

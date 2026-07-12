@@ -23,6 +23,7 @@ struct DashboardView: View {
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
     @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
+    @Query(sort: \RecoveryDay.date, order: .reverse) private var recoveryDays: [RecoveryDay]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
@@ -132,6 +133,7 @@ struct DashboardView: View {
                         try await health.refresh()
                         persistHealthSnapshot()
                         persistHealthActivity()
+                        persistHealthRecovery()
                         persistHealthWorkouts()
                     } catch {
                         healthMessage = "No se pudo sincronizar Salud: \(error.localizedDescription)"
@@ -719,6 +721,37 @@ struct DashboardView: View {
         try? modelContext.save()
     }
 
+    private func persistHealthRecovery() {
+        var stored = (try? modelContext.fetch(FetchDescriptor<RecoveryDay>())) ?? recoveryDays
+        for snapshot in health.recoveryHistory {
+            if let existing = stored.first(where: { $0.externalID == snapshot.externalID }) {
+                existing.date = snapshot.date
+                existing.sleepMinutes = snapshot.sleepMinutes
+                existing.coreMinutes = snapshot.coreMinutes
+                existing.deepMinutes = snapshot.deepMinutes
+                existing.remMinutes = snapshot.remMinutes
+                existing.restingHeartRate = snapshot.restingHeartRate
+                existing.hrvSDNN = snapshot.hrvSDNN
+                existing.source = snapshot.source
+            } else {
+                let entry = RecoveryDay(
+                    externalID: snapshot.externalID,
+                    date: snapshot.date,
+                    sleepMinutes: snapshot.sleepMinutes,
+                    coreMinutes: snapshot.coreMinutes,
+                    deepMinutes: snapshot.deepMinutes,
+                    remMinutes: snapshot.remMinutes,
+                    restingHeartRate: snapshot.restingHeartRate,
+                    hrvSDNN: snapshot.hrvSDNN,
+                    source: snapshot.source
+                )
+                modelContext.insert(entry)
+                stored.append(entry)
+            }
+        }
+        try? modelContext.save()
+    }
+
     private func syncAllWorkouts() async {
         workoutSyncing = true
         defer { workoutSyncing = false }
@@ -727,6 +760,7 @@ struct DashboardView: View {
                 try await health.refresh()
                 persistHealthSnapshot()
                 persistHealthActivity()
+                persistHealthRecovery()
                 persistHealthWorkouts()
             }
             if await syncHevy() { workoutMessage = "Actualizado ahora" }
@@ -754,6 +788,7 @@ struct DashboardView: View {
                 healthMessage = "Salud preparada. Importaremos únicamente los datos que autorices."
                 persistHealthSnapshot()
                 persistHealthActivity()
+                persistHealthRecovery()
                 persistHealthWorkouts()
                 _ = await syncHevy()
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
@@ -870,6 +905,7 @@ struct DashboardView: View {
         for meal in (try? modelContext.fetch(FetchDescriptor<MealEntry>())) ?? [] { modelContext.delete(meal) }
         for measurement in (try? modelContext.fetch(FetchDescriptor<BodyMeasurement>())) ?? [] { modelContext.delete(measurement) }
         for activity in (try? modelContext.fetch(FetchDescriptor<ActivityDay>())) ?? [] { modelContext.delete(activity) }
+        for recovery in (try? modelContext.fetch(FetchDescriptor<RecoveryDay>())) ?? [] { modelContext.delete(recovery) }
         for workout in (try? modelContext.fetch(FetchDescriptor<WorkoutEntry>())) ?? [] { modelContext.delete(workout) }
         for message in (try? modelContext.fetch(FetchDescriptor<CoachMessage>())) ?? [] { modelContext.delete(message) }
         try? modelContext.save()
@@ -893,6 +929,17 @@ struct DashboardView: View {
                 activeEnergy: 520 + Double((offset % 5) * 35),
                 restingEnergy: 1_860,
                 steps: 7_800 + Double((offset % 4) * 900)
+            ))
+            modelContext.insert(RecoveryDay(
+                externalID: "health-recovery:super-ui-\(offset)",
+                date: date,
+                sleepMinutes: 420 + Double((offset % 4) * 18),
+                coreMinutes: 235 + Double((offset % 3) * 12),
+                deepMinutes: 62 + Double((offset % 3) * 8),
+                remMinutes: 94 + Double((offset % 2) * 11),
+                restingHeartRate: 54 + Double(offset % 4),
+                hrvSDNN: 46 + Double((offset % 5) * 3),
+                source: "Apple Watch"
             ))
         }
         for index in 0..<4 {

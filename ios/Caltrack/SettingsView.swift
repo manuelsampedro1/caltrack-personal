@@ -10,6 +10,7 @@ struct SettingsView: View {
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
     @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
+    @Query(sort: \RecoveryDay.date, order: .reverse) private var recoveryDays: [RecoveryDay]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \CoachMessage.date) private var messages: [CoachMessage]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
@@ -41,7 +42,7 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    Label("Salud se conecta desde la primera tarjeta de Caltrack. Lee peso, composición y entrenamientos solo después de mostrar el permiso de Apple.", systemImage: "heart.text.square.fill")
+                    Label("Salud se conecta desde la primera tarjeta de Caltrack. Lee peso, composición, recuperación y entrenamientos solo después de mostrar el permiso de Apple.", systemImage: "heart.text.square.fill")
                         .font(.subheadline)
                     Toggle("Guardar nutrición en Salud", isOn: $healthNutritionEnabled)
                         .onChange(of: healthNutritionEnabled) { _, enabled in
@@ -182,7 +183,7 @@ struct SettingsView: View {
 
                 Section {
                     Button {
-                        backupDocument = CaltrackBackupDocument(backup: BackupService.make(meals: meals, measurements: measurements, activities: activityDays, workouts: workouts, messages: messages))
+                        backupDocument = CaltrackBackupDocument(backup: BackupService.make(meals: meals, measurements: measurements, activities: activityDays, recovery: recoveryDays, workouts: workouts, messages: messages))
                         showingExporter = true
                     } label: {
                         Label("Exportar copia privada", systemImage: "square.and.arrow.up")
@@ -196,11 +197,11 @@ struct SettingsView: View {
                 } header: {
                     Text("Tus datos")
                 } footer: {
-                    Text("El JSON incluye comidas, fotos, medidas, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
+                    Text("El JSON incluye comidas, fotos, medidas, recuperación, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
                 }
 
                 Section("Privacidad") {
-                    Label("Comidas, fotos y entrenamientos se guardan en este iPhone", systemImage: "iphone.gen3")
+                    Label("Comidas, recuperación, fotos y entrenamientos se guardan en este iPhone", systemImage: "iphone.gen3")
                     Label("Salud requiere permiso explícito", systemImage: "heart.text.square")
                     Label("Cada estimación se confirma antes de guardar", systemImage: "checkmark.seal")
                 }

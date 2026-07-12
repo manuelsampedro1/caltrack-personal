@@ -140,7 +140,7 @@ final class GrokServiceTests: XCTestCase {
 
     @MainActor
     func testBackupRestoreMergesWithoutDuplicates() throws {
-        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, WorkoutEntry.self, CoachMessage.self])
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, WorkoutEntry.self, CoachMessage.self])
         let container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         let mealID = UUID()
         let backup = CaltrackBackup(
@@ -247,7 +247,7 @@ final class GrokServiceTests: XCTestCase {
 
     @MainActor
     func testBodyPhotoBackupRestoresAndOldBackupWithoutPhotoDecodes() throws {
-        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, WorkoutEntry.self, CoachMessage.self])
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, WorkoutEntry.self, CoachMessage.self])
         let source = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         let photo = Data([1, 2, 3, 4])
         source.mainContext.insert(BodyMeasurement(weight: 78.9, waist: 80.5, photoData: photo, source: "manual"))
@@ -286,5 +286,62 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(NewBodyCheckInIntent.targetAction, .bodyCheckIn)
         XCTAssertEqual(OpenProgressIntent.targetAction, .progress)
         XCTAssertEqual(CaltrackShortcuts.appShortcuts.count, 4)
+    }
+
+    func testRecoverySleepAggregationMergesDuplicatesAndChoosesBestSource() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+        let formatter = ISO8601DateFormatter()
+        func date(_ value: String) -> Date { formatter.date(from: value)! }
+        let segments = [
+            RecoverySleepSegment(startDate: date("2026-07-11T22:00:00Z"), endDate: date("2026-07-12T00:00:00Z"), stage: .core, source: "Apple Watch"),
+            RecoverySleepSegment(startDate: date("2026-07-11T22:00:00Z"), endDate: date("2026-07-12T00:00:00Z"), stage: .core, source: "Apple Watch"),
+            RecoverySleepSegment(startDate: date("2026-07-12T00:00:00Z"), endDate: date("2026-07-12T01:00:00Z"), stage: .deep, source: "Apple Watch"),
+            RecoverySleepSegment(startDate: date("2026-07-11T23:00:00Z"), endDate: date("2026-07-12T00:00:00Z"), stage: .unspecified, source: "iPhone")
+        ]
+
+        let day = try XCTUnwrap(RecoveryMath.sleepDays(from: segments, calendar: calendar).first)
+        XCTAssertEqual(day.date, date("2026-07-12T00:00:00Z"))
+        XCTAssertEqual(day.sleepMinutes, 180)
+        XCTAssertEqual(day.coreMinutes, 120)
+        XCTAssertEqual(day.deepMinutes, 60)
+        XCTAssertEqual(day.source, "Apple Watch")
+    }
+
+    func testRecoveryComparisonNeedsPersonalHistory() {
+        XCTAssertNil(RecoveryMath.personalComparison(latest: 7.5, history: [7, 8], unit: "h"))
+        XCTAssertEqual(
+            RecoveryMath.personalComparison(latest: 8, history: [7, 7, 7], unit: "h"),
+            "+1 h frente a tu media reciente."
+        )
+    }
+
+    @MainActor
+    func testRecoveryBackupRoundTripAndLegacyBackupDefault() throws {
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, WorkoutEntry.self, CoachMessage.self])
+        let source = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        source.mainContext.insert(RecoveryDay(
+            externalID: "health-recovery:test",
+            date: .now,
+            sleepMinutes: 452,
+            coreMinutes: 260,
+            deepMinutes: 72,
+            remMinutes: 102,
+            restingHeartRate: 54,
+            hrvSDNN: 48,
+            source: "Apple Watch"
+        ))
+        try source.mainContext.save()
+        let recovery = try source.mainContext.fetch(FetchDescriptor<RecoveryDay>())
+        let backup = BackupService.make(meals: [], measurements: [], activities: [], recovery: recovery, workouts: [], messages: [])
+
+        let destination = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        XCTAssertEqual(try BackupService.restore(backup, into: destination.mainContext), 1)
+        let restored = try XCTUnwrap(destination.mainContext.fetch(FetchDescriptor<RecoveryDay>()).first)
+        XCTAssertEqual(restored.sleepMinutes, 452)
+        XCTAssertEqual(restored.hrvSDNN, 48)
+
+        let legacy = #"{"version":1,"exportedAt":"2026-07-12T12:00:00Z","meals":[],"measurements":[],"activities":[],"workouts":[],"messages":[]}"#
+        XCTAssertTrue(try BackupService.decode(Data(legacy.utf8)).recovery.isEmpty)
     }
 }
