@@ -14,6 +14,8 @@ struct DashboardView: View {
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
     @AppStorage("healthConnected") private var healthConnected = false
+    @AppStorage("hevyConnected") private var hevyConnected = false
+    @AppStorage("grokConnected") private var grokConnected = false
 
     @State private var health = HealthKitService()
     @State private var selectedImage: UIImage?
@@ -45,11 +47,11 @@ struct DashboardView: View {
                         .zIndex(1)
                     ScrollView {
                         LazyVStack(spacing: 14) {
+                            connectionCard
                             captureCard
-                            weeklyCard
-                            healthCard
-                            workoutCard
                             todayCard
+                            workoutCard
+                            weeklyCard
                             coachCard
                         }
                         .padding(.horizontal, 14)
@@ -77,12 +79,21 @@ struct DashboardView: View {
                 SettingsView()
             }
             .onChange(of: photoItem) { _, item in load(item) }
+            .onChange(of: showingSettings) { _, showing in
+                guard !showing else { return }
+                Task { _ = await syncHevy() }
+            }
             .task {
                 seedTestingDataIfNeeded()
-                guard healthConnected else { return }
-                try? await health.refresh()
-                persistHealthSnapshot()
-                persistHealthWorkouts()
+                if healthConnected {
+                    do {
+                        try await health.refresh()
+                        persistHealthSnapshot()
+                        persistHealthWorkouts()
+                    } catch {
+                        healthMessage = "No se pudo sincronizar Salud: \(error.localizedDescription)"
+                    }
+                }
                 _ = await syncHevy()
             }
         }
@@ -92,12 +103,16 @@ struct DashboardView: View {
         HStack(spacing: 12) {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 7) {
-                    Text("🥩")
-                    Text("caltrack")
-                        .font(.title2.weight(.black))
-                        .tracking(-0.8)
+                    Image(systemName: "fork.knife")
+                        .font(.caption.weight(.black))
+                        .foregroundStyle(.black)
+                        .frame(width: 30, height: 30)
+                        .background(CaltrackTheme.green, in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                    Text("Caltrack")
+                        .font(.title3.weight(.black))
+                        .tracking(-0.5)
                 }
-                Text("\(calorieMin.formatted(.number.precision(.fractionLength(0))))-\(calorieMax.formatted(.number.precision(.fractionLength(0)))) kcal · \(proteinMin.formatted(.number.precision(.fractionLength(0))))-\(proteinMax.formatted(.number.precision(.fractionLength(0)))) g proteína")
+                Text("\(calorieMin.formatted(.number.precision(.fractionLength(0)))) a \(calorieMax.formatted(.number.precision(.fractionLength(0)))) kcal · \(proteinMin.formatted(.number.precision(.fractionLength(0)))) a \(proteinMax.formatted(.number.precision(.fractionLength(0)))) g proteína")
                     .font(.caption2)
                     .foregroundStyle(CaltrackTheme.muted)
             }
@@ -129,7 +144,7 @@ struct DashboardView: View {
                             .foregroundStyle(CaltrackTheme.muted)
                     }
                     Spacer(minLength: 0)
-                    Image(systemName: "camera.macro")
+                    Image(systemName: "sparkles")
                         .font(.system(size: 33, weight: .medium))
                         .foregroundStyle(CaltrackTheme.green)
                 }
@@ -190,61 +205,84 @@ struct DashboardView: View {
         }
     }
 
-    private var healthCard: some View {
+    private var connectionCard: some View {
         Card {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Eyebrow(text: "Apple Salud")
-                        Text("Tu cuerpo, actualizado")
-                            .font(.title3.weight(.bold))
-                    }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline) {
+                    Eyebrow(text: "Conexiones")
                     Spacer()
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.red)
-                        .font(.title2)
+                    Label("Solo en tu iPhone", systemImage: "lock.fill")
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(CaltrackTheme.muted)
                 }
+
+                HStack(spacing: 8) {
+                    connectionTile(
+                    title: "Salud",
+                    detail: healthConnectionDetail,
+                    icon: "heart.fill",
+                    color: .red,
+                    action: connectHealth
+                    )
+                    connectionTile(
+                    title: "Hevy",
+                    detail: hevyConnected || KeychainStore.read(account: HevyService.apiKeyAccount) != nil ? "Preparado" : "Añadir clave",
+                    icon: "dumbbell.fill",
+                    color: CaltrackTheme.blue
+                    ) { showingSettings = true }
+                    connectionTile(
+                    title: "Grok",
+                    detail: grokConnected || KeychainStore.read(account: GrokService.apiKeyAccount) != nil ? "Preparado" : "Añadir clave",
+                    icon: "sparkles",
+                    color: CaltrackTheme.green
+                    ) { showingSettings = true }
+                }
+
                 if let latest = measurements.first(where: { $0.source == "HealthKit" }) ?? measurements.first {
-                    HStack(spacing: 10) {
+                    HStack(spacing: 8) {
                         healthMetric(latest.weight, suffix: "kg", label: "peso")
                         healthMetric(latest.bodyFat, suffix: "%", label: "grasa")
                         healthMetric(latest.waist, suffix: "cm", label: "cintura")
                     }
-                    Text("Actualizado (latest.date.formatted(.relative(presentation: .named)))")
-                        .font(.caption)
-                        .foregroundStyle(CaltrackTheme.muted)
-                } else {
-                    Text("Lee peso, grasa corporal, cintura y entrenamientos directamente de Salud. Tú decides el permiso.")
-                        .font(.subheadline)
-                        .foregroundStyle(CaltrackTheme.muted)
                 }
-                Button {
-                    Task {
-                        await health.connectAndRead()
-                        healthConnected = true
-                        persistHealthSnapshot()
-                        persistHealthWorkouts()
-                        _ = await syncHevy()
-                        if case .failed(let message) = health.state { healthMessage = message }
-                    }
-                } label: {
-                    HStack {
-                        if health.state == .loading { ProgressView().controlSize(.small) }
-                        Text(healthConnected ? "Sincronizar ahora" : "Conectar Salud")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 14)
-                    .frame(height: 46)
-                    .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
-                }
-                .disabled(health.state == .loading)
                 if let healthMessage {
-                    Text(healthMessage).font(.caption).foregroundStyle(CaltrackTheme.coral)
+                    Text(healthMessage)
+                        .font(.caption)
+                        .foregroundStyle(health.state.isFailure ? CaltrackTheme.coral : CaltrackTheme.muted)
                 }
             }
         }
+    }
+
+    private func connectionTile(title: String, detail: String, icon: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 8) {
+                Image(systemName: icon)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(color)
+                    .frame(width: 30, height: 30)
+                    .background(color.opacity(0.14), in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+                Text(title)
+                    .font(.caption.weight(.bold))
+                HStack(spacing: 4) {
+                    if title == "Salud", health.state == .loading {
+                        ProgressView().controlSize(.mini)
+                    }
+                    Text(detail)
+                        .font(.caption2)
+                        .foregroundStyle(CaltrackTheme.muted)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.72)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 84, alignment: .leading)
+            .padding(10)
+            .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title == "Salud" ? (healthConnected ? "Sincronizar Salud" : "Conectar Salud") : title)
+        .accessibilityValue(detail)
+        .disabled(title == "Salud" && health.state == .loading)
     }
 
     private var workoutCard: some View {
@@ -466,6 +504,41 @@ struct DashboardView: View {
         }
     }
 
+    private var healthConnectionDetail: String {
+        switch health.state {
+        case .loading: "Preparando"
+        case .unavailable: "No disponible"
+        case .failed: "Reintentar"
+        case .ready: "Preparada"
+        case .idle: healthConnected ? "Sincronizar" : "Conectar"
+        }
+    }
+
+    private func connectHealth() {
+        Task {
+            await health.connectAndRead()
+            switch health.state {
+            case .ready:
+                healthConnected = true
+                healthMessage = "Salud preparada. Importaremos únicamente los datos que autorices."
+                persistHealthSnapshot()
+                persistHealthWorkouts()
+                _ = await syncHevy()
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            case .unavailable:
+                healthConnected = false
+                healthMessage = "Apple Salud solo está disponible en la app instalada en un iPhone."
+                UINotificationFeedbackGenerator().notificationOccurred(.warning)
+            case .failed(let message):
+                healthConnected = false
+                healthMessage = "No se pudo preparar Salud: \(message)"
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            default:
+                break
+            }
+        }
+    }
+
     private func syncHevy() async -> Bool {
         guard let apiKey = KeychainStore.read(account: HevyService.apiKeyAccount) else { return true }
         do {
@@ -559,7 +632,7 @@ private struct DayTotal: Identifiable {
     let date: Date
     let calories: Double
     var id: Date { date }
-    var label: String { date.formatted(.dateTime.weekday(.narrow)) }
+    var label: String { date.formatted(.dateTime.weekday(.narrow).locale(Locale(identifier: "es_ES"))) }
 }
 
 private struct MealRow: View {
@@ -606,7 +679,7 @@ private struct WorkoutRow: View {
                     .background(sourceColor.opacity(0.13), in: RoundedRectangle(cornerRadius: 8))
                 VStack(alignment: .leading, spacing: 3) {
                     Text(workout.title).font(.subheadline.weight(.bold))
-                    Text(workout.startDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
+                    Text(workout.startDate.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated).locale(Locale(identifier: "es_ES"))))
                         .font(.caption2).foregroundStyle(CaltrackTheme.muted)
                 }
                 Spacer()

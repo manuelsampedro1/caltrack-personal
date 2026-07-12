@@ -55,6 +55,8 @@ button.primary, button.secondary, a.secondary { border-radius: 14px; border: 1px
 button:disabled { opacity: .55; cursor: wait; }
 .full { width: 100%; }
 .assumption { grid-column: 2; color: var(--green); font-size: 13px; margin-top: -16px; }
+.native-health-note { grid-column: 2; margin: -10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.45; }
+.native-health-note strong { color: var(--text); }
 .manual-entry { grid-column: 2; color: var(--muted); }
 .manual-entry summary { cursor: pointer; font-size: 13px; width: max-content; }
 .field-grid { display: grid; grid-template-columns: 1.5fr 1fr .7fr .7fr auto; gap: 10px; margin-top: 14px; align-items: end; }
@@ -186,7 +188,7 @@ label { color: var(--muted); font-size: 12px; display: grid; gap: 7px; }
   .topbar { margin-bottom: 26px; }
   main { gap: 18px; }
   .composer { grid-template-columns: 1fr; padding: 22px 18px; }
-  .assumption, .manual-entry { grid-column: 1; }
+  .assumption, .native-health-note, .manual-entry { grid-column: 1; }
   .assumption { margin-top: -10px; }
   .field-grid { grid-template-columns: 1fr 1fr; }
   .field-grid label:first-child { grid-column: 1 / -1; }

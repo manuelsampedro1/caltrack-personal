@@ -9,6 +9,22 @@ struct GrokService {
         self.session = session
     }
 
+    func validateAPIKey(_ apiKey: String) async throws {
+        guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            throw GrokError.missingAPIKey
+        }
+        var request = URLRequest(url: URL(string: "https://api.x.ai/v1/models")!)
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+        request.timeoutInterval = 30
+        let (data, response) = try await session.data(for: request)
+        guard let http = response as? HTTPURLResponse else { throw GrokError.invalidResponse }
+        guard (200..<300).contains(http.statusCode) else {
+            if http.statusCode == 401 { throw GrokError.invalidAPIKey }
+            let message = Self.errorMessage(from: data) ?? "xAI devolvió el código \(http.statusCode)."
+            throw GrokError.api(message)
+        }
+    }
+
     func analyze(image: UIImage, apiKey: String) async throws -> FoodAnalysis {
         guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw GrokError.missingAPIKey
@@ -124,6 +140,7 @@ private struct ResponseEnvelope: Decodable {
 
 enum GrokError: LocalizedError {
     case missingAPIKey
+    case invalidAPIKey
     case invalidImage
     case invalidResponse
     case api(String)
@@ -131,6 +148,7 @@ enum GrokError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .missingAPIKey: "Añade tu clave de xAI en Ajustes para analizar fotos con Grok."
+        case .invalidAPIKey: "La clave de xAI no es válida."
         case .invalidImage: "No se pudo preparar esta foto."
         case .invalidResponse: "Grok respondió con un formato que Caltrack no reconoce."
         case .api(let message): message

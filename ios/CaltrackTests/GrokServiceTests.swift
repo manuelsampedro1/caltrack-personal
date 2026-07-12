@@ -42,4 +42,11 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertFalse(WorkoutMatch.representsSameSession(sourceName: "Strava", sourceBundle: "com.strava", startDate: start, hevyStartDate: start.addingTimeInterval(300)))
         XCTAssertFalse(WorkoutMatch.representsSameSession(sourceName: "Hevy", sourceBundle: "com.hevyapp.hevy", startDate: start, hevyStartDate: start.addingTimeInterval(900)))
     }
+
+    func testHealthStateOnlyMarksUnavailableAndFailureAsFailure() {
+        XCTAssertFalse(HealthKitService.State.idle.isFailure)
+        XCTAssertFalse(HealthKitService.State.ready.isFailure)
+        XCTAssertTrue(HealthKitService.State.unavailable.isFailure)
+        XCTAssertTrue(HealthKitService.State.failed("Sin permiso").isFailure)
+    }
 }

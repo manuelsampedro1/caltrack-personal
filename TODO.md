@@ -10,5 +10,6 @@
 - [ ] Crear o facilitar una clave de xAI y guardarla desde Ajustes de Caltrack.
 - [ ] En Strava, activar `Gestionar apps y dispositivos > Salud > Enviar a Salud`.
 - [ ] En Hevy, conectar Apple Salud y mantener activado `Sync With` al guardar.
-- [ ] Si la cuenta de Hevy es Pro, crear una clave en `hevy.com/settings?developer` y guardarla en Caltrack.
+- [x] Validar la API de Hevy Pro y mostrar entrenamientos reales en el simulador.
+- [ ] Regenerar la clave de Hevy compartida en el chat y pegar la nueva directamente en Caltrack desde el iPhone.
 - [ ] Probar una comida real, corregir porciones y comparar la estimación con la etiqueta o receta.

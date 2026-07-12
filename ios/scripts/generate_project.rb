@@ -48,7 +48,7 @@ app.build_configurations.each do |config|
   settings['GENERATE_INFOPLIST_FILE'] = 'YES'
   settings['INFOPLIST_KEY_CFBundleDisplayName'] = 'Caltrack'
   settings['INFOPLIST_KEY_NSCameraUsageDescription'] = 'Caltrack usa la cámara para analizar una comida cuando decides fotografiarla.'
-  settings['INFOPLIST_KEY_NSHealthShareUsageDescription'] = 'Caltrack lee peso, grasa corporal y cintura para mostrar tu progreso con tus datos de Salud.'
+  settings['INFOPLIST_KEY_NSHealthShareUsageDescription'] = 'Caltrack lee el peso, la composición corporal y los entrenamientos que autorices para reunir tu progreso en un solo lugar.'
   settings['INFOPLIST_KEY_UIApplicationSceneManifest_Generation'] = 'YES'
   settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
   settings['INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone'] = 'UIInterfaceOrientationPortrait'

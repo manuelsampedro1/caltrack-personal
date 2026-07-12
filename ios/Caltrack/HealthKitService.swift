@@ -31,6 +31,13 @@ final class HealthKitService {
         case ready
         case unavailable
         case failed(String)
+
+        var isFailure: Bool {
+            switch self {
+            case .unavailable, .failed: true
+            default: false
+            }
+        }
     }
 
     private let store = HKHealthStore()

@@ -38,7 +38,7 @@ El historial personal se entrega en un QR local ignorado por Git. El contenido v
 
 ### Cliente iOS para foto y Salud
 
-Una PWA no puede acceder a HealthKit. Caltrack mantiene la web y añade un cliente SwiftUI local-first para iOS 17+. SwiftData guarda comidas y fotos, HealthKit lee únicamente peso, grasa corporal y cintura con permiso, y Keychain protege la clave de xAI.
+Una PWA no puede acceder a HealthKit. Caltrack mantiene la web y añade un cliente SwiftUI local-first para iOS 17+. SwiftData guarda comidas, fotos y entrenamientos, HealthKit lee peso, grasa corporal, cintura y actividad con permiso, y Keychain protege las claves personales.
 
 La foto es la acción principal. Grok devuelve un JSON estricto con componentes, porciones, macros, confianza y supuestos. Nada se guarda hasta que el usuario revisa y confirma la estimación.
 
@@ -51,3 +51,11 @@ Las referencias son las capturas del tuit original, la PWA ya publicada y las gu
 Strava y Hevy pueden escribir entrenamientos en Apple Salud. Caltrack los consulta desde HealthKit para evitar OAuth, secretos de Strava y un backend. La fuente original se conserva para mostrar si una actividad viene de Hevy, Strava u otra aplicación.
 
 HealthKit no conserva las series, repeticiones y cargas completas de Hevy. Por eso Caltrack admite una clave opcional de Hevy Pro en Keychain, importa el detalle desde la API oficial y fusiona la sesión con su resumen de Salud mediante identificador y hora de inicio.
+
+### Una sola API de IA
+
+Caltrack usa xAI Grok para imagen y salida nutricional estructurada. OpenAI no se añade porque duplicaría coste, claves y transferencia de datos sin resolver una necesidad distinta. La puntuación diaria y los avisos simples siguen siendo deterministas y locales.
+
+### Conexiones visibles y estados veraces
+
+Salud, Hevy y Grok aparecen en un panel compacto antes de la cámara. Salud solo se marca como preparada si HealthKit termina el flujo correctamente. Como Apple no revela si se denegó cada tipo de lectura, la interfaz no afirma acceso total. Hevy y xAI validan la clave antes de guardarla.

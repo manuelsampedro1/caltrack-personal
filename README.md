@@ -74,8 +74,11 @@ El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posteri
 1. Abre el proyecto en Xcode y selecciona tu iPhone.
 2. Comprueba que la cuenta de Apple Developer esté activa en `Xcode > Settings > Accounts`.
 3. Ejecuta Caltrack y acepta únicamente los datos de Salud que quieras compartir.
-4. En Ajustes de Caltrack, guarda una clave de xAI. Se conserva en Keychain y nunca se añade a Git.
-5. Pulsa `Fotografiar comida`, revisa la estimación y confirma los macros.
+4. En la primera tarjeta, toca `Salud` para mostrar el permiso de Apple.
+5. En Ajustes de Caltrack, valida y guarda una clave de xAI. Se conserva en Keychain y nunca se añade a Git.
+6. Pulsa `Fotografiar comida`, revisa la estimación y confirma los macros.
+
+La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La PWA no muestra una conexión falsa: Safari no puede acceder a HealthKit.
 
 ### Entrenamientos de Hevy y Strava
 
@@ -85,6 +88,8 @@ El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posteri
 
 Caltrack detecta sesiones equivalentes de Salud y Hevy para no duplicarlas.
 
+La clave se valida contra Hevy antes de guardarse. La integración se ha comprobado con entrenamientos reales de la cuenta, incluidos `5D - Upper B`, `5D - Lower A` y `5D - Upper A`.
+
 Para regenerar el proyecto después de añadir archivos Swift:
 
 ```bash
@@ -92,6 +97,8 @@ ruby ios/scripts/generate_project.rb
 ```
 
 La foto elegida se envía directamente a `api.x.ai` para el análisis. Los datos de Salud no se envían a xAI. Consulta [PRIVACY.md](PRIVACY.md).
+
+No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Grok, para visión y salida nutricional estructurada. El cálculo de objetivos, adherencia y avisos básicos se ejecuta localmente.
 
 ## Límite importante
 
