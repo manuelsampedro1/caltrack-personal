@@ -264,4 +264,27 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(decoded.measurements.first?.id, id)
         XCTAssertNil(decoded.measurements.first?.photoData)
     }
+
+    func testQuickActionStoreConsumesOnceAndParsesLaunchArguments() throws {
+        let suiteName = "CaltrackTests.QuickActionStore.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { UserDefaults.standard.removePersistentDomain(forName: suiteName) }
+
+        QuickActionStore.set(.barcode, defaults: defaults)
+        XCTAssertEqual(QuickActionStore.consume(defaults: defaults), .barcode)
+        XCTAssertNil(QuickActionStore.consume(defaults: defaults))
+        XCTAssertEqual(
+            QuickActionStore.fromLaunchArguments(["Caltrack", "-quick-action", "bodyCheckIn"]),
+            .bodyCheckIn
+        )
+        XCTAssertNil(QuickActionStore.fromLaunchArguments(["Caltrack", "-quick-action", "unknown"]))
+    }
+
+    func testAppIntentsExposeExpectedRoutesAndFourShortcuts() {
+        XCTAssertEqual(CaptureMealIntent.targetAction, .camera)
+        XCTAssertEqual(ScanProductIntent.targetAction, .barcode)
+        XCTAssertEqual(NewBodyCheckInIntent.targetAction, .bodyCheckIn)
+        XCTAssertEqual(OpenProgressIntent.targetAction, .progress)
+        XCTAssertEqual(CaltrackShortcuts.appShortcuts.count, 4)
+    }
 }

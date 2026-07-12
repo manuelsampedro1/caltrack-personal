@@ -252,4 +252,59 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Manual"].exists)
         XCTAssertTrue(app.tabBars.buttons["Progreso"].exists)
     }
+
+    func testQuickActionsOpenBarcodeAndBodyCheckInDestinations() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-barcode-fixture",
+            "-quick-action",
+            "barcode",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.textFields["barcodeField"].waitForExistence(timeout: 8))
+
+        app.terminate()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-quick-action",
+            "bodyCheckIn",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.textFields["checkInWeight"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.navigationBars["Nuevo check-in"].exists)
+    }
+
+    func testSystemShortcutsAreDiscoverableInSettings() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.buttons["Ajustes"].waitForExistence(timeout: 8))
+        app.buttons["Ajustes"].tap()
+
+        let shortcutsLink = app.buttons["openSystemShortcuts"]
+        for _ in 0..<12 where !shortcutsLink.isHittable { app.swipeUp() }
+        XCTAssertTrue(shortcutsLink.waitForExistence(timeout: 4))
+        XCTAssertTrue(shortcutsLink.isHittable)
+        XCTAssertTrue(app.staticTexts["Fotografiar comida"].exists)
+        XCTAssertTrue(app.staticTexts["Escanear producto"].exists)
+        XCTAssertTrue(app.staticTexts["Nuevo check-in"].exists)
+        XCTAssertTrue(app.staticTexts["Abrir progreso"].exists)
+
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Caltrack App Shortcuts"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+    }
 }

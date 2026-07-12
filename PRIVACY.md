@@ -59,6 +59,10 @@ La exportación JSON puede contener comidas, fotos de platos, fotos de progreso,
 
 Los recordatorios son notificaciones locales programadas por el propio iPhone. No se usa servidor, publicidad ni seguimiento.
 
+## Siri y Atajos
+
+Caltrack ofrece cuatro acciones del sistema para abrir cámara de comida, lector de productos, check-in corporal o progreso. El intent conserva localmente una ruta de un solo uso hasta que la app puede mostrarla. No incluye fotos, macros, peso, entrenamientos, claves ni datos de Apple Salud, y no requiere un servidor.
+
 ## Límites
 
 Los cálculos nutricionales obtenidos desde una foto y los datos recuperados por código de barras deben revisarse antes de guardarse. No sustituyen consejo médico o nutricional.

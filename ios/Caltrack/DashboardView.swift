@@ -11,7 +11,14 @@ private enum CaptureFlow: String, Identifiable {
     var id: String { rawValue }
 }
 
+enum DashboardRequest: Equatable {
+    case camera
+    case barcode
+}
+
+@MainActor
 struct DashboardView: View {
+    @Binding var requestedAction: DashboardRequest?
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
@@ -131,6 +138,19 @@ struct DashboardView: View {
                     }
                 }
                 _ = await syncHevy()
+            }
+            .onAppear { handleRequestedAction() }
+            .onChange(of: requestedAction) { _, _ in handleRequestedAction() }
+        }
+    }
+
+    private func handleRequestedAction() {
+        guard let requestedAction else { return }
+        self.requestedAction = nil
+        DispatchQueue.main.async {
+            switch requestedAction {
+            case .camera: captureFlow = .camera
+            case .barcode: captureFlow = .barcode
             }
         }
     }

@@ -19,7 +19,12 @@ private enum ProgressSheet: Identifiable {
     }
 }
 
+enum ProgressRequest: Equatable {
+    case bodyCheckIn
+}
+
 struct ProgressDashboardView: View {
+    @Binding var requestedAction: ProgressRequest?
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
@@ -123,7 +128,15 @@ struct ProgressDashboardView: View {
             .fullScreenCover(item: $selectedProgressPhoto) { measurement in
                 ProgressPhotoViewer(measurement: measurement)
             }
+            .onAppear { handleRequestedAction() }
+            .onChange(of: requestedAction) { _, _ in handleRequestedAction() }
         }
+    }
+
+    private func handleRequestedAction() {
+        guard requestedAction == .bodyCheckIn else { return }
+        requestedAction = nil
+        DispatchQueue.main.async { activeSheet = .newBodyCheckIn }
     }
 
     private var summaryCard: some View {

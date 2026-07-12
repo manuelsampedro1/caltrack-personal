@@ -101,3 +101,13 @@ Salud sigue siendo la fuente automática, pero no todas las básculas escriben g
 PhotosPicker concede acceso únicamente a la imagen elegida. Caltrack la redimensiona a 1600 píxeles, la comprime localmente y la guarda con `externalStorage`. No se analiza con IA. La copia mantiene versión 1 con `photoData` opcional para restaurar copias anteriores sin migraciones de formato.
 
 La gráfica fusiona solo la representación de métricas del mismo día y conserva los objetos originales. Así evita segmentos verticales cuando coinciden Salud y un check-in, sin perder procedencia ni capacidad de edición.
+
+### Cuatro acciones frecuentes en el sistema
+
+Caltrack expone fotografiar comida, escanear producto, nuevo check-in y abrir progreso mediante App Intents. Son cuatro acciones sin parámetros, dentro del rango de dos a cinco que Apple recomienda para App Shortcuts comunes. Se descubren desde Ajustes, Siri, Spotlight, Atajos y el botón Acción.
+
+Cada intent escribe solo una ruta local de un solo uso. RootView la conserva durante la introducción y la consume cuando puede presentar la pantalla correcta. No se serializan datos nutricionales, corporales o de Salud. En iOS 17 a 25 la acción abre la app con `openAppWhenRun`; en iOS 26 usa el modo de primer plano moderno.
+
+La cámara configura `cameraCaptureMode` únicamente cuando el hardware está disponible. En simulador y otros entornos sin cámara usa Fototeca sin llamar APIs exclusivas de captura.
+
+El generador del proyecto usa identificadores deterministas. Regenerarlo dos veces produce exactamente los mismos archivos, de modo que una versión futura no reescribe el proyecto completo por UUID aleatorios.

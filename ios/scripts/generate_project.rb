@@ -2,7 +2,17 @@
 # frozen_string_literal: true
 
 require 'fileutils'
+require 'digest'
+require 'securerandom'
 require 'xcodeproj'
+
+# xcodeproj uses random identifiers by default, which rewrites the whole project
+# on every regeneration. Stable identifiers keep reviews and future releases small.
+uuid_index = 0
+SecureRandom.define_singleton_method(:hex) do |bytes|
+  uuid_index += 1
+  Digest::SHA256.hexdigest("caltrack-xcodeproj-#{uuid_index}")[0, bytes * 2]
+end
 
 root = File.expand_path('..', __dir__)
 project_path = File.join(root, 'Caltrack.xcodeproj')
@@ -43,7 +53,7 @@ app.build_configurations.each do |config|
   settings['ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME'] = 'AccentColor'
   settings['CODE_SIGN_ENTITLEMENTS'] = 'Caltrack/Caltrack.entitlements'
   settings['CODE_SIGN_STYLE'] = 'Automatic'
-  settings['CURRENT_PROJECT_VERSION'] = '5'
+  settings['CURRENT_PROJECT_VERSION'] = '6'
   settings['DEVELOPMENT_TEAM'] = '6BG94RDHDG'
   settings['GENERATE_INFOPLIST_FILE'] = 'YES'
   settings['INFOPLIST_KEY_CFBundleDisplayName'] = 'Caltrack'
@@ -54,7 +64,7 @@ app.build_configurations.each do |config|
   settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
   settings['INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone'] = 'UIInterfaceOrientationPortrait'
   settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
-  settings['MARKETING_VERSION'] = '1.4'
+  settings['MARKETING_VERSION'] = '1.5'
   settings['LM_FILTER_WARNINGS'] = 'YES'
   settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.manuelsampedro.caltrack'
   settings['PRODUCT_NAME'] = '$(TARGET_NAME)'

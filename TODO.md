@@ -20,8 +20,10 @@
 - [x] Añadir escritura opcional de calorías y macros en Apple Salud.
 - [x] Añadir escáner nativo de productos con Open Food Facts, cantidad editable y fallback manual.
 - [x] Añadir check-ins corporales manuales con foto privada, edición, galería y backup compatible.
+- [x] Añadir App Shortcuts para comida, producto, check-in y progreso, con descubrimiento en Ajustes.
 - [ ] Regenerar la clave de Hevy compartida en el chat y pegar la nueva directamente en Caltrack desde el iPhone.
 - [ ] Probar una comida real, corregir porciones y comparar la estimación con la etiqueta o receta.
 - [ ] En un iPhone firmado, activar la escritura nutricional y comprobar una comida real en Salud.
 - [ ] En un iPhone firmado, escanear un envase real y contrastar los macros con su etiqueta.
 - [ ] En un iPhone firmado, seleccionar una foto de progreso real y comprobar su restauración desde una copia.
+- [ ] En un iPhone firmado, invocar los cuatro App Shortcuts con Siri y asignar el más usado al botón Acción.

@@ -1,3 +1,4 @@
+import AppIntents
 import SwiftData
 import SwiftUI
 import UIKit
@@ -164,6 +165,22 @@ struct SettingsView: View {
                 }
 
                 Section {
+                    shortcutRow("Fotografiar comida", phrase: "Fotografiar comida con Caltrack", icon: "camera.fill")
+                    shortcutRow("Escanear producto", phrase: "Escanear producto con Caltrack", icon: "barcode.viewfinder")
+                    shortcutRow("Nuevo check-in", phrase: "Nuevo check-in en Caltrack", icon: "scalemass.fill")
+                    shortcutRow("Abrir progreso", phrase: "Ver mi progreso en Caltrack", icon: "chart.xyaxis.line")
+                    ShortcutsLink {}
+                        .shortcutsLinkStyle(.dark)
+                        .frame(maxWidth: .infinity)
+                        .accessibilityLabel("Abrir Atajos")
+                        .accessibilityIdentifier("openSystemShortcuts")
+                } header: {
+                    Text("Atajos y Siri")
+                } footer: {
+                    Text("Úsalos desde Siri, Spotlight, Atajos o el botón Acción. Solo abren la pantalla elegida y no comparten tus datos.")
+                }
+
+                Section {
                     Button {
                         backupDocument = CaltrackBackupDocument(backup: BackupService.make(meals: meals, measurements: measurements, activities: activityDays, workouts: workouts, messages: messages))
                         showingExporter = true
@@ -245,6 +262,18 @@ struct SettingsView: View {
             Label(connected ? "Preparado" : "Sin configurar", systemImage: connected ? "checkmark.circle.fill" : "circle.dashed")
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(connected ? color : .secondary)
+        }
+    }
+
+    private func shortcutRow(_ title: String, phrase: String, icon: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .foregroundStyle(CaltrackTheme.green)
+                .frame(width: 28)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title).font(.subheadline.weight(.semibold))
+                Text("“\(phrase)”").font(.caption).foregroundStyle(.secondary)
+            }
         }
     }
 

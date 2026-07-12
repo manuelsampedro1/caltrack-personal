@@ -85,9 +85,15 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 - `Hoy`: foto, fototeca, código de barras, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
 - `Progreso`: gráficos de 14 días, composición corporal, check-ins manuales con foto privada opcional, gasto de Salud, búsqueda del historial de comidas y carga de entrenamiento.
 - `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
-- `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local y copia o restauración JSON.
+- `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local, App Shortcuts y copia o restauración JSON.
 
 La primera apertura incluye una introducción breve que se puede omitir. No solicita Salud, notificaciones ni claves automáticamente.
+
+### Siri, Spotlight y botón Acción
+
+La app nativa publica cuatro App Shortcuts: `Fotografiar comida`, `Escanear producto`, `Nuevo check-in` y `Abrir progreso`. Se pueden ejecutar desde Siri, Spotlight, la app Atajos o el botón Acción de un iPhone compatible. Cada acción abre directamente su destino y se consume una sola vez, incluso si primero hay que completar la introducción.
+
+En `Ajustes > Atajos y Siri` aparecen las frases sugeridas y el enlace nativo a Atajos. El intent solo guarda temporalmente el nombre de la pantalla elegida. No contiene ni comparte comidas, medidas o datos de Salud.
 
 ### Check-ins corporales
 
