@@ -1,6 +1,7 @@
 import Charts
 import SwiftData
 import SwiftUI
+import UIKit
 
 struct ProgressDashboardView: View {
     @Environment(\.modelContext) private var modelContext
@@ -12,9 +13,12 @@ struct ProgressDashboardView: View {
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
+    @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
     @State private var nutritionMetric = "Calorías"
     @State private var showingSettings = false
     @State private var editingMeal: MealEntry?
+    @State private var searchText = ""
+    @State private var nutritionSyncMessage: String?
 
     private var nutritionDays: [NutritionDay] {
         InsightEngine.nutritionDays(meals: meals, count: 14)
@@ -35,18 +39,32 @@ struct ProgressDashboardView: View {
         )
     }
 
+    private var filteredMeals: [MealEntry] {
+        let query = FoodLibrary.normalizedName(searchText)
+        guard !query.isEmpty else { return meals }
+        return meals.filter { meal in
+            FoodLibrary.normalizedName(meal.name).contains(query)
+                || FoodLibrary.normalizedName(meal.source).contains(query)
+                || meal.date.formatted(.dateTime.day().month(.wide).year().locale(Locale(identifier: "es_ES"))).localizedCaseInsensitiveContains(searchText)
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
                 CaltrackTheme.canvas.ignoresSafeArea()
                 ScrollView {
                     LazyVStack(spacing: 14) {
-                        summaryCard
-                        nutritionCard
-                        energyCard
-                        bodyCard
-                        trainingCard
-                        historyCard
+                        if searchText.isEmpty {
+                            summaryCard
+                            nutritionCard
+                            energyCard
+                            bodyCard
+                            trainingCard
+                            historyCard
+                        } else {
+                            historyCard
+                        }
                     }
                     .padding(14)
                     .padding(.bottom, 24)
@@ -54,6 +72,7 @@ struct ProgressDashboardView: View {
                 .scrollIndicators(.hidden)
             }
             .navigationTitle("Progreso")
+            .searchable(text: $searchText, prompt: "Buscar comidas")
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button { showingSettings = true } label: { Image(systemName: "gearshape.fill") }
@@ -72,6 +91,7 @@ struct ProgressDashboardView: View {
                     meal.confidence = editable.confidence
                     meal.assumption = editable.assumption
                     try? modelContext.save()
+                    syncNutritionIfEnabled(meal)
                 }
             }
         }
@@ -305,13 +325,18 @@ struct ProgressDashboardView: View {
                         Text("Comidas recientes").font(.title3.weight(.bold))
                     }
                     Spacer()
-                    MetricPill(text: "\(meals.count) total")
+                    MetricPill(text: searchText.isEmpty ? "\(meals.count) total" : "\(filteredMeals.count) resultados")
                 }
-                if meals.isEmpty {
-                    Text("Todavía no hay comidas guardadas.")
+                if let nutritionSyncMessage {
+                    Text(nutritionSyncMessage)
+                        .font(.caption)
+                        .foregroundStyle(CaltrackTheme.coral)
+                }
+                if filteredMeals.isEmpty {
+                    Text(searchText.isEmpty ? "Todavía no hay comidas guardadas." : "No hay comidas que coincidan con la búsqueda.")
                         .font(.subheadline).foregroundStyle(CaltrackTheme.muted)
                 } else {
-                    ForEach(meals.prefix(20)) { meal in
+                    ForEach(filteredMeals.prefix(30)) { meal in
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 3) {
                                 Text(meal.name).font(.subheadline.weight(.semibold)).lineLimit(1)
@@ -324,16 +349,16 @@ struct ProgressDashboardView: View {
                                 Text("\(Int(meal.protein)) g proteína").font(.caption2).foregroundStyle(CaltrackTheme.blue)
                             }
                             Menu {
+                                Button("Repetir ahora", systemImage: "plus.circle") { repeatMeal(meal) }
                                 Button("Editar", systemImage: "pencil") { editingMeal = meal }
                                 Button("Eliminar", systemImage: "trash", role: .destructive) {
-                                    modelContext.delete(meal)
-                                    try? modelContext.save()
+                                    deleteMeal(meal)
                                 }
                             } label: {
                                 Image(systemName: "ellipsis").frame(width: 28, height: 36)
                             }
                         }
-                        if meal.id != meals.prefix(20).last?.id { Divider().overlay(CaltrackTheme.line) }
+                        if meal.id != filteredMeals.prefix(30).last?.id { Divider().overlay(CaltrackTheme.line) }
                     }
                 }
             }
@@ -353,6 +378,47 @@ struct ProgressDashboardView: View {
     private func barColor(for day: NutritionDay) -> Color {
         if nutritionMetric == "Proteína" { return day.protein >= proteinMin ? CaltrackTheme.green : CaltrackTheme.blue }
         return day.calories > calorieMax ? CaltrackTheme.coral : CaltrackTheme.green
+    }
+
+    private func repeatMeal(_ meal: MealEntry) {
+        let repeated = MealEntry(
+            name: meal.name,
+            calories: meal.calories,
+            protein: meal.protein,
+            carbohydrates: meal.carbohydrates,
+            fat: meal.fat,
+            source: "repeated",
+            assumption: "Repetida desde el historial"
+        )
+        modelContext.insert(repeated)
+        try? modelContext.save()
+        syncNutritionIfEnabled(repeated)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    private func deleteMeal(_ meal: MealEntry) {
+        let id = meal.id
+        modelContext.delete(meal)
+        try? modelContext.save()
+        guard healthNutritionEnabled else { return }
+        Task {
+            do {
+                try await HealthNutritionService().delete(mealID: id)
+            } catch {
+                nutritionSyncMessage = "La comida se borró de Caltrack, pero no de Salud: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func syncNutritionIfEnabled(_ meal: MealEntry) {
+        guard healthNutritionEnabled else { return }
+        Task {
+            do {
+                try await HealthNutritionService().upsert(meal)
+            } catch {
+                nutritionSyncMessage = "Salud no pudo actualizar esta comida: \(error.localizedDescription)"
+            }
+        }
     }
 }
 

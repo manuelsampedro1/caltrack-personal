@@ -71,3 +71,19 @@ Caltrack suma energía activa y basal leídas de Salud y la compara con comidas 
 ### Portabilidad sin cuenta
 
 La app nativa exporta y fusiona un JSON con comidas, fotos, cuerpo, actividad, entrenamientos y conversación. La restauración usa identificadores estables para no duplicar. Keychain queda fuera. Los recordatorios son locales y están desactivados por defecto.
+
+### Repetición antes que análisis repetido
+
+Las comidas de los últimos 90 días se agrupan localmente por nombre normalizado. Las seis más frecuentes reutilizan los valores de su registro más reciente y crean una comida nueva sin copiar la foto. Esto reduce tiempo y evita pagar otra llamada de visión por un plato ya conocido.
+
+### Búsqueda enfocada
+
+Progreso conserva gráficos e historial en la misma pantalla. Al escribir en el buscador, oculta temporalmente los gráficos y lleva los resultados arriba. La búsqueda cubre nombre, fuente y fecha, y mantiene repetir, editar y borrar.
+
+### Introducción sin permisos anticipados
+
+La primera apertura explica foto, Salud, Hevy y tendencias en una pantalla que se puede omitir. No abre permisos del sistema. Cada permiso aparece después de una acción con contexto y la introducción se puede volver a abrir desde Ajustes.
+
+### Escritura nutricional explícita en Salud
+
+Caltrack no lee nutrición. La escritura está desactivada por defecto y usa una correlación de comida con energía, proteína, carbohidratos y grasa. El UUID local se guarda como identificador externo para actualizar sin duplicar y eliminar solo objetos creados por Caltrack. La sincronización del historial necesita una acción explícita.

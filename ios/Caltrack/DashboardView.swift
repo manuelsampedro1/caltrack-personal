@@ -17,6 +17,7 @@ struct DashboardView: View {
     @AppStorage("healthConnected") private var healthConnected = false
     @AppStorage("hevyConnected") private var hevyConnected = false
     @AppStorage("grokConnected") private var grokConnected = false
+    @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
 
     @State private var health = HealthKitService()
     @State private var selectedImage: UIImage?
@@ -38,6 +39,10 @@ struct DashboardView: View {
         CaltrackMath.totals(for: todayMeals)
     }
 
+    private var frequentMeals: [FrequentMeal] {
+        FoodLibrary.frequentMeals(meals: meals)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack {
@@ -52,6 +57,7 @@ struct DashboardView: View {
                         LazyVStack(spacing: 14) {
                             connectionCard
                             captureCard
+                            if !frequentMeals.isEmpty { frequentMealsCard }
                             todayCard
                             workoutCard
                             weeklyCard
@@ -83,7 +89,7 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showingManualEntry) {
                 ManualMealSheet { editable, date in
-                    saveMeal(editable, imageData: nil, date: date)
+                    saveMeal(editable, imageData: nil, date: date, source: "manual")
                 }
             }
             .sheet(item: $editingMeal) { meal in
@@ -224,6 +230,48 @@ struct DashboardView: View {
                     }
                 }
                 .frame(height: 150)
+            }
+        }
+    }
+
+    private var frequentMealsCard: some View {
+        Card {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Eyebrow(text: "Un toque")
+                        Text("Comidas frecuentes").font(.title3.weight(.bold))
+                    }
+                    Spacer()
+                    Image(systemName: "clock.arrow.circlepath").foregroundStyle(CaltrackTheme.green)
+                }
+                ScrollView(.horizontal) {
+                    HStack(spacing: 10) {
+                        ForEach(frequentMeals) { suggestion in
+                            Button { repeatMeal(suggestion) } label: {
+                                VStack(alignment: .leading, spacing: 7) {
+                                    Text(suggestion.name)
+                                        .font(.subheadline.weight(.semibold))
+                                        .lineLimit(2)
+                                        .multilineTextAlignment(.leading)
+                                    Text("\(Int(suggestion.calories)) kcal · \(Int(suggestion.protein)) g P")
+                                        .font(.caption)
+                                        .foregroundStyle(CaltrackTheme.muted)
+                                    Label("Repetir", systemImage: "plus.circle.fill")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(CaltrackTheme.green)
+                                }
+                                .padding(12)
+                                .frame(width: 180, height: 116, alignment: .topLeading)
+                                .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Repetir \(suggestion.name)")
+                            .accessibilityHint("Añade esta comida al día de hoy")
+                        }
+                    }
+                }
+                .scrollIndicators(.hidden)
             }
         }
     }
@@ -398,9 +446,10 @@ struct DashboardView: View {
                     ForEach(todayMeals) { meal in
                         MealRow(meal: meal) {
                             editingMeal = meal
+                        } repeatMeal: {
+                            repeatMeal(meal)
                         } delete: {
-                            modelContext.delete(meal)
-                            try? modelContext.save()
+                            deleteMeal(meal)
                         }
                         if meal.id != todayMeals.last?.id { Divider().overlay(CaltrackTheme.line) }
                     }
@@ -466,7 +515,7 @@ struct DashboardView: View {
         }
     }
 
-    private func saveMeal(_ editable: EditableMeal, imageData: Data?, date: Date = .now) {
+    private func saveMeal(_ editable: EditableMeal, imageData: Data?, date: Date = .now, source: String = "Grok Vision") {
         let meal = MealEntry(
             date: date,
             name: editable.name,
@@ -475,12 +524,13 @@ struct DashboardView: View {
             carbohydrates: editable.number(editable.carbohydrates),
             fat: editable.number(editable.fat),
             photoData: imageData,
-            source: "Grok Vision",
+            source: source,
             confidence: editable.confidence,
             assumption: editable.assumption
         )
         modelContext.insert(meal)
         try? modelContext.save()
+        syncNutritionIfEnabled(meal)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
     }
 
@@ -494,7 +544,63 @@ struct DashboardView: View {
         meal.confidence = editable.confidence
         meal.assumption = editable.assumption
         try? modelContext.save()
+        syncNutritionIfEnabled(meal)
         UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    private func repeatMeal(_ suggestion: FrequentMeal) {
+        insertRepeatedMeal(
+            name: suggestion.name,
+            calories: suggestion.calories,
+            protein: suggestion.protein,
+            carbohydrates: suggestion.carbohydrates,
+            fat: suggestion.fat
+        )
+    }
+
+    private func repeatMeal(_ meal: MealEntry) {
+        insertRepeatedMeal(name: meal.name, calories: meal.calories, protein: meal.protein, carbohydrates: meal.carbohydrates, fat: meal.fat)
+    }
+
+    private func insertRepeatedMeal(name: String, calories: Double, protein: Double, carbohydrates: Double, fat: Double) {
+        let meal = MealEntry(
+            name: name,
+            calories: calories,
+            protein: protein,
+            carbohydrates: carbohydrates,
+            fat: fat,
+            source: "repeated",
+            assumption: "Repetida desde el historial"
+        )
+        modelContext.insert(meal)
+        try? modelContext.save()
+        syncNutritionIfEnabled(meal)
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
+    private func deleteMeal(_ meal: MealEntry) {
+        let id = meal.id
+        modelContext.delete(meal)
+        try? modelContext.save()
+        guard healthNutritionEnabled else { return }
+        Task {
+            do {
+                try await HealthNutritionService().delete(mealID: id)
+            } catch {
+                healthMessage = "La comida se borró de Caltrack, pero no de Salud: \(error.localizedDescription)"
+            }
+        }
+    }
+
+    private func syncNutritionIfEnabled(_ meal: MealEntry) {
+        guard healthNutritionEnabled else { return }
+        Task {
+            do {
+                try await HealthNutritionService().upsert(meal)
+            } catch {
+                healthMessage = "La comida está en Caltrack, pero Salud no pudo guardarla: \(error.localizedDescription)"
+            }
+        }
     }
 
     private func persistHealthSnapshot() {
@@ -717,57 +823,53 @@ struct DashboardView: View {
 #if DEBUG
     private func seedSuperAppTestingData() {
         let calendar = Calendar.current
-        if meals.isEmpty {
-            for offset in 0..<14 {
-                let day = calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now
-                let variation = Double((offset % 4) * 45)
-                modelContext.insert(MealEntry(date: day.addingTimeInterval(-28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
-                modelContext.insert(MealEntry(date: day.addingTimeInterval(-14_400), name: "Pollo con arroz", calories: 720, protein: 62, carbohydrates: 74, fat: 18, source: "Grok Vision", confidence: 0.91))
-                modelContext.insert(MealEntry(date: day.addingTimeInterval(-3_600), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
-            }
+        for meal in (try? modelContext.fetch(FetchDescriptor<MealEntry>())) ?? [] { modelContext.delete(meal) }
+        for measurement in (try? modelContext.fetch(FetchDescriptor<BodyMeasurement>())) ?? [] { modelContext.delete(measurement) }
+        for activity in (try? modelContext.fetch(FetchDescriptor<ActivityDay>())) ?? [] { modelContext.delete(activity) }
+        for workout in (try? modelContext.fetch(FetchDescriptor<WorkoutEntry>())) ?? [] { modelContext.delete(workout) }
+        for message in (try? modelContext.fetch(FetchDescriptor<CoachMessage>())) ?? [] { modelContext.delete(message) }
+        try? modelContext.save()
+
+        for offset in 0..<14 {
+            let day = calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now
+            let variation = Double((offset % 4) * 45)
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(-28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(-14_400), name: "Pollo con arroz", calories: 720, protein: 62, carbohydrates: 74, fat: 18, source: "Grok Vision", confidence: 0.91))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(-3_600), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
         }
-        if measurements.isEmpty {
-            for index in 0..<6 {
-                let date = calendar.date(byAdding: .day, value: -(index * 7), to: .now) ?? .now
-                modelContext.insert(BodyMeasurement(date: date, weight: 79.4 + Double(index) * 0.35, bodyFat: 14.2 + Double(index) * 0.22, waist: 81.0 + Double(index) * 0.45, source: "HealthKit"))
-            }
+        for index in 0..<6 {
+            let date = calendar.date(byAdding: .day, value: -(index * 7), to: .now) ?? .now
+            modelContext.insert(BodyMeasurement(date: date, weight: 79.4 + Double(index) * 0.35, bodyFat: 14.2 + Double(index) * 0.22, waist: 81.0 + Double(index) * 0.45, source: "HealthKit"))
         }
-        if activityDays.isEmpty {
-            for offset in 0..<14 {
-                let date = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now)
-                modelContext.insert(ActivityDay(
-                    externalID: "health-activity:super-ui-\(offset)",
-                    date: date,
-                    activeEnergy: 520 + Double((offset % 5) * 35),
-                    restingEnergy: 1_860,
-                    steps: 7_800 + Double((offset % 4) * 900)
-                ))
-            }
+        for offset in 0..<14 {
+            let date = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now)
+            modelContext.insert(ActivityDay(
+                externalID: "health-activity:super-ui-\(offset)",
+                date: date,
+                activeEnergy: 520 + Double((offset % 5) * 35),
+                restingEnergy: 1_860,
+                steps: 7_800 + Double((offset % 4) * 900)
+            ))
         }
-        if workouts.isEmpty {
-            for index in 0..<4 {
-                let start = calendar.date(byAdding: .day, value: -(index * 2), to: .now) ?? .now
-                modelContext.insert(WorkoutEntry(
-                    externalID: "hevy:super-ui-\(index)",
-                    startDate: start.addingTimeInterval(-4_200),
-                    endDate: start,
-                    title: ["Upper B", "Lower A", "Upper A", "Delts y brazos"][index],
-                    activityType: "Fuerza",
-                    durationMinutes: Double([67, 55, 72, 48][index]),
-                    source: "Hevy",
-                    sourceBundle: "com.hevyapp.hevy",
-                    exercises: [
-                        WorkoutExerciseSummary(name: "Press de pecho", setCount: 4, bestWeight: 55 + Double(index) * 5, bestReps: 8, volumeKg: 1_760, rpe: 8),
-                        WorkoutExerciseSummary(name: "Jalón al pecho", setCount: 4, bestWeight: 60, bestReps: 10, volumeKg: 2_000, rpe: 8)
-                    ]
-                ))
-            }
+        for index in 0..<4 {
+            let start = calendar.date(byAdding: .day, value: -(index * 2), to: .now) ?? .now
+            modelContext.insert(WorkoutEntry(
+                externalID: "hevy:super-ui-\(index)",
+                startDate: start.addingTimeInterval(-4_200),
+                endDate: start,
+                title: ["Upper B", "Lower A", "Upper A", "Delts y brazos"][index],
+                activityType: "Fuerza",
+                durationMinutes: Double([67, 55, 72, 48][index]),
+                source: "Hevy",
+                sourceBundle: "com.hevyapp.hevy",
+                exercises: [
+                    WorkoutExerciseSummary(name: "Press de pecho", setCount: 4, bestWeight: 55 + Double(index) * 5, bestReps: 8, volumeKg: 1_760, rpe: 8),
+                    WorkoutExerciseSummary(name: "Jalón al pecho", setCount: 4, bestWeight: 60, bestReps: 10, volumeKg: 2_000, rpe: 8)
+                ]
+            ))
         }
-        let existingMessages = (try? modelContext.fetch(FetchDescriptor<CoachMessage>())) ?? []
-        if existingMessages.isEmpty {
-            modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-120), role: "user", content: "¿Qué patrón debería mejorar esta semana?"))
-            modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-60), role: "assistant", content: "Tu proteína es consistente y el entrenamiento está cubierto. La principal mejora es reducir la variación de calorías entre días. Acción para esta semana: deja planificada la cena antes de las 18:00."))
-        }
+        modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-120), role: "user", content: "¿Qué patrón debería mejorar esta semana?"))
+        modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-60), role: "assistant", content: "Tu proteína es consistente y el entrenamiento está cubierto. La principal mejora es reducir la variación de calorías entre días. Acción para esta semana: deja planificada la cena antes de las 18:00."))
         try? modelContext.save()
     }
 #endif
@@ -783,6 +885,7 @@ private struct DayTotal: Identifiable {
 private struct MealRow: View {
     let meal: MealEntry
     let edit: () -> Void
+    let repeatMeal: () -> Void
     let delete: () -> Void
 
     var body: some View {
@@ -805,6 +908,7 @@ private struct MealRow: View {
             Spacer()
             Text("\(Int(meal.calories)) kcal").font(.subheadline.weight(.bold))
             Menu {
+                Button("Repetir ahora", systemImage: "plus.circle", action: repeatMeal)
                 Button("Editar", systemImage: "pencil", action: edit)
                 Button("Eliminar", systemImage: "trash", role: .destructive, action: delete)
             } label: {

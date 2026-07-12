@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import HealthKit
 @testable import Caltrack
 
 final class GrokServiceTests: XCTestCase {
@@ -161,5 +162,39 @@ final class GrokServiceTests: XCTestCase {
     func testActivityTotalEnergyCombinesActiveAndResting() {
         let activity = ActivityDay(externalID: "test:activity", date: .now, activeEnergy: 650, restingEnergy: 1_850, steps: 10_000)
         XCTAssertEqual(activity.totalEnergy, 2_500)
+    }
+
+    func testFrequentMealsNormalizesNamesAndUsesLatestValues() throws {
+        let now = Date(timeIntervalSince1970: 1_788_739_200)
+        let meals = [
+            MealEntry(date: now.addingTimeInterval(-300), name: "  Pollo   con arroz ", calories: 700, protein: 60, carbohydrates: 70, fat: 18),
+            MealEntry(date: now.addingTimeInterval(-100), name: "POLLO CON ARROZ", calories: 740, protein: 64, carbohydrates: 74, fat: 19),
+            MealEntry(date: now.addingTimeInterval(-200), name: "Salmón", calories: 610, protein: 55)
+        ]
+
+        let frequent = FoodLibrary.frequentMeals(meals: meals, now: now)
+        let first = try XCTUnwrap(frequent.first)
+
+        XCTAssertEqual(first.key, "pollo con arroz")
+        XCTAssertEqual(first.count, 2)
+        XCTAssertEqual(first.calories, 740)
+        XCTAssertEqual(FoodLibrary.normalizedName("  SALMÓN  "), "salmon")
+    }
+
+    func testHealthNutritionCorrelationContainsConfirmedMacrosAndStableIdentifier() throws {
+        let id = UUID()
+        let date = Date(timeIntervalSince1970: 1_788_739_200)
+        let meal = MealEntry(id: id, date: date, name: "Bowl", calories: 640, protein: 52, carbohydrates: 68, fat: 18)
+        let correlation = try HealthNutritionService.makeCorrelation(for: meal)
+
+        XCTAssertEqual(correlation.startDate, date)
+        XCTAssertEqual(correlation.metadata?[HKMetadataKeyExternalUUID] as? String, id.uuidString)
+        XCTAssertEqual(correlation.objects.count, 4)
+
+        let samples = correlation.objects.compactMap { $0 as? HKQuantitySample }
+        let energy = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryEnergyConsumed.rawValue })
+        let protein = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryProtein.rawValue })
+        XCTAssertEqual(energy.quantity.doubleValue(for: .kilocalorie()), 640)
+        XCTAssertEqual(protein.quantity.doubleValue(for: .gram()), 52)
     }
 }

@@ -2,7 +2,7 @@
 
 Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
 
-El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision y lectura autorizada de peso, grasa corporal y cintura desde Apple Salud.
+El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision, lectura autorizada de peso, grasa corporal y cintura desde Apple Salud, y entrenamientos de Hevy o Strava.
 
 ## Usarla en iPhone
 
@@ -82,10 +82,16 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 
 ### Áreas de la app
 
-- `Hoy`: foto, fototeca, entrada manual, edición, objetivos, balance estimado y entrenamientos.
-- `Progreso`: gráficos de 14 días, composición corporal, gasto de Salud, historial de comidas y carga de entrenamiento.
+- `Hoy`: foto, fototeca, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
+- `Progreso`: gráficos de 14 días, composición corporal, gasto de Salud, búsqueda del historial de comidas y carga de entrenamiento.
 - `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
-- `Ajustes`: claves validadas, objetivos, recordatorio local y copia o restauración JSON.
+- `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local y copia o restauración JSON.
+
+La primera apertura incluye una introducción breve que se puede omitir. No solicita Salud, notificaciones ni claves automáticamente.
+
+### Nutrición en Apple Salud
+
+En `Ajustes > Apple Salud` se puede activar `Guardar nutrición en Salud`. Caltrack solicita ese permiso en contexto y guarda cada comida confirmada con calorías, proteína, carbohidratos y grasa. La opción está desactivada por defecto, no lee la dieta creada por otras apps y permite sincronizar el historial solo mediante una acción explícita.
 
 ### Entrenamientos de Hevy y Strava
 

@@ -8,7 +8,8 @@ final class CaltrackUITests: XCTestCase {
     func testMainPhotoFlowAndSettingsAreReachable() {
         let app = XCUIApplication()
         let liveHevyKey = ProcessInfo.processInfo.environment["CALTRACK_TEST_HEVY_KEY"]
-        if liveHevyKey == nil { app.launchArguments = ["-seed-superapp"] }
+        app.launchArguments = ["-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        if liveHevyKey == nil { app.launchArguments.append("-seed-superapp") }
         app.launch()
 
         XCTAssertTrue(app.buttons["Conectar Salud"].waitForExistence(timeout: 8))
@@ -26,8 +27,15 @@ final class CaltrackUITests: XCTestCase {
 
         app.buttons["Ajustes"].tap()
         XCTAssertTrue(app.navigationBars["Ajustes"].waitForExistence(timeout: 3))
-        XCTAssertTrue(app.secureTextFields["Clave de xAI"].exists)
-        for _ in 0..<3 where !app.secureTextFields["Clave de API de Hevy"].exists {
+        let healthSettingsScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        healthSettingsScreenshot.name = "Caltrack Health nutrition settings"
+        healthSettingsScreenshot.lifetime = .keepAlways
+        add(healthSettingsScreenshot)
+        for _ in 0..<4 where !app.secureTextFields["Clave de xAI"].isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(app.secureTextFields["Clave de xAI"].waitForExistence(timeout: 3))
+        for _ in 0..<4 where !app.secureTextFields["Clave de API de Hevy"].isHittable {
             app.swipeUp()
         }
         let hevyField = app.secureTextFields["Clave de API de Hevy"]
@@ -47,8 +55,9 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Restaurar o fusionar copia"].exists)
         app.buttons["Listo"].tap()
 
+        let dashboardScroll = app.scrollViews.firstMatch
         for _ in 0..<6 where !app.staticTexts["Entrenamientos"].isHittable {
-            app.swipeUp()
+            dashboardScroll.swipeUp()
         }
         XCTAssertTrue(app.staticTexts["Entrenamientos"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.staticTexts["Entrenamientos"].isHittable)
@@ -61,7 +70,7 @@ final class CaltrackUITests: XCTestCase {
 
     func testManualEntryProgressAndCoachTabs() {
         let app = XCUIApplication()
-        app.launchArguments = ["-seed-superapp"]
+        app.launchArguments = ["-seed-superapp", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
         app.launch()
 
         XCTAssertTrue(app.buttons["Manual"].waitForExistence(timeout: 8))
@@ -95,10 +104,63 @@ final class CaltrackUITests: XCTestCase {
         app.tabBars.buttons["Entrenador"].tap()
         XCTAssertTrue(app.navigationBars["Entrenador"].waitForExistence(timeout: 4))
         XCTAssertTrue(app.staticTexts["ANÁLISIS LOCAL"].exists)
-        XCTAssertTrue(app.staticTexts["Profundiza en tus datos"].exists)
+        for _ in 0..<3 where !app.staticTexts["Profundiza en tus datos"].isHittable { app.swipeUp() }
+        XCTAssertTrue(app.staticTexts["Profundiza en tus datos"].waitForExistence(timeout: 3))
         let coachScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         coachScreenshot.name = "Caltrack coach"
         coachScreenshot.lifetime = .keepAlways
         add(coachScreenshot)
+    }
+
+    func testFrequentMealsAndSearch() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-seed-superapp", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launch()
+
+        let repeatButton = app.buttons["Repetir Pollo con arroz"]
+        for _ in 0..<3 where !repeatButton.isHittable { app.swipeUp() }
+        XCTAssertTrue(repeatButton.waitForExistence(timeout: 4))
+        let frequentScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        frequentScreenshot.name = "Caltrack frequent meals"
+        frequentScreenshot.lifetime = .keepAlways
+        add(frequentScreenshot)
+        repeatButton.tap()
+
+        app.tabBars.buttons["Progreso"].tap()
+        let search = app.searchFields["Buscar comidas"]
+        XCTAssertTrue(search.waitForExistence(timeout: 4))
+        search.tap()
+        search.typeText("Salmón")
+        XCTAssertTrue(app.staticTexts["Salmón y verduras"].waitForExistence(timeout: 4))
+    }
+
+    func testOnboardingCanBeSkipped() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-force-onboarding", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Tu dieta, cuerpo y entrenamiento, sin ruido"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Empezar"].exists)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Caltrack onboarding"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        app.buttons["Omitir introducción"].tap()
+        XCTAssertTrue(app.tabBars.buttons["Hoy"].waitForExistence(timeout: 4))
+    }
+
+    func testCriticalActionsAtAccessibilityTextSize() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryAccessibilityExtraExtraLarge"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.buttons["Fotografiar comida"].waitForExistence(timeout: 6))
+        XCTAssertTrue(app.buttons["Fototeca"].exists)
+        XCTAssertTrue(app.buttons["Manual"].exists)
+        XCTAssertTrue(app.tabBars.buttons["Progreso"].exists)
     }
 }

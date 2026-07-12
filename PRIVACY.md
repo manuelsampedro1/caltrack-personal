@@ -16,7 +16,7 @@ El entrenador funciona localmente por defecto. Solo cuando el usuario envía una
 
 ## Apple Salud
 
-Caltrack solicita acceso de lectura únicamente a:
+Caltrack solicita acceso de lectura a:
 
 - peso
 - porcentaje de grasa corporal
@@ -25,6 +25,15 @@ Caltrack solicita acceso de lectura únicamente a:
 - energía basal y pasos
 
 El usuario elige qué permisos concede y puede cambiarlos en Salud o Ajustes. Caltrack no vende, comparte ni usa estos datos para publicidad.
+
+De forma separada y desactivada por defecto, el usuario puede permitir que Caltrack escriba las comidas que confirma. Cada comida se guarda como una correlación de Salud con:
+
+- energía dietética
+- proteína
+- carbohidratos
+- grasa total
+
+Caltrack no solicita lectura de nutrición ni importa comidas creadas por otras aplicaciones. Editar o borrar una comida actualiza o elimina el registro creado por Caltrack mientras la opción está activa. Desactivar la opción detiene escrituras futuras y no borra silenciosamente el historial ya guardado en Salud. La sincronización de comidas anteriores requiere pulsar un botón explícito.
 
 ## Hevy y Strava
 

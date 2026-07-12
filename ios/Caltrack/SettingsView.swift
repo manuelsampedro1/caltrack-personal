@@ -20,6 +20,8 @@ struct SettingsView: View {
     @AppStorage("reminderEnabled") private var reminderEnabled = false
     @AppStorage("reminderHour") private var reminderHour = 21
     @AppStorage("reminderMinute") private var reminderMinute = 0
+    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
     @State private var apiKey = ""
     @State private var hevyKey = ""
     @State private var validatingGrok = false
@@ -31,6 +33,8 @@ struct SettingsView: View {
     @State private var backupDocument: CaltrackBackupDocument?
     @State private var showingExporter = false
     @State private var showingImporter = false
+    @State private var healthNutritionMessage: String?
+    @State private var healthNutritionSyncing = false
 
     var body: some View {
         NavigationStack {
@@ -38,10 +42,30 @@ struct SettingsView: View {
                 Section {
                     Label("Salud se conecta desde la primera tarjeta de Caltrack. Lee peso, composición y entrenamientos solo después de mostrar el permiso de Apple.", systemImage: "heart.text.square.fill")
                         .font(.subheadline)
+                    Toggle("Guardar nutrición en Salud", isOn: $healthNutritionEnabled)
+                        .onChange(of: healthNutritionEnabled) { _, enabled in
+                            Task { await updateHealthNutrition(enabled: enabled) }
+                        }
+                    if healthNutritionEnabled {
+                        Button {
+                            Task { await syncNutritionHistory() }
+                        } label: {
+                            HStack {
+                                if healthNutritionSyncing { ProgressView().controlSize(.small) }
+                                Label("Sincronizar comidas existentes", systemImage: "arrow.triangle.2.circlepath")
+                            }
+                        }
+                        .disabled(healthNutritionSyncing)
+                    }
+                    if let healthNutritionMessage {
+                        Text(healthNutritionMessage)
+                            .font(.caption)
+                            .foregroundStyle(healthNutritionEnabled ? .secondary : CaltrackTheme.coral)
+                    }
                 } header: {
                     Text("Apple Salud")
                 } footer: {
-                    Text("Esta conexión solo existe en la app nativa instalada en el iPhone. Safari y la PWA no pueden acceder a HealthKit.")
+                    Text("La escritura es opcional. Caltrack guarda como comida las calorías, proteína, carbohidratos y grasa que confirmes. Desactivarla no borra datos ya guardados. Safari y la PWA no pueden acceder a HealthKit.")
                 }
 
                 Section {
@@ -163,6 +187,15 @@ struct SettingsView: View {
                     Label("Salud requiere permiso explícito", systemImage: "heart.text.square")
                     Label("Cada estimación se confirma antes de guardar", systemImage: "checkmark.seal")
                 }
+
+                Section("Ayuda") {
+                    Button {
+                        hasCompletedOnboarding = false
+                        dismiss()
+                    } label: {
+                        Label("Ver introducción", systemImage: "questionmark.circle")
+                    }
+                }
             }
             .navigationTitle("Ajustes")
             .navigationBarTitleDisplayMode(.inline)
@@ -265,6 +298,39 @@ struct SettingsView: View {
         } catch {
             reminderEnabled = false
             reminderMessage = error.localizedDescription
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+
+    @MainActor
+    private func updateHealthNutrition(enabled: Bool) async {
+        guard enabled else {
+            healthNutritionMessage = "Las nuevas comidas no se enviarán a Salud"
+            return
+        }
+        do {
+            try await HealthNutritionService().requestAuthorization()
+            healthNutritionMessage = "Las nuevas comidas se guardarán también en Salud"
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            healthNutritionEnabled = false
+            healthNutritionMessage = error.localizedDescription
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+    }
+
+    @MainActor
+    private func syncNutritionHistory() async {
+        healthNutritionSyncing = true
+        defer { healthNutritionSyncing = false }
+        do {
+            let service = HealthNutritionService()
+            try await service.requestAuthorization()
+            let count = try await service.syncAll(meals)
+            healthNutritionMessage = count == 1 ? "1 comida sincronizada con Salud" : "\(count) comidas sincronizadas con Salud"
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            healthNutritionMessage = error.localizedDescription
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }
