@@ -103,6 +103,14 @@ La app nativa publica cuatro App Shortcuts: `Fotografiar comida`, `Escanear prod
 
 En `Ajustes > Atajos y Siri` aparecen las frases sugeridas y el enlace nativo a Atajos. El intent solo guarda temporalmente el nombre de la pantalla elegida. No contiene ni comparte comidas, medidas o datos de Salud.
 
+### Widgets de inicio y pantalla de bloqueo
+
+La app nativa incluye widgets pequeño y mediano para ver calorías, proteína y cierre del día, además de accesos directos a Foto, Código y Peso. También ofrece formatos inline, circular y rectangular para la pantalla de bloqueo y StandBy.
+
+La app prepara un resumen mínimo en un App Group. La extensión no abre la base completa, no consulta Salud, no usa Keychain y no hace peticiones de red. Los valores nutricionales se marcan como privados para que iOS pueda ocultarlos cuando corresponda. Si el resumen pertenece a ayer, el widget reinicia el consumo y conserva solo los objetivos.
+
+Para añadirlo, mantén pulsada la pantalla de inicio o de bloqueo, entra en edición y busca `Caltrack` en la galería de widgets.
+
 ### Check-ins corporales
 
 `Progreso > Check-in` permite registrar peso, grasa corporal y cintura aunque esas métricas no estén en Apple Salud. También admite una foto de progreso opcional elegida con el selector privado de Apple. La imagen se reduce localmente a un máximo de 1600 píxeles, se puede ampliar en el visor y queda relacionada con las métricas de ese día.

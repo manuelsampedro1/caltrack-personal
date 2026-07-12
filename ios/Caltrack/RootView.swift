@@ -12,6 +12,18 @@ struct RootView: View {
     @State private var readLaunchAction = false
 
     var body: some View {
+#if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-preview-widgets") {
+            WidgetPreviewGallery()
+        } else {
+            mainContent
+        }
+#else
+        mainContent
+#endif
+    }
+
+    private var mainContent: some View {
         TabView(selection: $selection) {
             DashboardView(requestedAction: $dashboardRequest)
                 .tag(0)

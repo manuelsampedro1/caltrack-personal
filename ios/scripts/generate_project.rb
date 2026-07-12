@@ -23,6 +23,8 @@ project.root_object.attributes['LastSwiftUpdateCheck'] = '2600'
 project.root_object.attributes['LastUpgradeCheck'] = '2600'
 
 app = project.new_target(:application, 'Caltrack', :ios, '17.0')
+widget = project.new_target(:app_extension, 'CaltrackWidgets', :ios, '17.0')
+app.add_dependency(widget)
 tests = project.new_target(:unit_test_bundle, 'CaltrackTests', :ios, '17.0')
 tests.add_dependency(app)
 ui_tests = project.new_target(:ui_test_bundle, 'CaltrackUITests', :ios, '17.0')
@@ -30,7 +32,10 @@ ui_tests.add_dependency(app)
 
 app_intents = project.frameworks_group.new_file('System/Library/Frameworks/AppIntents.framework')
 app_intents.source_tree = 'SDKROOT'
-[app, tests, ui_tests].each { |target| target.frameworks_build_phase.add_file_reference(app_intents) }
+[app, widget, tests, ui_tests].each { |target| target.frameworks_build_phase.add_file_reference(app_intents) }
+widget_kit = project.frameworks_group.new_file('System/Library/Frameworks/WidgetKit.framework')
+widget_kit.source_tree = 'SDKROOT'
+[app, widget].each { |target| target.frameworks_build_phase.add_file_reference(widget_kit) }
 
 app_group = project.main_group.new_group('Caltrack', 'Caltrack')
 source_refs = Dir[File.join(root, 'Caltrack', '*.swift')].sort.map { |path| app_group.new_file(File.basename(path)) }
@@ -38,6 +43,20 @@ app.add_file_references(source_refs)
 assets = app_group.new_file('Assets.xcassets')
 app.resources_build_phase.add_file_reference(assets)
 app_group.new_file('Caltrack.entitlements')
+
+widget_group = project.main_group.new_group('CaltrackWidgets', 'CaltrackWidgets')
+widget_refs = Dir[File.join(root, 'CaltrackWidgets', '*.swift')].sort.map { |path| widget_group.new_file(File.basename(path)) }
+widget.add_file_references(widget_refs)
+shared_widget_sources = source_refs.select do |ref|
+  ['CaltrackWidgetContent.swift', 'QuickActions.swift', 'WidgetSnapshotStore.swift'].include?(ref.path)
+end
+widget.add_file_references(shared_widget_sources)
+widget_group.new_file('Info.plist')
+widget_group.new_file('CaltrackWidgets.entitlements')
+
+embed_extensions = app.new_copy_files_build_phase('Embed App Extensions')
+embed_extensions.symbol_dst_subfolder_spec = :plug_ins
+embed_extensions.add_file_reference(widget.product_reference)
 
 test_group = project.main_group.new_group('CaltrackTests', 'CaltrackTests')
 test_refs = Dir[File.join(root, 'CaltrackTests', '*.swift')].sort.map { |path| test_group.new_file(File.basename(path)) }
@@ -53,7 +72,7 @@ app.build_configurations.each do |config|
   settings['ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME'] = 'AccentColor'
   settings['CODE_SIGN_ENTITLEMENTS'] = 'Caltrack/Caltrack.entitlements'
   settings['CODE_SIGN_STYLE'] = 'Automatic'
-  settings['CURRENT_PROJECT_VERSION'] = '8'
+  settings['CURRENT_PROJECT_VERSION'] = '9'
   settings['DEVELOPMENT_TEAM'] = '6BG94RDHDG'
   settings['GENERATE_INFOPLIST_FILE'] = 'YES'
   settings['INFOPLIST_KEY_CFBundleDisplayName'] = 'Caltrack'
@@ -64,10 +83,30 @@ app.build_configurations.each do |config|
   settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
   settings['INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone'] = 'UIInterfaceOrientationPortrait'
   settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
-  settings['MARKETING_VERSION'] = '1.7'
+  settings['MARKETING_VERSION'] = '1.8'
   settings['LM_FILTER_WARNINGS'] = 'YES'
   settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.manuelsampedro.caltrack'
   settings['PRODUCT_NAME'] = '$(TARGET_NAME)'
+  settings['SWIFT_EMIT_LOC_STRINGS'] = 'YES'
+  settings['SWIFT_VERSION'] = '5.0'
+  settings['TARGETED_DEVICE_FAMILY'] = '1'
+end
+
+widget.build_configurations.each do |config|
+  settings = config.build_settings
+  settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
+  settings['CODE_SIGN_ENTITLEMENTS'] = 'CaltrackWidgets/CaltrackWidgets.entitlements'
+  settings['CODE_SIGN_STYLE'] = 'Automatic'
+  settings['CURRENT_PROJECT_VERSION'] = '9'
+  settings['DEVELOPMENT_TEAM'] = '6BG94RDHDG'
+  settings['GENERATE_INFOPLIST_FILE'] = 'NO'
+  settings['INFOPLIST_FILE'] = 'CaltrackWidgets/Info.plist'
+  settings['IPHONEOS_DEPLOYMENT_TARGET'] = '17.0'
+  settings['LD_RUNPATH_SEARCH_PATHS'] = '$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks'
+  settings['MARKETING_VERSION'] = '1.8'
+  settings['PRODUCT_BUNDLE_IDENTIFIER'] = 'com.manuelsampedro.caltrack.widgets'
+  settings['PRODUCT_NAME'] = '$(TARGET_NAME)'
+  settings['SKIP_INSTALL'] = 'YES'
   settings['SWIFT_EMIT_LOC_STRINGS'] = 'YES'
   settings['SWIFT_VERSION'] = '5.0'
   settings['TARGETED_DEVICE_FAMILY'] = '1'
@@ -104,7 +143,15 @@ project.root_object.attributes['TargetAttributes'] = {
   app.uuid => {
     'CreatedOnToolsVersion' => '26.0',
     'DevelopmentTeam' => '6BG94RDHDG',
-    'SystemCapabilities' => { 'com.apple.HealthKit' => { 'enabled' => 1 } }
+    'SystemCapabilities' => {
+      'com.apple.ApplicationGroups.iOS' => { 'enabled' => 1 },
+      'com.apple.HealthKit' => { 'enabled' => 1 }
+    }
+  },
+  widget.uuid => {
+    'CreatedOnToolsVersion' => '26.0',
+    'DevelopmentTeam' => '6BG94RDHDG',
+    'SystemCapabilities' => { 'com.apple.ApplicationGroups.iOS' => { 'enabled' => 1 } }
   },
   tests.uuid => {
     'CreatedOnToolsVersion' => '26.0',

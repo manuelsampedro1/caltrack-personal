@@ -3,6 +3,7 @@ import PhotosUI
 import SwiftData
 import SwiftUI
 import UIKit
+import WidgetKit
 
 private enum CaptureFlow: String, Identifiable {
     case camera
@@ -84,6 +85,22 @@ struct DashboardView: View {
             weeklyRate: planWeeklyRate,
             calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
             lastAdjustmentDate: planLastAdjustmentTimestamp > 0 ? Date(timeIntervalSince1970: planLastAdjustmentTimestamp) : nil
+        )
+    }
+
+    private var widgetSnapshot: WidgetSnapshot {
+        let calories = CaltrackMath.orderedRange(calorieMin, calorieMax)
+        return WidgetSnapshot(
+            day: Calendar.current.startOfDay(for: .now),
+            generatedAt: .now,
+            calories: todayTotals.calories,
+            protein: todayTotals.protein,
+            calorieMin: calories.lowerBound,
+            calorieMax: calories.upperBound,
+            proteinMin: min(proteinMin, proteinMax),
+            mealCount: todayMeals.count,
+            nutritionComplete: todayPlanCheckIn?.nutritionComplete == true,
+            planTitle: adaptivePlanReview.title
         )
     }
 
@@ -198,6 +215,11 @@ struct DashboardView: View {
                     }
                 }
                 _ = await syncHevy()
+            }
+            .task(id: widgetSnapshot) {
+                if WidgetSnapshotStore.save(widgetSnapshot) {
+                    WidgetCenter.shared.reloadAllTimelines()
+                }
             }
             .onAppear { handleRequestedAction() }
             .onChange(of: requestedAction) { _, _ in handleRequestedAction() }

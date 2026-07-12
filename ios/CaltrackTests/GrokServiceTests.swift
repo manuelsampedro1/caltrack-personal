@@ -287,6 +287,42 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertNil(QuickActionStore.fromLaunchArguments(["Caltrack", "-quick-action", "unknown"]))
     }
 
+    func testWidgetSnapshotPersistsContentAndExpiresAtMidnight() throws {
+        let suiteName = "CaltrackTests.WidgetSnapshot.\(UUID().uuidString)"
+        let defaults = try XCTUnwrap(UserDefaults(suiteName: suiteName))
+        defer { UserDefaults.standard.removePersistentDomain(forName: suiteName) }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+        let formatter = ISO8601DateFormatter()
+        let day = try XCTUnwrap(formatter.date(from: "2026-07-13T12:00:00Z"))
+        let tomorrow = try XCTUnwrap(formatter.date(from: "2026-07-14T00:01:00Z"))
+        let snapshot = WidgetSnapshot(
+            day: calendar.startOfDay(for: day),
+            generatedAt: day,
+            calories: 1_760,
+            protein: 159,
+            calorieMin: 1_800,
+            calorieMax: 2_000,
+            proteinMin: 160,
+            mealCount: 3,
+            nutritionComplete: true,
+            planTitle: "Mantén el rango"
+        )
+
+        XCTAssertTrue(WidgetSnapshotStore.save(snapshot, defaults: defaults))
+        XCTAssertFalse(WidgetSnapshotStore.save(snapshot, defaults: defaults))
+        XCTAssertEqual(WidgetSnapshotStore.load(defaults: defaults, now: day, calendar: calendar), snapshot)
+
+        let expired = WidgetSnapshotStore.load(defaults: defaults, now: tomorrow, calendar: calendar)
+        XCTAssertEqual(expired.calories, 0)
+        XCTAssertEqual(expired.protein, 0)
+        XCTAssertEqual(expired.mealCount, 0)
+        XCTAssertFalse(expired.nutritionComplete)
+        XCTAssertEqual(expired.calorieMax, 2_000)
+        XCTAssertEqual(expired.proteinMin, 160)
+        XCTAssertEqual(expired.planTitle, "Empieza el día")
+    }
+
     func testAppIntentsExposeExpectedRoutesAndFourShortcuts() {
         XCTAssertEqual(CaptureMealIntent.targetAction, .camera)
         XCTAssertEqual(ScanProductIntent.targetAction, .barcode)

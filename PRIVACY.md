@@ -68,6 +68,12 @@ Los recordatorios son notificaciones locales programadas por el propio iPhone. N
 
 Caltrack ofrece cuatro acciones del sistema para abrir cámara de comida, lector de productos, check-in corporal o progreso. El intent conserva localmente una ruta de un solo uso hasta que la app puede mostrarla. No incluye fotos, macros, peso, entrenamientos, claves ni datos de Apple Salud, y no requiere un servidor.
 
+## Widgets
+
+La app comparte con su extensión un resumen local del día que contiene calorías, proteína, objetivos, número de comidas, estado de cierre y un título breve del plan. Se guarda en el App Group privado de Caltrack y caduca al cambiar de día.
+
+La extensión no recibe fotos, conversación, historial completo, identificadores de Salud ni claves de xAI o Hevy. Tampoco consulta internet. Las métricas se declaran sensibles para que iOS pueda redactarlas en superficies protegidas.
+
 ## Límites
 
 Los cálculos nutricionales obtenidos desde una foto y los datos recuperados por código de barras deben revisarse antes de guardarse. No sustituyen consejo médico o nutricional.

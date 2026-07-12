@@ -123,3 +123,17 @@ El cálculo cuenta solo intervalos dormidos, une solapamientos, atribuye la noch
 El rango deja de ser un número manual sin seguimiento, pero Caltrack no se convierte en un piloto automático. Solo revisa días marcados como completos y exige siete cierres, tres pesos repartidos durante siete días y al menos 70% de adherencia al rango vigente. La tendencia usa regresión lineal sobre 14 días para reducir el efecto de una medición aislada.
 
 Una propuesta mueve ambos límites 100 kcal, se limita entre 1.000 y 6.000 kcal y requiere confirmación explícita con comparación anterior y nueva. Después espera seis días. No calcula metabolismo con sexo, edad o altura, ni promete un ritmo de cambio. Hambre y energía sirven como contexto agregado y permanecen locales salvo que el usuario pregunte voluntariamente a Grok.
+
+## 2026-07-13
+
+### Estado diario visible sin abrir la app
+
+Caltrack añade widgets pequeño y mediano para la pantalla de inicio y formatos inline, circular y rectangular para la pantalla de bloqueo. La prioridad es ver el progreso y llegar a Foto, Código o Peso con menos pasos. No se añade un widget grande porque repetiría el dashboard, ni una Live Activity porque el seguimiento nutricional dura todo el día y no necesita actualizaciones continuas.
+
+### Snapshot mínimo en App Group
+
+La extensión no abre SwiftData. La app calcula un `WidgetSnapshot` con las métricas estrictamente necesarias y lo guarda en `group.com.manuelsampedro.caltrack`. Esto evita compartir fotos, historial, HealthKit o Keychain con otro proceso. Un snapshot de otro día reinicia el consumo sin perder objetivos y WidgetKit solo recibe una solicitud de recarga cuando el contenido cambia.
+
+### Privacidad y acciones en WidgetKit
+
+Los valores, el recuento de comidas y el estado del plan se marcan como sensibles. En redacción privada el progreso se neutraliza para que el anillo no revele el consumo. Los botones reutilizan los App Intents existentes y escriben una ruta de un solo uso en el mismo App Group, sin añadir backend, SDK o API.

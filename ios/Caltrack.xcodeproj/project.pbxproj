@@ -7,47 +7,60 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		05A4801E9F1E97DC25751768 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35FA7C6243E485954E4306D /* Models.swift */; };
-		0AA1CA53CBB810C514A1C119 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1F25868083AAB95546E02E /* KeychainStore.swift */; };
-		0B49FD8EBDE2E5EB5F5D7930 /* BarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54FDC6A585C8D28C03B9E86 /* BarcodeScannerView.swift */; };
-		0DE5E4470D37AAA9D56D3DC6 /* ProgressPhotoViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE593B3A1253CE454972E1 /* ProgressPhotoViewer.swift */; };
-		14AEA8184F4CEDE0A4294162 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455450789F3CFD5D5E19920F /* RootView.swift */; };
-		1C86908723646E383690BC9B /* BarcodeLookupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121CED0DE3C05D12524A61E4 /* BarcodeLookupSheet.swift */; };
-		1D9F94F64111AD69FF5BC9D3 /* GrokService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20F9E92DAE18FD0A88A99A3A /* GrokService.swift */; };
-		26B0E5E2D937BBAC1D1D49F2 /* RecoveryMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9250FEB5E427614E93514A /* RecoveryMath.swift */; };
-		2CF17F5D8F4D26C16010E929 /* ManualMealSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8798111EFF1666F1EBD1FBDB /* ManualMealSheet.swift */; };
-		2EADED35E015EFB5C2FD5826 /* MealAnalysisSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2F36024D756AA6E2F8601C /* MealAnalysisSheet.swift */; };
-		2ECA19435FE064E3CAA41FE0 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6FD097A50DC9521D2BD538F2 /* HealthKitService.swift */; };
+		00A070E72D2C70D1E219F84D /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832366604FD1260471C8529B /* HealthKitService.swift */; };
+		05A4801E9F1E97DC25751768 /* AppShortcuts.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB0FC56AD3EFA85B16067A8 /* AppShortcuts.swift */; };
+		07EBA7882420CBE149629F20 /* CaltrackWidgets.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 5EDC8BD6CD38D334874F36C2 /* CaltrackWidgets.appex */; };
+		0A9C3C346900BB5F7359AE75 /* GrokServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B359CF02D58503B11DF84A3 /* GrokServiceTests.swift */; };
+		0DE5E4470D37AAA9D56D3DC6 /* CaltrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61ADB94E4A437CA7D77D5394 /* CaltrackApp.swift */; };
+		14AEA8184F4CEDE0A4294162 /* CoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69AE593B3A1253CE454972E1 /* CoachView.swift */; };
+		14E83B020343156663AC79E8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4255709C53F6F0F03ADF0E8D /* Assets.xcassets */; };
+		20F9E92DAE18FD0A88A99A3A /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F596429E157B84EA226338A8 /* WidgetKit.framework */; };
+		26B0E5E2D937BBAC1D1D49F2 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFCC0E1A982C4E55CAD7B98 /* CameraPicker.swift */; };
+		2E8EFC60CED7B441D385BBB6 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85E0B5A8BCBCF372B675A886 /* RootView.swift */; };
+		2EADED35E015EFB5C2FD5826 /* AdaptivePlanEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E7592960F520B980EE731 /* AdaptivePlanEngine.swift */; };
+		30E186393CBB0EC68126C555 /* CaltrackWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A43494425A38CDB0257F58 /* CaltrackWidgetContent.swift */; };
+		38285C294CC6C29FA2CC84B5 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6F86367B290AE17FF8004F16 /* SettingsView.swift */; };
 		3C0853007F6A157D33D5CB87 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29100F1892932C446E1DAF95 /* Foundation.framework */; };
-		4052DC2DCB5B1D5367E1BBAF /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832366604FD1260471C8529B /* SettingsView.swift */; };
-		412E8D2420EA51594C83FD86 /* ReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971F51BEBB50301DCDB24FB2 /* ReminderService.swift */; };
-		473F378885E3CE8C2216798A /* FoodLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = F596429E157B84EA226338A8 /* FoodLibrary.swift */; };
-		4F70B4BBDCB9ED2D7C6D1B3F /* CaltrackUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4467D805EBDA3094E2FE5516 /* CaltrackUITests.swift */; };
-		51424C664AE3123930B28A50 /* GrokServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57ABF17806D862A2D43A85A4 /* GrokServiceTests.swift */; };
-		52623B45C2DF1B500E7099B7 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 459ACA9D098845EB1744C754 /* DashboardView.swift */; };
-		558ECC1D7BC0F5F318D32EBB /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6C525AE1598A3BD960E823 /* Theme.swift */; };
-		6F86367B290AE17FF8004F16 /* HevyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 349E7592960F520B980EE731 /* HevyService.swift */; };
-		74E9AB41A03267D9CDCBCA7D /* CoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3C62BD9F02B6B557E2087696 /* CoachView.swift */; };
-		750A9B5465316256D027B4DC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EF9AFB497701DE03E31D8DC8 /* Assets.xcassets */; };
-		766F4D3385ADAAFDE4DBF6DB /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E19D82E86E7A6500980AA6 /* AppIntents.framework */; };
-		787B293C2A0497D647554E43 /* BackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EAD879C9F13AFFC82A06189 /* BackupService.swift */; };
-		8099E89BEF8B00C5631561DF /* CaltrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB8BBCF31307DDB4F2954D79 /* CaltrackApp.swift */; };
-		844D500B369B319AF62DB997 /* OpenFoodFactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A43494425A38CDB0257F58 /* OpenFoodFactsService.swift */; };
-		85E0B5A8BCBCF372B675A886 /* HealthNutritionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 582CC80CE0D82AFD70001186 /* HealthNutritionService.swift */; };
-		91AE0EC6C1A2AFE11EE60F24 /* DailyPlanCheckInSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CF4C7BF28A781770B5950391 /* DailyPlanCheckInSheet.swift */; };
-		94667C6E3B399FB76A2D8166 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61ADB94E4A437CA7D77D5394 /* OnboardingView.swift */; };
-		96846CAE5ADDF923437F6555 /* AdaptivePlanEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA86BDA9BFB83B44498FEB7C /* AdaptivePlanEngine.swift */; };
-		9D69C031750513A48AFC5DC5 /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDE23033EE2AEAFC418CD2C9 /* CameraPicker.swift */; };
-		A94B25ABE83407DAB4853F62 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E19D82E86E7A6500980AA6 /* AppIntents.framework */; };
-		CB2D12B43586D90D6E42664E /* BodyCheckInSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879E382E488D94130B25BB84 /* BodyCheckInSheet.swift */; };
-		CF237B28EBFEF9586E4EBF6A /* ProgressDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A9CAFD53E09FBB64585CC7 /* ProgressDashboardView.swift */; };
-		DB38FFABE5B677010F41B881 /* QuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F207C647004B340DB2C8FD /* QuickActions.swift */; };
-		DE8A0A1AC609FC7031044E38 /* Insights.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB0FC56AD3EFA85B16067A8 /* Insights.swift */; };
-		DF42F103D427EEE93883C3A5 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70E19D82E86E7A6500980AA6 /* AppIntents.framework */; };
-		E9EAE267184688F28ED767A9 /* CoachService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7335E46DFFACD626944DB6B7 /* CoachService.swift */; };
+		3C62BD9F02B6B557E2087696 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDE23033EE2AEAFC418CD2C9 /* AppIntents.framework */; };
+		4052DC2DCB5B1D5367E1BBAF /* DailyPlanCheckInSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F207C647004B340DB2C8FD /* DailyPlanCheckInSheet.swift */; };
+		412E8D2420EA51594C83FD86 /* CoachService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 17A9CAFD53E09FBB64585CC7 /* CoachService.swift */; };
+		4467D805EBDA3094E2FE5516 /* ManualMealSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0B49FD8EBDE2E5EB5F5D7930 /* ManualMealSheet.swift */; };
+		459ACA9D098845EB1744C754 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDE23033EE2AEAFC418CD2C9 /* AppIntents.framework */; };
+		47D695478100492EFCD834BF /* WidgetPreviewGallery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AA1CA53CBB810C514A1C119 /* WidgetPreviewGallery.swift */; };
+		4BB3ACDC3D4A5A3B32326D6C /* QuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473F378885E3CE8C2216798A /* QuickActions.swift */; };
+		4F70B4BBDCB9ED2D7C6D1B3F /* MealAnalysisSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB2D12B43586D90D6E42664E /* MealAnalysisSheet.swift */; };
+		51424C664AE3123930B28A50 /* Insights.swift in Sources */ = {isa = PBXBuildFile; fileRef = 787B293C2A0497D647554E43 /* Insights.swift */; };
+		51B527907E00726EF6229321 /* ProgressPhotoViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52623B45C2DF1B500E7099B7 /* ProgressPhotoViewer.swift */; };
+		558ECC1D7BC0F5F318D32EBB /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B9250FEB5E427614E93514A /* DashboardView.swift */; };
+		57ABF17806D862A2D43A85A4 /* HevyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96846CAE5ADDF923437F6555 /* HevyService.swift */; };
+		5C2880C771ABAC4C7DEF7CA7 /* CaltrackUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CE4FFEEBD750F66B9DA46F6 /* CaltrackUITests.swift */; };
+		62F4D9049874851A7AB45A4E /* HealthNutritionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D6C525AE1598A3BD960E823 /* HealthNutritionService.swift */; };
+		6FD097A50DC9521D2BD538F2 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F596429E157B84EA226338A8 /* WidgetKit.framework */; };
+		71DB449CD0390896524BC7C6 /* RecoveryMath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D9F94F64111AD69FF5BC9D3 /* RecoveryMath.swift */; };
+		7312A4B5E67DF38CA6C0D2E9 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C86908723646E383690BC9B /* KeychainStore.swift */; };
+		7335E46DFFACD626944DB6B7 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDE23033EE2AEAFC418CD2C9 /* AppIntents.framework */; };
+		750A9B5465316256D027B4DC /* GrokService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 455450789F3CFD5D5E19920F /* GrokService.swift */; };
+		75DD28545307887E86DC7D69 /* OpenFoodFactsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9EAE267184688F28ED767A9 /* OpenFoodFactsService.swift */; };
+		8368832CDFA836A0E98711C2 /* QuickActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 473F378885E3CE8C2216798A /* QuickActions.swift */; };
+		844D500B369B319AF62DB997 /* BarcodeLookupSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8798111EFF1666F1EBD1FBDB /* BarcodeLookupSheet.swift */; };
+		8549AB2C9C0BBC1DAE74088C /* PlanSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74E9AB41A03267D9CDCBCA7D /* PlanSettingsSheet.swift */; };
+		899FCE9677F0AF194C85F127 /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF17F5D8F4D26C16010E929 /* WidgetSnapshotStore.swift */; };
+		8DF22A3D90F3F539C15078C0 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8099E89BEF8B00C5631561DF /* Models.swift */; };
+		94667C6E3B399FB76A2D8166 /* BackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F1F25868083AAB95546E02E /* BackupService.swift */; };
+		951483C3799B03C793B80952 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE8A0A1AC609FC7031044E38 /* Theme.swift */; };
+		9B31EFA88D000BD607DFF44B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D69C031750513A48AFC5DC5 /* OnboardingView.swift */; };
+		B54FDC6A585C8D28C03B9E86 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29100F1892932C446E1DAF95 /* Foundation.framework */; };
+		B7FD6D7CA5FFDC120EC72B24 /* WidgetSnapshotStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CF17F5D8F4D26C16010E929 /* WidgetSnapshotStore.swift */; };
+		BBCBD86B1CAA7CFC5DDA6207 /* ReminderService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ECA19435FE064E3CAA41FE0 /* ReminderService.swift */; };
+		CF237B28EBFEF9586E4EBF6A /* BodyCheckInSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35FA7C6243E485954E4306D /* BodyCheckInSheet.swift */; };
+		CF4C7BF28A781770B5950391 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDE23033EE2AEAFC418CD2C9 /* AppIntents.framework */; };
+		DB38FFABE5B677010F41B881 /* CaltrackWidgetContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = D8A43494425A38CDB0257F58 /* CaltrackWidgetContent.swift */; };
+		E5DF5DD53C6CC98B78FF4154 /* ProgressDashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91AE0EC6C1A2AFE11EE60F24 /* ProgressDashboardView.swift */; };
 		EE6A28B43548A3448E4624BE /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29100F1892932C446E1DAF95 /* Foundation.framework */; };
-		F00E1FEBB75B3CE219D1891A /* PlanSettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCFCC0E1A982C4E55CAD7B98 /* PlanSettingsSheet.swift */; };
+		EF9AFB497701DE03E31D8DC8 /* FoodLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 971F51BEBB50301DCDB24FB2 /* FoodLibrary.swift */; };
+		F00E1FEBB75B3CE219D1891A /* BarcodeScannerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A2F36024D756AA6E2F8601C /* BarcodeScannerView.swift */; };
 		F0E62948994EAEF1889E7BEB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29100F1892932C446E1DAF95 /* Foundation.framework */; };
+		FFF341D235DC6E671D3E5F42 /* CaltrackWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 514BC07945869DEC732A838A /* CaltrackWidgets.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,8 +68,8 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = BA6DA8BBFBFBAC5F9D0F4C31 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 423DF72D370AC9A094AA6632;
-			remoteInfo = Caltrack;
+			remoteGlobalIDString = 3746EBD79FC34789633EED63;
+			remoteInfo = CaltrackWidgets;
 		};
 		4065710434CE6A4654DCF8B5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -65,59 +78,98 @@
 			remoteGlobalIDString = 423DF72D370AC9A094AA6632;
 			remoteInfo = Caltrack;
 		};
+		879E382E488D94130B25BB84 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = BA6DA8BBFBFBAC5F9D0F4C31 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 423DF72D370AC9A094AA6632;
+			remoteInfo = Caltrack;
+		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		8A396D46501E6DE79953196E /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				07EBA7882420CBE149629F20 /* CaltrackWidgets.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		00A070E72D2C70D1E219F84D /* Caltrack.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Caltrack.entitlements; sourceTree = "<group>"; };
-		0A2F36024D756AA6E2F8601C /* MealAnalysisSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MealAnalysisSheet.swift; sourceTree = "<group>"; };
-		0EAD879C9F13AFFC82A06189 /* BackupService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
-		121CED0DE3C05D12524A61E4 /* BarcodeLookupSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarcodeLookupSheet.swift; sourceTree = "<group>"; };
-		17A9CAFD53E09FBB64585CC7 /* ProgressDashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProgressDashboardView.swift; sourceTree = "<group>"; };
-		20F9E92DAE18FD0A88A99A3A /* GrokService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrokService.swift; sourceTree = "<group>"; };
-		28F207C647004B340DB2C8FD /* QuickActions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickActions.swift; sourceTree = "<group>"; };
+		0A2F36024D756AA6E2F8601C /* BarcodeScannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
+		0AA1CA53CBB810C514A1C119 /* WidgetPreviewGallery.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetPreviewGallery.swift; sourceTree = "<group>"; };
+		0B49FD8EBDE2E5EB5F5D7930 /* ManualMealSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManualMealSheet.swift; sourceTree = "<group>"; };
+		0EA480F333A2FB68E5F01613 /* CaltrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaltrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		17A9CAFD53E09FBB64585CC7 /* CoachService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachService.swift; sourceTree = "<group>"; };
+		1C86908723646E383690BC9B /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		1D9F94F64111AD69FF5BC9D3 /* RecoveryMath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecoveryMath.swift; sourceTree = "<group>"; };
+		235D88AD3A332773DA9219B6 /* Caltrack.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Caltrack.entitlements; sourceTree = "<group>"; };
+		28F207C647004B340DB2C8FD /* DailyPlanCheckInSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyPlanCheckInSheet.swift; sourceTree = "<group>"; };
 		29100F1892932C446E1DAF95 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		2CF17F5D8F4D26C16010E929 /* WidgetSnapshotStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = WidgetSnapshotStore.swift; sourceTree = "<group>"; };
 		2E977BF8126D7A2543D1FC96 /* Caltrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caltrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		349E7592960F520B980EE731 /* HevyService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HevyService.swift; sourceTree = "<group>"; };
-		3C62BD9F02B6B557E2087696 /* CoachView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachView.swift; sourceTree = "<group>"; };
-		4467D805EBDA3094E2FE5516 /* CaltrackUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackUITests.swift; sourceTree = "<group>"; };
-		455450789F3CFD5D5E19920F /* RootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
-		459ACA9D098845EB1744C754 /* DashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
-		57ABF17806D862A2D43A85A4 /* GrokServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrokServiceTests.swift; sourceTree = "<group>"; };
-		582CC80CE0D82AFD70001186 /* HealthNutritionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthNutritionService.swift; sourceTree = "<group>"; };
-		5D6C525AE1598A3BD960E823 /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		5EDC8BD6CD38D334874F36C2 /* CaltrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaltrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		61ADB94E4A437CA7D77D5394 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
-		69AE593B3A1253CE454972E1 /* ProgressPhotoViewer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProgressPhotoViewer.swift; sourceTree = "<group>"; };
-		6FD097A50DC9521D2BD538F2 /* HealthKitService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
-		70E19D82E86E7A6500980AA6 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
-		7335E46DFFACD626944DB6B7 /* CoachService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachService.swift; sourceTree = "<group>"; };
-		7F1F25868083AAB95546E02E /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
-		832366604FD1260471C8529B /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		8798111EFF1666F1EBD1FBDB /* ManualMealSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ManualMealSheet.swift; sourceTree = "<group>"; };
-		879E382E488D94130B25BB84 /* BodyCheckInSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BodyCheckInSheet.swift; sourceTree = "<group>"; };
-		954BC94921462EB95F3A20D0 /* CaltrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaltrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		971F51BEBB50301DCDB24FB2 /* ReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReminderService.swift; sourceTree = "<group>"; };
-		9B9250FEB5E427614E93514A /* RecoveryMath.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RecoveryMath.swift; sourceTree = "<group>"; };
-		A35FA7C6243E485954E4306D /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		B54FDC6A585C8D28C03B9E86 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
-		BDE23033EE2AEAFC418CD2C9 /* CameraPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
-		CB8BBCF31307DDB4F2954D79 /* CaltrackApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackApp.swift; sourceTree = "<group>"; };
-		CCFCC0E1A982C4E55CAD7B98 /* PlanSettingsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlanSettingsSheet.swift; sourceTree = "<group>"; };
-		CF4C7BF28A781770B5950391 /* DailyPlanCheckInSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DailyPlanCheckInSheet.swift; sourceTree = "<group>"; };
-		D8A43494425A38CDB0257F58 /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsService.swift; sourceTree = "<group>"; };
-		EF9AFB497701DE03E31D8DC8 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		F596429E157B84EA226338A8 /* FoodLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoodLibrary.swift; sourceTree = "<group>"; };
-		FA86BDA9BFB83B44498FEB7C /* AdaptivePlanEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AdaptivePlanEngine.swift; sourceTree = "<group>"; };
-		FBB0FC56AD3EFA85B16067A8 /* Insights.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Insights.swift; sourceTree = "<group>"; };
+		2ECA19435FE064E3CAA41FE0 /* ReminderService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ReminderService.swift; sourceTree = "<group>"; };
+		349E7592960F520B980EE731 /* AdaptivePlanEngine.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AdaptivePlanEngine.swift; sourceTree = "<group>"; };
+		4255709C53F6F0F03ADF0E8D /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		455450789F3CFD5D5E19920F /* GrokService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrokService.swift; sourceTree = "<group>"; };
+		473F378885E3CE8C2216798A /* QuickActions.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = QuickActions.swift; sourceTree = "<group>"; };
+		514BC07945869DEC732A838A /* CaltrackWidgets.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackWidgets.swift; sourceTree = "<group>"; };
+		52623B45C2DF1B500E7099B7 /* ProgressPhotoViewer.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProgressPhotoViewer.swift; sourceTree = "<group>"; };
+		5D6C525AE1598A3BD960E823 /* HealthNutritionService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthNutritionService.swift; sourceTree = "<group>"; };
+		5EDC8BD6CD38D334874F36C2 /* CaltrackWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CaltrackWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		61ADB94E4A437CA7D77D5394 /* CaltrackApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackApp.swift; sourceTree = "<group>"; };
+		69AE593B3A1253CE454972E1 /* CoachView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CoachView.swift; sourceTree = "<group>"; };
+		6B359CF02D58503B11DF84A3 /* GrokServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrokServiceTests.swift; sourceTree = "<group>"; };
+		6F86367B290AE17FF8004F16 /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		74E9AB41A03267D9CDCBCA7D /* PlanSettingsSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PlanSettingsSheet.swift; sourceTree = "<group>"; };
+		787B293C2A0497D647554E43 /* Insights.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Insights.swift; sourceTree = "<group>"; };
+		7F1F25868083AAB95546E02E /* BackupService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
+		8099E89BEF8B00C5631561DF /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		832366604FD1260471C8529B /* HealthKitService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		85E0B5A8BCBCF372B675A886 /* RootView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		8798111EFF1666F1EBD1FBDB /* BarcodeLookupSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BarcodeLookupSheet.swift; sourceTree = "<group>"; };
+		8CE4FFEEBD750F66B9DA46F6 /* CaltrackUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackUITests.swift; sourceTree = "<group>"; };
+		8EEB68C821C955C3FFE5E107 /* CaltrackWidgets.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = CaltrackWidgets.entitlements; sourceTree = "<group>"; };
+		91AE0EC6C1A2AFE11EE60F24 /* ProgressDashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ProgressDashboardView.swift; sourceTree = "<group>"; };
+		9425F9496F86EC933A1AECDB /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		954BC94921462EB95F3A20D0 /* CaltrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaltrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		96846CAE5ADDF923437F6555 /* HevyService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HevyService.swift; sourceTree = "<group>"; };
+		971F51BEBB50301DCDB24FB2 /* FoodLibrary.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = FoodLibrary.swift; sourceTree = "<group>"; };
+		9B9250FEB5E427614E93514A /* DashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		9D69C031750513A48AFC5DC5 /* OnboardingView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		A35FA7C6243E485954E4306D /* BodyCheckInSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BodyCheckInSheet.swift; sourceTree = "<group>"; };
+		BDE23033EE2AEAFC418CD2C9 /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+		CB2D12B43586D90D6E42664E /* MealAnalysisSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MealAnalysisSheet.swift; sourceTree = "<group>"; };
+		CCFCC0E1A982C4E55CAD7B98 /* CameraPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
+		D8A43494425A38CDB0257F58 /* CaltrackWidgetContent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackWidgetContent.swift; sourceTree = "<group>"; };
+		DE8A0A1AC609FC7031044E38 /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		E9EAE267184688F28ED767A9 /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsService.swift; sourceTree = "<group>"; };
+		F596429E157B84EA226338A8 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		FBB0FC56AD3EFA85B16067A8 /* AppShortcuts.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = AppShortcuts.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		0EAD879C9F13AFFC82A06189 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B54FDC6A585C8D28C03B9E86 /* Foundation.framework in Frameworks */,
+				459ACA9D098845EB1744C754 /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AA62596D72E3B8FE8070950E /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				F0E62948994EAEF1889E7BEB /* Foundation.framework in Frameworks */,
-				766F4D3385ADAAFDE4DBF6DB /* AppIntents.framework in Frameworks */,
+				CF4C7BF28A781770B5950391 /* AppIntents.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -126,7 +178,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				EE6A28B43548A3448E4624BE /* Foundation.framework in Frameworks */,
-				DF42F103D427EEE93883C3A5 /* AppIntents.framework in Frameworks */,
+				3C62BD9F02B6B557E2087696 /* AppIntents.framework in Frameworks */,
+				6FD097A50DC9521D2BD538F2 /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,88 +188,106 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C0853007F6A157D33D5CB87 /* Foundation.framework in Frameworks */,
-				A94B25ABE83407DAB4853F62 /* AppIntents.framework in Frameworks */,
+				7335E46DFFACD626944DB6B7 /* AppIntents.framework in Frameworks */,
+				20F9E92DAE18FD0A88A99A3A /* WidgetKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0EA480F333A2FB68E5F01613 /* Caltrack */ = {
+		2A5BE19B0F71EC7835E5A5A0 /* CaltrackUITests */ = {
 			isa = PBXGroup;
 			children = (
-				FA86BDA9BFB83B44498FEB7C /* AdaptivePlanEngine.swift */,
-				0EAD879C9F13AFFC82A06189 /* BackupService.swift */,
-				121CED0DE3C05D12524A61E4 /* BarcodeLookupSheet.swift */,
-				B54FDC6A585C8D28C03B9E86 /* BarcodeScannerView.swift */,
-				879E382E488D94130B25BB84 /* BodyCheckInSheet.swift */,
-				CB8BBCF31307DDB4F2954D79 /* CaltrackApp.swift */,
-				BDE23033EE2AEAFC418CD2C9 /* CameraPicker.swift */,
-				7335E46DFFACD626944DB6B7 /* CoachService.swift */,
-				3C62BD9F02B6B557E2087696 /* CoachView.swift */,
-				CF4C7BF28A781770B5950391 /* DailyPlanCheckInSheet.swift */,
-				459ACA9D098845EB1744C754 /* DashboardView.swift */,
-				F596429E157B84EA226338A8 /* FoodLibrary.swift */,
-				20F9E92DAE18FD0A88A99A3A /* GrokService.swift */,
-				6FD097A50DC9521D2BD538F2 /* HealthKitService.swift */,
-				582CC80CE0D82AFD70001186 /* HealthNutritionService.swift */,
-				349E7592960F520B980EE731 /* HevyService.swift */,
-				FBB0FC56AD3EFA85B16067A8 /* Insights.swift */,
-				7F1F25868083AAB95546E02E /* KeychainStore.swift */,
-				8798111EFF1666F1EBD1FBDB /* ManualMealSheet.swift */,
-				0A2F36024D756AA6E2F8601C /* MealAnalysisSheet.swift */,
-				A35FA7C6243E485954E4306D /* Models.swift */,
-				61ADB94E4A437CA7D77D5394 /* OnboardingView.swift */,
-				D8A43494425A38CDB0257F58 /* OpenFoodFactsService.swift */,
-				CCFCC0E1A982C4E55CAD7B98 /* PlanSettingsSheet.swift */,
-				17A9CAFD53E09FBB64585CC7 /* ProgressDashboardView.swift */,
-				69AE593B3A1253CE454972E1 /* ProgressPhotoViewer.swift */,
-				28F207C647004B340DB2C8FD /* QuickActions.swift */,
-				9B9250FEB5E427614E93514A /* RecoveryMath.swift */,
-				971F51BEBB50301DCDB24FB2 /* ReminderService.swift */,
-				455450789F3CFD5D5E19920F /* RootView.swift */,
-				832366604FD1260471C8529B /* SettingsView.swift */,
-				5D6C525AE1598A3BD960E823 /* Theme.swift */,
-				EF9AFB497701DE03E31D8DC8 /* Assets.xcassets */,
-				00A070E72D2C70D1E219F84D /* Caltrack.entitlements */,
+				8CE4FFEEBD750F66B9DA46F6 /* CaltrackUITests.swift */,
+			);
+			name = CaltrackUITests;
+			path = CaltrackUITests;
+			sourceTree = "<group>";
+		};
+		582CC80CE0D82AFD70001186 /* Caltrack */ = {
+			isa = PBXGroup;
+			children = (
+				349E7592960F520B980EE731 /* AdaptivePlanEngine.swift */,
+				FBB0FC56AD3EFA85B16067A8 /* AppShortcuts.swift */,
+				7F1F25868083AAB95546E02E /* BackupService.swift */,
+				8798111EFF1666F1EBD1FBDB /* BarcodeLookupSheet.swift */,
+				0A2F36024D756AA6E2F8601C /* BarcodeScannerView.swift */,
+				A35FA7C6243E485954E4306D /* BodyCheckInSheet.swift */,
+				61ADB94E4A437CA7D77D5394 /* CaltrackApp.swift */,
+				D8A43494425A38CDB0257F58 /* CaltrackWidgetContent.swift */,
+				CCFCC0E1A982C4E55CAD7B98 /* CameraPicker.swift */,
+				17A9CAFD53E09FBB64585CC7 /* CoachService.swift */,
+				69AE593B3A1253CE454972E1 /* CoachView.swift */,
+				28F207C647004B340DB2C8FD /* DailyPlanCheckInSheet.swift */,
+				9B9250FEB5E427614E93514A /* DashboardView.swift */,
+				971F51BEBB50301DCDB24FB2 /* FoodLibrary.swift */,
+				455450789F3CFD5D5E19920F /* GrokService.swift */,
+				832366604FD1260471C8529B /* HealthKitService.swift */,
+				5D6C525AE1598A3BD960E823 /* HealthNutritionService.swift */,
+				96846CAE5ADDF923437F6555 /* HevyService.swift */,
+				787B293C2A0497D647554E43 /* Insights.swift */,
+				1C86908723646E383690BC9B /* KeychainStore.swift */,
+				0B49FD8EBDE2E5EB5F5D7930 /* ManualMealSheet.swift */,
+				CB2D12B43586D90D6E42664E /* MealAnalysisSheet.swift */,
+				8099E89BEF8B00C5631561DF /* Models.swift */,
+				9D69C031750513A48AFC5DC5 /* OnboardingView.swift */,
+				E9EAE267184688F28ED767A9 /* OpenFoodFactsService.swift */,
+				74E9AB41A03267D9CDCBCA7D /* PlanSettingsSheet.swift */,
+				91AE0EC6C1A2AFE11EE60F24 /* ProgressDashboardView.swift */,
+				52623B45C2DF1B500E7099B7 /* ProgressPhotoViewer.swift */,
+				473F378885E3CE8C2216798A /* QuickActions.swift */,
+				1D9F94F64111AD69FF5BC9D3 /* RecoveryMath.swift */,
+				2ECA19435FE064E3CAA41FE0 /* ReminderService.swift */,
+				85E0B5A8BCBCF372B675A886 /* RootView.swift */,
+				6F86367B290AE17FF8004F16 /* SettingsView.swift */,
+				DE8A0A1AC609FC7031044E38 /* Theme.swift */,
+				0AA1CA53CBB810C514A1C119 /* WidgetPreviewGallery.swift */,
+				2CF17F5D8F4D26C16010E929 /* WidgetSnapshotStore.swift */,
+				4255709C53F6F0F03ADF0E8D /* Assets.xcassets */,
+				235D88AD3A332773DA9219B6 /* Caltrack.entitlements */,
 			);
 			name = Caltrack;
 			path = Caltrack;
 			sourceTree = "<group>";
 		};
-		62F4D9049874851A7AB45A4E /* CaltrackTests */ = {
+		5AE82F0BC5F8616B9D362177 /* CaltrackTests */ = {
 			isa = PBXGroup;
 			children = (
-				57ABF17806D862A2D43A85A4 /* GrokServiceTests.swift */,
+				6B359CF02D58503B11DF84A3 /* GrokServiceTests.swift */,
 			);
 			name = CaltrackTests;
 			path = CaltrackTests;
-			sourceTree = "<group>";
-		};
-		7312A4B5E67DF38CA6C0D2E9 /* CaltrackUITests */ = {
-			isa = PBXGroup;
-			children = (
-				4467D805EBDA3094E2FE5516 /* CaltrackUITests.swift */,
-			);
-			name = CaltrackUITests;
-			path = CaltrackUITests;
 			sourceTree = "<group>";
 		};
 		82542073A29197BCB208E51E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				FC1E0A50003EB409F0ACBA06 /* iOS */,
-				70E19D82E86E7A6500980AA6 /* AppIntents.framework */,
+				BDE23033EE2AEAFC418CD2C9 /* AppIntents.framework */,
+				F596429E157B84EA226338A8 /* WidgetKit.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		934884B78C8B1C627595B337 /* CaltrackWidgets */ = {
+			isa = PBXGroup;
+			children = (
+				514BC07945869DEC732A838A /* CaltrackWidgets.swift */,
+				9425F9496F86EC933A1AECDB /* Info.plist */,
+				8EEB68C821C955C3FFE5E107 /* CaltrackWidgets.entitlements */,
+			);
+			name = CaltrackWidgets;
+			path = CaltrackWidgets;
 			sourceTree = "<group>";
 		};
 		B714BDB120439ECE8A08B848 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				2E977BF8126D7A2543D1FC96 /* Caltrack.app */,
-				5EDC8BD6CD38D334874F36C2 /* CaltrackTests.xctest */,
-				954BC94921462EB95F3A20D0 /* CaltrackUITests.xctest */,
+				5EDC8BD6CD38D334874F36C2 /* CaltrackWidgets.appex */,
+				954BC94921462EB95F3A20D0 /* CaltrackTests.xctest */,
+				0EA480F333A2FB68E5F01613 /* CaltrackUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -226,9 +297,10 @@
 			children = (
 				B714BDB120439ECE8A08B848 /* Products */,
 				82542073A29197BCB208E51E /* Frameworks */,
-				0EA480F333A2FB68E5F01613 /* Caltrack */,
-				62F4D9049874851A7AB45A4E /* CaltrackTests */,
-				7312A4B5E67DF38CA6C0D2E9 /* CaltrackUITests */,
+				582CC80CE0D82AFD70001186 /* Caltrack */,
+				934884B78C8B1C627595B337 /* CaltrackWidgets */,
+				5AE82F0BC5F8616B9D362177 /* CaltrackTests */,
+				2A5BE19B0F71EC7835E5A5A0 /* CaltrackUITests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -243,9 +315,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		3746EBD79FC34789633EED63 /* CaltrackTests */ = {
+		3746EBD79FC34789633EED63 /* CaltrackWidgets */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1BBFAB29DF88BD863F8F2ACE /* Build configuration list for PBXNativeTarget "CaltrackTests" */;
+			buildConfigurationList = 1BBFAB29DF88BD863F8F2ACE /* Build configuration list for PBXNativeTarget "CaltrackWidgets" */;
 			buildPhases = (
 				51DC0A4C7878886D35B75E71 /* Sources */,
 				BC85C36B4AED525E63473F5C /* Frameworks */,
@@ -254,12 +326,11 @@
 			buildRules = (
 			);
 			dependencies = (
-				0424F995A606CED5672E2911 /* PBXTargetDependency */,
 			);
-			name = CaltrackTests;
-			productName = CaltrackTests;
-			productReference = 5EDC8BD6CD38D334874F36C2 /* CaltrackTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
+			name = CaltrackWidgets;
+			productName = CaltrackWidgets;
+			productReference = 5EDC8BD6CD38D334874F36C2 /* CaltrackWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 		423DF72D370AC9A094AA6632 /* Caltrack */ = {
 			isa = PBXNativeTarget;
@@ -268,19 +339,39 @@
 				89BBABF7937810D9F7370BD9 /* Sources */,
 				E64F91E083F6EBC4FAF49FFC /* Frameworks */,
 				CBA913032CDD0B4D210B1253 /* Resources */,
+				8A396D46501E6DE79953196E /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				0424F995A606CED5672E2911 /* PBXTargetDependency */,
 			);
 			name = Caltrack;
 			productName = Caltrack;
 			productReference = 2E977BF8126D7A2543D1FC96 /* Caltrack.app */;
 			productType = "com.apple.product-type.application";
 		};
-		A1F5AA40C97785A0A9AACEBF /* CaltrackUITests */ = {
+		70E19D82E86E7A6500980AA6 /* CaltrackUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E9EAE71945C36D4668ADFCA9 /* Build configuration list for PBXNativeTarget "CaltrackUITests" */;
+			buildConfigurationList = A94B25ABE83407DAB4853F62 /* Build configuration list for PBXNativeTarget "CaltrackUITests" */;
+			buildPhases = (
+				FA86BDA9BFB83B44498FEB7C /* Sources */,
+				0EAD879C9F13AFFC82A06189 /* Frameworks */,
+				121CED0DE3C05D12524A61E4 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CB8BBCF31307DDB4F2954D79 /* PBXTargetDependency */,
+			);
+			name = CaltrackUITests;
+			productName = CaltrackUITests;
+			productReference = 0EA480F333A2FB68E5F01613 /* CaltrackUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		A1F5AA40C97785A0A9AACEBF /* CaltrackTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E9EAE71945C36D4668ADFCA9 /* Build configuration list for PBXNativeTarget "CaltrackTests" */;
 			buildPhases = (
 				E4D55071AD15999A6722EFC7 /* Sources */,
 				AA62596D72E3B8FE8070950E /* Frameworks */,
@@ -291,10 +382,10 @@
 			dependencies = (
 				D22419062E47C7ED55FE1325 /* PBXTargetDependency */,
 			);
-			name = CaltrackUITests;
-			productName = CaltrackUITests;
-			productReference = 954BC94921462EB95F3A20D0 /* CaltrackUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
+			name = CaltrackTests;
+			productName = CaltrackTests;
+			productReference = 954BC94921462EB95F3A20D0 /* CaltrackTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -308,15 +399,27 @@
 					3746EBD79FC34789633EED63 = {
 						CreatedOnToolsVersion = 26.0;
 						DevelopmentTeam = 6BG94RDHDG;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					423DF72D370AC9A094AA6632 = {
 						CreatedOnToolsVersion = 26.0;
 						DevelopmentTeam = 6BG94RDHDG;
 						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
 							com.apple.HealthKit = {
 								enabled = 1;
 							};
 						};
+					};
+					70E19D82E86E7A6500980AA6 = {
+						CreatedOnToolsVersion = 26.0;
+						DevelopmentTeam = 6BG94RDHDG;
 					};
 					A1F5AA40C97785A0A9AACEBF = {
 						CreatedOnToolsVersion = 26.0;
@@ -340,13 +443,21 @@
 			projectRoot = "";
 			targets = (
 				423DF72D370AC9A094AA6632 /* Caltrack */,
-				3746EBD79FC34789633EED63 /* CaltrackTests */,
-				A1F5AA40C97785A0A9AACEBF /* CaltrackUITests */,
+				3746EBD79FC34789633EED63 /* CaltrackWidgets */,
+				A1F5AA40C97785A0A9AACEBF /* CaltrackTests */,
+				70E19D82E86E7A6500980AA6 /* CaltrackUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		121CED0DE3C05D12524A61E4 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4D80BBA936411390984CCA6C /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -358,7 +469,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				750A9B5465316256D027B4DC /* Assets.xcassets in Resources */,
+				14E83B020343156663AC79E8 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -376,7 +487,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				51424C664AE3123930B28A50 /* GrokServiceTests.swift in Sources */,
+				FFF341D235DC6E671D3E5F42 /* CaltrackWidgets.swift in Sources */,
+				30E186393CBB0EC68126C555 /* CaltrackWidgetContent.swift in Sources */,
+				4BB3ACDC3D4A5A3B32326D6C /* QuickActions.swift in Sources */,
+				B7FD6D7CA5FFDC120EC72B24 /* WidgetSnapshotStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,38 +498,42 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				96846CAE5ADDF923437F6555 /* AdaptivePlanEngine.swift in Sources */,
-				787B293C2A0497D647554E43 /* BackupService.swift in Sources */,
-				1C86908723646E383690BC9B /* BarcodeLookupSheet.swift in Sources */,
-				0B49FD8EBDE2E5EB5F5D7930 /* BarcodeScannerView.swift in Sources */,
-				CB2D12B43586D90D6E42664E /* BodyCheckInSheet.swift in Sources */,
-				8099E89BEF8B00C5631561DF /* CaltrackApp.swift in Sources */,
-				9D69C031750513A48AFC5DC5 /* CameraPicker.swift in Sources */,
-				E9EAE267184688F28ED767A9 /* CoachService.swift in Sources */,
-				74E9AB41A03267D9CDCBCA7D /* CoachView.swift in Sources */,
-				91AE0EC6C1A2AFE11EE60F24 /* DailyPlanCheckInSheet.swift in Sources */,
-				52623B45C2DF1B500E7099B7 /* DashboardView.swift in Sources */,
-				473F378885E3CE8C2216798A /* FoodLibrary.swift in Sources */,
-				1D9F94F64111AD69FF5BC9D3 /* GrokService.swift in Sources */,
-				2ECA19435FE064E3CAA41FE0 /* HealthKitService.swift in Sources */,
-				85E0B5A8BCBCF372B675A886 /* HealthNutritionService.swift in Sources */,
-				6F86367B290AE17FF8004F16 /* HevyService.swift in Sources */,
-				DE8A0A1AC609FC7031044E38 /* Insights.swift in Sources */,
-				0AA1CA53CBB810C514A1C119 /* KeychainStore.swift in Sources */,
-				2CF17F5D8F4D26C16010E929 /* ManualMealSheet.swift in Sources */,
-				2EADED35E015EFB5C2FD5826 /* MealAnalysisSheet.swift in Sources */,
-				05A4801E9F1E97DC25751768 /* Models.swift in Sources */,
-				94667C6E3B399FB76A2D8166 /* OnboardingView.swift in Sources */,
-				844D500B369B319AF62DB997 /* OpenFoodFactsService.swift in Sources */,
-				F00E1FEBB75B3CE219D1891A /* PlanSettingsSheet.swift in Sources */,
-				CF237B28EBFEF9586E4EBF6A /* ProgressDashboardView.swift in Sources */,
-				0DE5E4470D37AAA9D56D3DC6 /* ProgressPhotoViewer.swift in Sources */,
-				DB38FFABE5B677010F41B881 /* QuickActions.swift in Sources */,
-				26B0E5E2D937BBAC1D1D49F2 /* RecoveryMath.swift in Sources */,
-				412E8D2420EA51594C83FD86 /* ReminderService.swift in Sources */,
-				14AEA8184F4CEDE0A4294162 /* RootView.swift in Sources */,
-				4052DC2DCB5B1D5367E1BBAF /* SettingsView.swift in Sources */,
-				558ECC1D7BC0F5F318D32EBB /* Theme.swift in Sources */,
+				2EADED35E015EFB5C2FD5826 /* AdaptivePlanEngine.swift in Sources */,
+				05A4801E9F1E97DC25751768 /* AppShortcuts.swift in Sources */,
+				94667C6E3B399FB76A2D8166 /* BackupService.swift in Sources */,
+				844D500B369B319AF62DB997 /* BarcodeLookupSheet.swift in Sources */,
+				F00E1FEBB75B3CE219D1891A /* BarcodeScannerView.swift in Sources */,
+				CF237B28EBFEF9586E4EBF6A /* BodyCheckInSheet.swift in Sources */,
+				0DE5E4470D37AAA9D56D3DC6 /* CaltrackApp.swift in Sources */,
+				DB38FFABE5B677010F41B881 /* CaltrackWidgetContent.swift in Sources */,
+				26B0E5E2D937BBAC1D1D49F2 /* CameraPicker.swift in Sources */,
+				412E8D2420EA51594C83FD86 /* CoachService.swift in Sources */,
+				14AEA8184F4CEDE0A4294162 /* CoachView.swift in Sources */,
+				4052DC2DCB5B1D5367E1BBAF /* DailyPlanCheckInSheet.swift in Sources */,
+				558ECC1D7BC0F5F318D32EBB /* DashboardView.swift in Sources */,
+				EF9AFB497701DE03E31D8DC8 /* FoodLibrary.swift in Sources */,
+				750A9B5465316256D027B4DC /* GrokService.swift in Sources */,
+				00A070E72D2C70D1E219F84D /* HealthKitService.swift in Sources */,
+				62F4D9049874851A7AB45A4E /* HealthNutritionService.swift in Sources */,
+				57ABF17806D862A2D43A85A4 /* HevyService.swift in Sources */,
+				51424C664AE3123930B28A50 /* Insights.swift in Sources */,
+				7312A4B5E67DF38CA6C0D2E9 /* KeychainStore.swift in Sources */,
+				4467D805EBDA3094E2FE5516 /* ManualMealSheet.swift in Sources */,
+				4F70B4BBDCB9ED2D7C6D1B3F /* MealAnalysisSheet.swift in Sources */,
+				8DF22A3D90F3F539C15078C0 /* Models.swift in Sources */,
+				9B31EFA88D000BD607DFF44B /* OnboardingView.swift in Sources */,
+				75DD28545307887E86DC7D69 /* OpenFoodFactsService.swift in Sources */,
+				8549AB2C9C0BBC1DAE74088C /* PlanSettingsSheet.swift in Sources */,
+				E5DF5DD53C6CC98B78FF4154 /* ProgressDashboardView.swift in Sources */,
+				51B527907E00726EF6229321 /* ProgressPhotoViewer.swift in Sources */,
+				8368832CDFA836A0E98711C2 /* QuickActions.swift in Sources */,
+				71DB449CD0390896524BC7C6 /* RecoveryMath.swift in Sources */,
+				BBCBD86B1CAA7CFC5DDA6207 /* ReminderService.swift in Sources */,
+				2E8EFC60CED7B441D385BBB6 /* RootView.swift in Sources */,
+				38285C294CC6C29FA2CC84B5 /* SettingsView.swift in Sources */,
+				951483C3799B03C793B80952 /* Theme.swift in Sources */,
+				47D695478100492EFCD834BF /* WidgetPreviewGallery.swift in Sources */,
+				899FCE9677F0AF194C85F127 /* WidgetSnapshotStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -423,7 +541,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4F70B4BBDCB9ED2D7C6D1B3F /* CaltrackUITests.swift in Sources */,
+				0A9C3C346900BB5F7359AE75 /* GrokServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FA86BDA9BFB83B44498FEB7C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5C2880C771ABAC4C7DEF7CA7 /* CaltrackUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -432,9 +558,15 @@
 /* Begin PBXTargetDependency section */
 		0424F995A606CED5672E2911 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			name = CaltrackWidgets;
+			target = 3746EBD79FC34789633EED63 /* CaltrackWidgets */;
+			targetProxy = 0E28FE95AC64D27332B03A4A /* PBXContainerItemProxy */;
+		};
+		CB8BBCF31307DDB4F2954D79 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
 			name = Caltrack;
 			target = 423DF72D370AC9A094AA6632 /* Caltrack */;
-			targetProxy = 0E28FE95AC64D27332B03A4A /* PBXContainerItemProxy */;
+			targetProxy = 879E382E488D94130B25BB84 /* PBXContainerItemProxy */;
 		};
 		D22419062E47C7ED55FE1325 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -448,6 +580,74 @@
 		0EAA5D3D9B61992749552AEC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LM_FILTER_WARNINGS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caltrack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caltrack";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		2E919956A5D155C2B54EC03D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = CaltrackWidgets/CaltrackWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CaltrackWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.8;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		3ADFF9C39924F46344BE36C1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = CaltrackWidgets/CaltrackWidgets.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 9;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = CaltrackWidgets/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.8;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.widgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		766F4D3385ADAAFDE4DBF6DB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 6BG94RDHDG;
@@ -459,44 +659,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = Caltrack;
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		2E919956A5D155C2B54EC03D /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6BG94RDHDG;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LM_FILTER_WARNINGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.tests;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caltrack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caltrack";
-				VALIDATE_PRODUCT = YES;
-			};
-			name = Release;
-		};
-		3ADFF9C39924F46344BE36C1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CLANG_ENABLE_OBJC_WEAK = NO;
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 6BG94RDHDG;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
-				LM_FILTER_WARNINGS = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.tests;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caltrack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caltrack";
 			};
 			name = Debug;
 		};
@@ -623,7 +785,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = Caltrack/Caltrack.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 6BG94RDHDG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caltrack;
@@ -636,7 +798,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LM_FILTER_WARNINGS = YES;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -647,6 +809,24 @@
 			name = Debug;
 		};
 		D8266C801A6E86AFD9F93678 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LM_FILTER_WARNINGS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caltrack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caltrack";
+			};
+			name = Debug;
+		};
+		DF42F103D427EEE93883C3A5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_OBJC_WEAK = NO;
@@ -660,8 +840,9 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = Caltrack;
+				VALIDATE_PRODUCT = YES;
 			};
-			name = Debug;
+			name = Release;
 		};
 		EF43F75B18B8FAE8C6B8EA7B /* Release */ = {
 			isa = XCBuildConfiguration;
@@ -671,7 +852,7 @@
 				CLANG_ENABLE_OBJC_WEAK = NO;
 				CODE_SIGN_ENTITLEMENTS = Caltrack/Caltrack.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DEVELOPMENT_TEAM = 6BG94RDHDG;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Caltrack;
@@ -684,7 +865,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LM_FILTER_WARNINGS = YES;
-				MARKETING_VERSION = 1.7;
+				MARKETING_VERSION = 1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -698,7 +879,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1BBFAB29DF88BD863F8F2ACE /* Build configuration list for PBXNativeTarget "CaltrackTests" */ = {
+		1BBFAB29DF88BD863F8F2ACE /* Build configuration list for PBXNativeTarget "CaltrackWidgets" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				2E919956A5D155C2B54EC03D /* Release */,
@@ -725,7 +906,16 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E9EAE71945C36D4668ADFCA9 /* Build configuration list for PBXNativeTarget "CaltrackUITests" */ = {
+		A94B25ABE83407DAB4853F62 /* Build configuration list for PBXNativeTarget "CaltrackUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DF42F103D427EEE93883C3A5 /* Release */,
+				766F4D3385ADAAFDE4DBF6DB /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E9EAE71945C36D4668ADFCA9 /* Build configuration list for PBXNativeTarget "CaltrackTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				0EAA5D3D9B61992749552AEC /* Release */,

@@ -5,7 +5,7 @@
 - [ ] Descargar una primera copia privada y guardarla en iCloud Drive.
 - [ ] Tras 14 días completos, revisar mantenimiento contra la tendencia real de peso.
 - [x] Integrar Apple Salud mediante el cliente iOS nativo.
-- [ ] Volver a iniciar sesión en `Xcode > Settings > Accounts` para renovar la firma.
+- [x] Renovar la firma y generar perfiles con HealthKit y App Groups para app y widget.
 - [ ] Conectar el iPhone de Manolo por cable o Wi-Fi y ejecutar la app nativa.
 - [ ] Crear o facilitar una clave de xAI y guardarla desde Ajustes de Caltrack.
 - [ ] En Strava, activar `Gestionar apps y dispositivos > Salud > Enviar a Salud`.
@@ -23,6 +23,7 @@
 - [x] Añadir App Shortcuts para comida, producto, check-in y progreso, con descubrimiento en Ajustes.
 - [x] Añadir tendencias privadas de sueño, frecuencia cardiaca en reposo y HRV desde Apple Salud, sin score opaco.
 - [x] Añadir cierre diario y plan semanal adaptativo con evidencia, cambios de 100 kcal y confirmación explícita.
+- [x] Añadir widgets de inicio y bloqueo con calorías, proteína, privacidad y accesos rápidos.
 - [ ] Regenerar la clave de Hevy compartida en el chat y pegar la nueva directamente en Caltrack desde el iPhone.
 - [ ] Probar una comida real, corregir porciones y comparar la estimación con la etiqueta o receta.
 - [ ] En un iPhone firmado, activar la escritura nutricional y comprobar una comida real en Salud.
@@ -31,3 +32,4 @@
 - [ ] En un iPhone firmado, invocar los cuatro App Shortcuts con Siri y asignar el más usado al botón Acción.
 - [ ] En un iPhone firmado, conceder sueño, frecuencia cardiaca en reposo y HRV, y contrastar la gráfica con Salud.
 - [ ] En un iPhone firmado, cerrar siete días reales y revisar la primera propuesta semanal antes de aplicarla.
+- [ ] En un iPhone firmado, añadir los widgets de Caltrack y comprobar Foto, Código, Peso y redacción en bloqueo.

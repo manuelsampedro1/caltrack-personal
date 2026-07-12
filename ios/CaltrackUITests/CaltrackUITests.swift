@@ -256,6 +256,37 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Progreso"].exists)
     }
 
+    func testWidgetGalleryRendersHomeLockEmptyAndPrivateStates() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-preview-widgets",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Widgets de Caltrack"].waitForExistence(timeout: 8))
+        let gallery = app.scrollViews.firstMatch
+        XCTAssertTrue(app.otherElements["widgetPreviewSmall"].exists)
+        XCTAssertTrue(app.otherElements["widgetPreviewEmpty"].exists)
+        XCTAssertTrue(app.otherElements["widgetPreviewMedium"].exists)
+        XCTAssertTrue(app.otherElements["widgetPreviewRectangular"].exists)
+        XCTAssertTrue(app.otherElements["widgetPreviewCircular"].exists)
+        XCTAssertTrue(app.otherElements["widgetPreviewInline"].exists)
+        let home = XCTAttachment(screenshot: app.screenshot())
+        home.name = "Caltrack home and Lock Screen widgets"
+        home.lifetime = .keepAlways
+        add(home)
+
+        gallery.swipeUp()
+        let privateWidget = app.otherElements["widgetPreviewPrivate"]
+        XCTAssertTrue(privateWidget.waitForExistence(timeout: 4))
+        let privacy = XCTAttachment(screenshot: app.screenshot())
+        privacy.name = "Caltrack private widget redaction"
+        privacy.lifetime = .keepAlways
+        add(privacy)
+    }
+
     func testQuickActionsOpenBarcodeAndBodyCheckInDestinations() {
         let app = XCUIApplication()
         app.launchArguments = [

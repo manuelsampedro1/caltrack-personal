@@ -11,11 +11,13 @@ enum QuickAction: String, CaseIterable, Sendable {
 enum QuickActionStore {
     private static let key = "pendingQuickAction"
 
-    static func set(_ action: QuickAction, defaults: UserDefaults = .standard) {
+    static func set(_ action: QuickAction, defaults: UserDefaults? = nil) {
+        let defaults = defaults ?? WidgetSnapshotStore.sharedDefaults
         defaults.set(action.rawValue, forKey: key)
     }
 
-    static func consume(defaults: UserDefaults = .standard) -> QuickAction? {
+    static func consume(defaults: UserDefaults? = nil) -> QuickAction? {
+        let defaults = defaults ?? WidgetSnapshotStore.sharedDefaults
         guard let rawValue = defaults.string(forKey: key) else { return nil }
         defaults.removeObject(forKey: key)
         return QuickAction(rawValue: rawValue)
@@ -93,47 +95,4 @@ struct OpenProgressIntent: AppIntent {
         QuickActionStore.set(Self.targetAction)
         return .result()
     }
-}
-
-struct CaltrackShortcuts: AppShortcutsProvider {
-    static var appShortcuts: [AppShortcut] {
-        AppShortcut(
-            intent: CaptureMealIntent(),
-            phrases: [
-                "Fotografiar comida con \(.applicationName)",
-                "Registrar una comida con \(.applicationName)"
-            ],
-            shortTitle: "Fotografiar comida",
-            systemImageName: "camera.fill"
-        )
-        AppShortcut(
-            intent: ScanProductIntent(),
-            phrases: [
-                "Escanear producto con \(.applicationName)",
-                "Abrir código en \(.applicationName)"
-            ],
-            shortTitle: "Escanear producto",
-            systemImageName: "barcode.viewfinder"
-        )
-        AppShortcut(
-            intent: NewBodyCheckInIntent(),
-            phrases: [
-                "Nuevo check-in en \(.applicationName)",
-                "Registrar peso en \(.applicationName)"
-            ],
-            shortTitle: "Nuevo check-in",
-            systemImageName: "scalemass.fill"
-        )
-        AppShortcut(
-            intent: OpenProgressIntent(),
-            phrases: [
-                "Ver mi progreso en \(.applicationName)",
-                "Abrir progreso en \(.applicationName)"
-            ],
-            shortTitle: "Abrir progreso",
-            systemImageName: "chart.xyaxis.line"
-        )
-    }
-
-    static var shortcutTileColor: ShortcutTileColor { .lime }
 }
