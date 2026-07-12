@@ -87,3 +87,9 @@ La primera apertura explica foto, Salud, Hevy y tendencias en una pantalla que s
 ### Escritura nutricional explícita en Salud
 
 Caltrack no lee nutrición. La escritura está desactivada por defecto y usa una correlación de comida con energía, proteína, carbohidratos y grasa. El UUID local se guarda como identificador externo para actualizar sin duplicar y eliminar solo objetos creados por Caltrack. La sincronización del historial necesita una acción explícita.
+
+### Etiqueta antes que IA para productos envasados
+
+Los productos con código se leen con AVFoundation y se consultan en Open Food Facts v3. Esto evita gastar una llamada de Grok y prioriza los valores declarados del envase. No se añade SDK, cuenta, clave ni backend.
+
+Los datos colaborativos nunca se guardan automáticamente. La hoja muestra valores por 100 g, ración, atribución y aviso, y permite corregir nombre, cantidad y todos los macros. Si falta información, Caltrack ofrece registro manual y no inventa valores.

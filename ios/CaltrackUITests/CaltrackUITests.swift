@@ -149,6 +149,36 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.buttons["Hoy"].waitForExistence(timeout: 4))
     }
 
+    func testBarcodeProductCanBeConfirmedWithoutCameraOrNetwork() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-barcode-fixture",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Comidas frecuentes"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.buttons["Código"].waitForExistence(timeout: 6))
+        app.buttons["Código"].tap()
+        let field = app.textFields["barcodeField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 4))
+        field.tap()
+        field.typeText("3017620422003")
+        app.buttons["Buscar producto"].tap()
+
+        XCTAssertTrue(app.staticTexts["Nutella"].waitForExistence(timeout: 4))
+        XCTAssertEqual(app.textFields["barcodeAmountField"].value as? String, "15")
+        XCTAssertFalse((app.textFields["barcodeCaloriesField"].value as? String ?? "").isEmpty)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Caltrack barcode confirmation"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        app.buttons["Guardar producto"].tap()
+        XCTAssertTrue(app.staticTexts["Nutella · Ferrero"].waitForExistence(timeout: 4))
+    }
+
     func testCriticalActionsAtAccessibilityTextSize() {
         let app = XCUIApplication()
         app.launchArguments = [
@@ -160,6 +190,7 @@ final class CaltrackUITests: XCTestCase {
 
         XCTAssertTrue(app.buttons["Fotografiar comida"].waitForExistence(timeout: 6))
         XCTAssertTrue(app.buttons["Fototeca"].exists)
+        XCTAssertTrue(app.buttons["Código"].exists)
         XCTAssertTrue(app.buttons["Manual"].exists)
         XCTAssertTrue(app.tabBars.buttons["Progreso"].exists)
     }

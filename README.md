@@ -2,7 +2,7 @@
 
 Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
 
-El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision, lectura autorizada de peso, grasa corporal y cintura desde Apple Salud, y entrenamientos de Hevy o Strava.
+El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision, escáner de productos envasados, lectura autorizada de peso, grasa corporal y cintura desde Apple Salud, y entrenamientos de Hevy o Strava.
 
 ## Usarla en iPhone
 
@@ -82,12 +82,18 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 
 ### Áreas de la app
 
-- `Hoy`: foto, fototeca, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
+- `Hoy`: foto, fototeca, código de barras, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
 - `Progreso`: gráficos de 14 días, composición corporal, gasto de Salud, búsqueda del historial de comidas y carga de entrenamiento.
 - `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
 - `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local y copia o restauración JSON.
 
 La primera apertura incluye una introducción breve que se puede omitir. No solicita Salud, notificaciones ni claves automáticamente.
+
+### Productos con código de barras
+
+`Hoy > Código` abre un lector nativo para EAN, UPC y otros códigos lineales comunes. Caltrack consulta directamente Open Food Facts, muestra los valores por 100 g y recalcula calorías y macros según la cantidad consumida. El resultado siempre se puede editar antes de guardarlo.
+
+No requiere cuenta, clave, SDK ni servidor. Si la cámara no está disponible, se puede introducir el código a mano. Open Food Facts es una base colaborativa, por lo que conviene comparar el resultado con la etiqueta del envase.
 
 ### Nutrición en Apple Salud
 

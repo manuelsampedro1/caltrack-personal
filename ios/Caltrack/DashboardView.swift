@@ -4,6 +4,13 @@ import SwiftData
 import SwiftUI
 import UIKit
 
+private enum CaptureFlow: String, Identifiable {
+    case camera
+    case barcode
+
+    var id: String { rawValue }
+}
+
 struct DashboardView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
@@ -22,7 +29,7 @@ struct DashboardView: View {
     @State private var health = HealthKitService()
     @State private var selectedImage: UIImage?
     @State private var photoItem: PhotosPickerItem?
-    @State private var showingCamera = false
+    @State private var captureFlow: CaptureFlow?
     @State private var showingSettings = false
     @State private var showingAnalysis = false
     @State private var showingManualEntry = false
@@ -70,12 +77,21 @@ struct DashboardView: View {
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
-            .fullScreenCover(isPresented: $showingCamera) {
-                CameraPicker { image in
-                    selectedImage = image
-                    showingAnalysis = true
+            .fullScreenCover(item: $captureFlow) { flow in
+                switch flow {
+                case .camera:
+                    CameraPicker { image in
+                        selectedImage = image
+                        showingAnalysis = true
+                    }
+                    .ignoresSafeArea()
+                case .barcode:
+                    BarcodeLookupSheet { editable in
+                        saveMeal(editable, imageData: nil, source: "Open Food Facts")
+                    } onManual: {
+                        showingManualEntry = true
+                    }
                 }
-                .ignoresSafeArea()
             }
             .sheet(isPresented: $showingAnalysis) {
                 if let selectedImage {
@@ -170,7 +186,7 @@ struct DashboardView: View {
                 }
 
                 Button {
-                    showingCamera = true
+                    captureFlow = .camera
                 } label: {
                     Label("Fotografiar comida", systemImage: "camera.fill")
                         .font(.headline)
@@ -179,11 +195,19 @@ struct DashboardView: View {
                         .foregroundStyle(.black)
                         .background(CaltrackTheme.green, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                 }
-                .sensoryFeedback(.impact(weight: .medium), trigger: showingCamera)
+                .sensoryFeedback(.impact(weight: .medium), trigger: captureFlow)
 
-                HStack(spacing: 10) {
+                HStack(spacing: 8) {
                     PhotosPicker(selection: $photoItem, matching: .images) {
-                        Label("Fototeca", systemImage: "photo.on.rectangle")
+                        Label("Fotos", systemImage: "photo.on.rectangle")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 44)
+                            .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                    }
+                    .accessibilityLabel("Fototeca")
+                    Button { captureFlow = .barcode } label: {
+                        Label("Código", systemImage: "barcode.viewfinder")
                             .font(.subheadline.weight(.semibold))
                             .frame(maxWidth: .infinity)
                             .frame(height: 44)

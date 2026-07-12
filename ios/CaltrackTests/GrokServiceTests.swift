@@ -197,4 +197,24 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(energy.quantity.doubleValue(for: .kilocalorie()), 640)
         XCTAssertEqual(protein.quantity.doubleValue(for: .gram()), 52)
     }
+
+    func testOpenFoodFactsDecodesV3ProductAndScalesServing() throws {
+        let fixture = #"{"status":"success","code":"3017620422003","product":{"code":"3017620422003","product_name":"Nutella","product_name_es":"Nutella","brands":"Ferrero","serving_size":"15 g","nutriscore_grade":"e","nutriments":{"energy-kcal_100g":539,"proteins_100g":6.3,"carbohydrates_100g":57.5,"fat_100g":30.9}}}"#
+        let product = try OpenFoodFactsService.decodeProduct(Data(fixture.utf8))
+        let meal = product.editableMeal(amount: 30)
+
+        XCTAssertEqual(product.name, "Nutella")
+        XCTAssertEqual(product.servingSize, "15 g")
+        XCTAssertEqual(meal.number(meal.calories), 161.7, accuracy: 0.01)
+        XCTAssertEqual(meal.number(meal.protein), 1.9, accuracy: 0.01)
+        XCTAssertTrue(meal.assumption.contains("3017620422003"))
+    }
+
+    func testOpenFoodFactsRejectsInvalidBarcodeAndIncompleteNutrition() throws {
+        XCTAssertThrowsError(try OpenFoodFactsService.normalizedBarcode("ABC-123"))
+        let fixture = #"{"status":"success","code":"12345678","product":{"product_name":"Producto","nutriments":{"energy-kcal_100g":100}}}"#
+        XCTAssertThrowsError(try OpenFoodFactsService.decodeProduct(Data(fixture.utf8))) { error in
+            XCTAssertEqual(error as? OpenFoodFactsError, .incompleteNutrition)
+        }
+    }
 }
