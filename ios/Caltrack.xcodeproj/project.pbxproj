@@ -1,0 +1,650 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0EEE470DDB99B99720814642 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBE676F9B9FF44B0C913D1B0 /* Theme.swift */; };
+		33B6AB1C84538D1106A0B112 /* CaltrackUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E34ED338C706300411FE5833 /* CaltrackUITests.swift */; };
+		3C17DA91D0E40BEB2126BF6E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0844A724968C27D571987938 /* Foundation.framework */; };
+		41D8AB1492C1EC9519E20D6F /* CaltrackApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B0C00D8138D018601ED3A75 /* CaltrackApp.swift */; };
+		4778BFA3E2D313F1C49974CA /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85F671BB6BC5AE2D6243E34A /* AppIntents.framework */; };
+		562DEEDEEED71199B2001F55 /* GrokService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C08C174EDCB0E1180EB5CF44 /* GrokService.swift */; };
+		613D21419FD38932B9D70CA0 /* GrokServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11015D5198CC90191008C5B7 /* GrokServiceTests.swift */; };
+		64F6AD5AE3B6881B826AC842 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0844A724968C27D571987938 /* Foundation.framework */; };
+		66354E4E560488C737238605 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B96B16780A178119882AEA /* SettingsView.swift */; };
+		7D0B468FF3FD709B1C255F48 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 714CD8F732A9E2DFF5174D93 /* HealthKitService.swift */; };
+		A4F20A833D8C3112809AFE2D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0844A724968C27D571987938 /* Foundation.framework */; };
+		AE5165C2A57B91F71CA6436C /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85F671BB6BC5AE2D6243E34A /* AppIntents.framework */; };
+		B6B97721174B2A16AA09E6E0 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF0FB256F4724D27A796FAFD /* DashboardView.swift */; };
+		BF56F515E5A6AE80CA42174C /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CCF0E845AE0409AAA7D3FF6 /* Models.swift */; };
+		C8A13CA39EC2690887910841 /* AppIntents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85F671BB6BC5AE2D6243E34A /* AppIntents.framework */; };
+		D58B32206A521FF45D07EFCC /* CameraPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 76FFD0D831E8E85192E53AAD /* CameraPicker.swift */; };
+		E9F0506B287BB0E3C05BA3F2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BA5D652FE0B74029C8531D91 /* Assets.xcassets */; };
+		F14A09D740013A674A4A940C /* MealAnalysisSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5626ADE0E19048F3B6F02258 /* MealAnalysisSheet.swift */; };
+		F5A9C8A46134BF90EEDD26A9 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6734D99A3A672DD4D2156522 /* KeychainStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		BE7C8EDBBFD8FBB50FCB66B2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A3AE93D69D53130904724A1F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D63C02B29276B78650D4AD71;
+			remoteInfo = Caltrack;
+		};
+		FB04A657B64B0F38668EAD90 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A3AE93D69D53130904724A1F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D63C02B29276B78650D4AD71;
+			remoteInfo = Caltrack;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0844A724968C27D571987938 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		0CCF0E845AE0409AAA7D3FF6 /* Models.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		11015D5198CC90191008C5B7 /* GrokServiceTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrokServiceTests.swift; sourceTree = "<group>"; };
+		1D1B20408898FDD8DA8B8A68 /* CaltrackTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaltrackTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		206F2C5EA3FC4468ACA802CB /* CaltrackUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CaltrackUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5626ADE0E19048F3B6F02258 /* MealAnalysisSheet.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = MealAnalysisSheet.swift; sourceTree = "<group>"; };
+		61B96B16780A178119882AEA /* SettingsView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		6734D99A3A672DD4D2156522 /* KeychainStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		714CD8F732A9E2DFF5174D93 /* HealthKitService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		76FFD0D831E8E85192E53AAD /* CameraPicker.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CameraPicker.swift; sourceTree = "<group>"; };
+		85F671BB6BC5AE2D6243E34A /* AppIntents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppIntents.framework; path = System/Library/Frameworks/AppIntents.framework; sourceTree = SDKROOT; };
+		9B0C00D8138D018601ED3A75 /* CaltrackApp.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackApp.swift; sourceTree = "<group>"; };
+		9F5DEBE3D0A9A860D9479A6E /* Caltrack.entitlements */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.entitlements; path = Caltrack.entitlements; sourceTree = "<group>"; };
+		BA5D652FE0B74029C8531D91 /* Assets.xcassets */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BF0FB256F4724D27A796FAFD /* DashboardView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		C08C174EDCB0E1180EB5CF44 /* GrokService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = GrokService.swift; sourceTree = "<group>"; };
+		CBE676F9B9FF44B0C913D1B0 /* Theme.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		E34ED338C706300411FE5833 /* CaltrackUITests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = CaltrackUITests.swift; sourceTree = "<group>"; };
+		E7F52B50C5111DDC126C76F6 /* Caltrack.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Caltrack.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		491BCAEBE371CB1DDAA574A6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C17DA91D0E40BEB2126BF6E /* Foundation.framework in Frameworks */,
+				AE5165C2A57B91F71CA6436C /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9D45C8E4E0693F7C42C0ADD8 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				64F6AD5AE3B6881B826AC842 /* Foundation.framework in Frameworks */,
+				C8A13CA39EC2690887910841 /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C1DBFB6AB37DD314DBDB3550 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A4F20A833D8C3112809AFE2D /* Foundation.framework in Frameworks */,
+				4778BFA3E2D313F1C49974CA /* AppIntents.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		06FC265BD31FF77335E58F8A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				61E0C4F18E88680D4BCB3C00 /* iOS */,
+				85F671BB6BC5AE2D6243E34A /* AppIntents.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		2A3CE482750541C2A40C4121 /* Caltrack */ = {
+			isa = PBXGroup;
+			children = (
+				9B0C00D8138D018601ED3A75 /* CaltrackApp.swift */,
+				76FFD0D831E8E85192E53AAD /* CameraPicker.swift */,
+				BF0FB256F4724D27A796FAFD /* DashboardView.swift */,
+				C08C174EDCB0E1180EB5CF44 /* GrokService.swift */,
+				714CD8F732A9E2DFF5174D93 /* HealthKitService.swift */,
+				6734D99A3A672DD4D2156522 /* KeychainStore.swift */,
+				5626ADE0E19048F3B6F02258 /* MealAnalysisSheet.swift */,
+				0CCF0E845AE0409AAA7D3FF6 /* Models.swift */,
+				61B96B16780A178119882AEA /* SettingsView.swift */,
+				CBE676F9B9FF44B0C913D1B0 /* Theme.swift */,
+				BA5D652FE0B74029C8531D91 /* Assets.xcassets */,
+				9F5DEBE3D0A9A860D9479A6E /* Caltrack.entitlements */,
+			);
+			name = Caltrack;
+			path = Caltrack;
+			sourceTree = "<group>";
+		};
+		61E0C4F18E88680D4BCB3C00 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				0844A724968C27D571987938 /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		8D5D37252A8AC5E1E12525FF = {
+			isa = PBXGroup;
+			children = (
+				9F2830A96A827C533BD1F8E3 /* Products */,
+				06FC265BD31FF77335E58F8A /* Frameworks */,
+				2A3CE482750541C2A40C4121 /* Caltrack */,
+				9B387DE2831E5187B8B80BB3 /* CaltrackTests */,
+				C791C227C956127497E5E7BB /* CaltrackUITests */,
+			);
+			sourceTree = "<group>";
+		};
+		9B387DE2831E5187B8B80BB3 /* CaltrackTests */ = {
+			isa = PBXGroup;
+			children = (
+				11015D5198CC90191008C5B7 /* GrokServiceTests.swift */,
+			);
+			name = CaltrackTests;
+			path = CaltrackTests;
+			sourceTree = "<group>";
+		};
+		9F2830A96A827C533BD1F8E3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E7F52B50C5111DDC126C76F6 /* Caltrack.app */,
+				1D1B20408898FDD8DA8B8A68 /* CaltrackTests.xctest */,
+				206F2C5EA3FC4468ACA802CB /* CaltrackUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C791C227C956127497E5E7BB /* CaltrackUITests */ = {
+			isa = PBXGroup;
+			children = (
+				E34ED338C706300411FE5833 /* CaltrackUITests.swift */,
+			);
+			name = CaltrackUITests;
+			path = CaltrackUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		884FF0F2AA6FD0D063C62970 /* CaltrackUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7BAC69B38527085A3C7B8F2F /* Build configuration list for PBXNativeTarget "CaltrackUITests" */;
+			buildPhases = (
+				3DB4C979DE31E79A20552C54 /* Sources */,
+				9D45C8E4E0693F7C42C0ADD8 /* Frameworks */,
+				21E9DCFC2E7E7EEA9A22C191 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				939A5DFCC17EEC15B9A3FAAD /* PBXTargetDependency */,
+			);
+			name = CaltrackUITests;
+			productName = CaltrackUITests;
+			productReference = 206F2C5EA3FC4468ACA802CB /* CaltrackUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		CB8AC99FBDDE337838A10C0F /* CaltrackTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9D1EF4D4F92FD0232D1DF94D /* Build configuration list for PBXNativeTarget "CaltrackTests" */;
+			buildPhases = (
+				66243CB07F9F89149B340163 /* Sources */,
+				C1DBFB6AB37DD314DBDB3550 /* Frameworks */,
+				E35878E2D302EF98D5D7B22A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DE47C2BFB56FD94F4754F3B9 /* PBXTargetDependency */,
+			);
+			name = CaltrackTests;
+			productName = CaltrackTests;
+			productReference = 1D1B20408898FDD8DA8B8A68 /* CaltrackTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D63C02B29276B78650D4AD71 /* Caltrack */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 59404EA61B6102912C87AFE9 /* Build configuration list for PBXNativeTarget "Caltrack" */;
+			buildPhases = (
+				0194EAB5291A7949EB7898C3 /* Sources */,
+				491BCAEBE371CB1DDAA574A6 /* Frameworks */,
+				FD4753D5E54AE226364D9902 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Caltrack;
+			productName = Caltrack;
+			productReference = E7F52B50C5111DDC126C76F6 /* Caltrack.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A3AE93D69D53130904724A1F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 2600;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					884FF0F2AA6FD0D063C62970 = {
+						CreatedOnToolsVersion = 26.0;
+						DevelopmentTeam = 6BG94RDHDG;
+					};
+					CB8AC99FBDDE337838A10C0F = {
+						CreatedOnToolsVersion = 26.0;
+						DevelopmentTeam = 6BG94RDHDG;
+					};
+					D63C02B29276B78650D4AD71 = {
+						CreatedOnToolsVersion = 26.0;
+						DevelopmentTeam = 6BG94RDHDG;
+						SystemCapabilities = {
+							com.apple.HealthKit = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = 2C5B96A3071C54105AD1DC85 /* Build configuration list for PBXProject "Caltrack" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8D5D37252A8AC5E1E12525FF;
+			minimizedProjectReferenceProxies = 0;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 9F2830A96A827C533BD1F8E3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D63C02B29276B78650D4AD71 /* Caltrack */,
+				CB8AC99FBDDE337838A10C0F /* CaltrackTests */,
+				884FF0F2AA6FD0D063C62970 /* CaltrackUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		21E9DCFC2E7E7EEA9A22C191 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E35878E2D302EF98D5D7B22A /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FD4753D5E54AE226364D9902 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E9F0506B287BB0E3C05BA3F2 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		0194EAB5291A7949EB7898C3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				41D8AB1492C1EC9519E20D6F /* CaltrackApp.swift in Sources */,
+				D58B32206A521FF45D07EFCC /* CameraPicker.swift in Sources */,
+				B6B97721174B2A16AA09E6E0 /* DashboardView.swift in Sources */,
+				562DEEDEEED71199B2001F55 /* GrokService.swift in Sources */,
+				7D0B468FF3FD709B1C255F48 /* HealthKitService.swift in Sources */,
+				F5A9C8A46134BF90EEDD26A9 /* KeychainStore.swift in Sources */,
+				F14A09D740013A674A4A940C /* MealAnalysisSheet.swift in Sources */,
+				BF56F515E5A6AE80CA42174C /* Models.swift in Sources */,
+				66354E4E560488C737238605 /* SettingsView.swift in Sources */,
+				0EEE470DDB99B99720814642 /* Theme.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3DB4C979DE31E79A20552C54 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				33B6AB1C84538D1106A0B112 /* CaltrackUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66243CB07F9F89149B340163 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				613D21419FD38932B9D70CA0 /* GrokServiceTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		939A5DFCC17EEC15B9A3FAAD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Caltrack;
+			target = D63C02B29276B78650D4AD71 /* Caltrack */;
+			targetProxy = FB04A657B64B0F38668EAD90 /* PBXContainerItemProxy */;
+		};
+		DE47C2BFB56FD94F4754F3B9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Caltrack;
+			target = D63C02B29276B78650D4AD71 /* Caltrack */;
+			targetProxy = BE7C8EDBBFD8FBB50FCB66B2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		0025AB1A4345E83872368983 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Caltrack/Caltrack.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Caltrack;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Caltrack usa la cámara para analizar una comida cuando decides fotografiarla.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caltrack lee peso, grasa corporal y cintura para mostrar tu progreso con tus datos de Salud.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LM_FILTER_WARNINGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		74677998CD4F4EE11482F387 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LM_FILTER_WARNINGS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caltrack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caltrack";
+			};
+			name = Debug;
+		};
+		8EB58CE708CB6C5CEEDBBD7C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = Caltrack/Caltrack.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Caltrack;
+				INFOPLIST_KEY_NSCameraUsageDescription = "Caltrack usa la cámara para analizar una comida cuando decides fotografiarla.";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "Caltrack lee peso, grasa corporal y cintura para mostrar tu progreso con tus datos de Salud.";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LM_FILTER_WARNINGS = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		948DFDBBCD5CB41F051F29E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		D02C73D55A8B75AC689E801E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LM_FILTER_WARNINGS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.tests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Caltrack.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Caltrack";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		DBA6C78CDEFF7ED78F72BB68 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LM_FILTER_WARNINGS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.uitests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Caltrack;
+			};
+			name = Debug;
+		};
+		E90036A7C222ECCDDBD7061B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 6BG94RDHDG;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				LM_FILTER_WARNINGS = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.manuelsampedro.caltrack.uitests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Caltrack;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		EBBEB351C92B774A4A18C841 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2C5B96A3071C54105AD1DC85 /* Build configuration list for PBXProject "Caltrack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBBEB351C92B774A4A18C841 /* Debug */,
+				948DFDBBCD5CB41F051F29E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		59404EA61B6102912C87AFE9 /* Build configuration list for PBXNativeTarget "Caltrack" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0025AB1A4345E83872368983 /* Release */,
+				8EB58CE708CB6C5CEEDBBD7C /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7BAC69B38527085A3C7B8F2F /* Build configuration list for PBXNativeTarget "CaltrackUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E90036A7C222ECCDDBD7061B /* Release */,
+				DBA6C78CDEFF7ED78F72BB68 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9D1EF4D4F92FD0232D1DF94D /* Build configuration list for PBXNativeTarget "CaltrackTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D02C73D55A8B75AC689E801E /* Release */,
+				74677998CD4F4EE11482F387 /* Debug */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A3AE93D69D53130904724A1F /* Project object */;
+}

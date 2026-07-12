@@ -2,6 +2,8 @@
 
 Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
 
+El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision y lectura autorizada de peso, grasa corporal y cintura desde Apple Salud.
+
 ## Usarla en iPhone
 
 1. Abre la web publicada en Safari.
@@ -65,6 +67,26 @@ Abre `http://127.0.0.1:8765`.
 
 La publicación usa GitHub Pages mediante [pages.yml](.github/workflows/pages.yml). Cada push a `main` publica el contenido de `caltrack/static`.
 
+## App iOS con Grok y Salud
+
+El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posterior.
+
+1. Abre el proyecto en Xcode y selecciona tu iPhone.
+2. Comprueba que la cuenta de Apple Developer esté activa en `Xcode > Settings > Accounts`.
+3. Ejecuta Caltrack y acepta únicamente los datos de Salud que quieras compartir.
+4. En Ajustes de Caltrack, guarda una clave de xAI. Se conserva en Keychain y nunca se añade a Git.
+5. Pulsa `Fotografiar comida`, revisa la estimación y confirma los macros.
+
+Para regenerar el proyecto después de añadir archivos Swift:
+
+```bash
+ruby ios/scripts/generate_project.rb
+```
+
+La foto elegida se envía directamente a `api.x.ai` para el análisis. Los datos de Salud no se envían a xAI. Consulta [PRIVACY.md](PRIVACY.md).
+
 ## Límite importante
 
 Caltrack organiza estimaciones, no sustituye consejo médico o nutricional. Un déficit concreto puede ser adecuado para una persona y no para otra. El sistema bloquea déficits superiores a 1.000 kcal y señala tendencias agresivas.
+
+Una foto no permite medir porciones, aceites o ingredientes ocultos con precisión. Grok propone una estimación que debe revisarse antes de guardarla.
