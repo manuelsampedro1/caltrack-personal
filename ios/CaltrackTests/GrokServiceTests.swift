@@ -22,6 +22,7 @@ final class GrokServiceTests: XCTestCase {
     func testAdherenceRewardsConfiguredRanges() {
         XCTAssertEqual(CaltrackMath.adherence(calories: 1_900, protein: 170, calorieRange: 1_800...2_000, proteinRange: 160...190), 100)
         XCTAssertLessThan(CaltrackMath.adherence(calories: 2_800, protein: 80, calorieRange: 1_800...2_000, proteinRange: 160...190), 100)
+        XCTAssertEqual(CaltrackMath.orderedRange(2_000, 1_800), 1_800...2_000)
     }
 
     func testDecodesHevyAndCalculatesStrengthDetails() throws {
@@ -92,15 +93,21 @@ final class GrokServiceTests: XCTestCase {
             meals: [meal],
             measurements: [],
             workouts: [workout],
+            checkIns: [DailyPlanCheckIn(externalID: "private-check-in-id", date: .now, hunger: 4, energy: 2)],
+            planMode: .lose,
+            planWeeklyRate: 0.5,
             calorieRange: 1_800...2_000,
             proteinRange: 160...190
         )
 
         XCTAssertTrue(context.contains("500 kcal"))
         XCTAssertTrue(context.contains("Torso"))
+        XCTAssertTrue(context.contains("Hambre media 4"))
+        XCTAssertTrue(context.contains("Perder peso"))
         XCTAssertFalse(context.contains("private-photo"))
         XCTAssertFalse(context.contains("secret-identifier"))
         XCTAssertFalse(context.contains("private.bundle"))
+        XCTAssertFalse(context.contains("private-check-in-id"))
     }
 
     func testCoachDecodesTextResponse() throws {
@@ -140,7 +147,7 @@ final class GrokServiceTests: XCTestCase {
 
     @MainActor
     func testBackupRestoreMergesWithoutDuplicates() throws {
-        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, WorkoutEntry.self, CoachMessage.self])
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, DailyPlanCheckIn.self, WorkoutEntry.self, CoachMessage.self])
         let container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         let mealID = UUID()
         let backup = CaltrackBackup(
@@ -247,7 +254,7 @@ final class GrokServiceTests: XCTestCase {
 
     @MainActor
     func testBodyPhotoBackupRestoresAndOldBackupWithoutPhotoDecodes() throws {
-        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, WorkoutEntry.self, CoachMessage.self])
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, DailyPlanCheckIn.self, WorkoutEntry.self, CoachMessage.self])
         let source = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         let photo = Data([1, 2, 3, 4])
         source.mainContext.insert(BodyMeasurement(weight: 78.9, waist: 80.5, photoData: photo, source: "manual"))
@@ -318,7 +325,7 @@ final class GrokServiceTests: XCTestCase {
 
     @MainActor
     func testRecoveryBackupRoundTripAndLegacyBackupDefault() throws {
-        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, WorkoutEntry.self, CoachMessage.self])
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, DailyPlanCheckIn.self, WorkoutEntry.self, CoachMessage.self])
         let source = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         source.mainContext.insert(RecoveryDay(
             externalID: "health-recovery:test",
@@ -343,5 +350,168 @@ final class GrokServiceTests: XCTestCase {
 
         let legacy = #"{"version":1,"exportedAt":"2026-07-12T12:00:00Z","meals":[],"measurements":[],"activities":[],"workouts":[],"messages":[]}"#
         XCTAssertTrue(try BackupService.decode(Data(legacy.utf8)).recovery.isEmpty)
+    }
+
+    func testAdaptivePlanCollectsEvidenceBeforeReviewing() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+        let now = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-07-12T12:00:00Z"))
+        let configured = AdaptivePlanEngine.review(
+            days: [],
+            weights: [],
+            mode: .lose,
+            weeklyRate: 0.5,
+            calorieRange: 1_800...2_000,
+            now: now,
+            calendar: calendar
+        )
+        XCTAssertEqual(configured.state, .collecting)
+        XCTAssertTrue(configured.message.contains("7 días completos"))
+        XCTAssertTrue(configured.message.contains("3 pesos"))
+
+        let unconfigured = AdaptivePlanEngine.review(
+            days: [],
+            weights: [],
+            mode: .notSet,
+            weeklyRate: 0.5,
+            calorieRange: 1_800...2_000,
+            now: now,
+            calendar: calendar
+        )
+        XCTAssertEqual(unconfigured.state, .needsConfiguration)
+        XCTAssertNil(unconfigured.calorieDelta)
+    }
+
+    func testAdaptivePlanRequiresAdherenceBeforeChangingCalories() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+        let now = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-07-12T12:00:00Z"))
+        let days = (0..<14).map { offset in
+            AdaptivePlanDay(
+                date: calendar.date(byAdding: .day, value: -offset, to: now)!,
+                calories: offset < 5 ? 1_900 : 1_500,
+                isComplete: true
+            )
+        }
+        let review = AdaptivePlanEngine.review(
+            days: days,
+            weights: adaptiveWeights(slope: -0.1, now: now, calendar: calendar),
+            mode: .lose,
+            weeklyRate: 0.5,
+            calorieRange: 1_800...2_000,
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(review.state, .followCurrentPlan)
+        XCTAssertEqual(review.rangeAdherence ?? -1, 5.0 / 14.0, accuracy: 0.001)
+        XCTAssertNil(review.calorieDelta)
+    }
+
+    func testAdaptivePlanProposesSmallConfirmedAdjustments() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))
+        let now = try XCTUnwrap(ISO8601DateFormatter().date(from: "2026-07-12T12:00:00Z"))
+        let days = (0..<14).map { offset in
+            AdaptivePlanDay(date: calendar.date(byAdding: .day, value: -offset, to: now)!, calories: 1_900, isComplete: true)
+        }
+
+        let slow = AdaptivePlanEngine.review(
+            days: days,
+            weights: adaptiveWeights(slope: -0.1, now: now, calendar: calendar),
+            mode: .lose,
+            weeklyRate: 0.5,
+            calorieRange: 1_800...2_000,
+            now: now,
+            calendar: calendar
+        )
+        XCTAssertEqual(slow.state, .adjustment)
+        XCTAssertEqual(slow.calorieDelta, -100)
+        XCTAssertEqual(slow.proposedRange, 1_700...1_900)
+
+        let fast = AdaptivePlanEngine.review(
+            days: days,
+            weights: adaptiveWeights(slope: -0.9, now: now, calendar: calendar),
+            mode: .lose,
+            weeklyRate: 0.5,
+            calorieRange: 1_800...2_000,
+            now: now,
+            calendar: calendar
+        )
+        XCTAssertEqual(fast.calorieDelta, 100)
+        XCTAssertEqual(fast.proposedRange, 1_900...2_100)
+
+        let paused = AdaptivePlanEngine.review(
+            days: days,
+            weights: adaptiveWeights(slope: -0.1, now: now, calendar: calendar),
+            mode: .lose,
+            weeklyRate: 0.5,
+            calorieRange: 1_800...2_000,
+            lastAdjustmentDate: calendar.date(byAdding: .day, value: -2, to: now),
+            now: now,
+            calendar: calendar
+        )
+        XCTAssertEqual(paused.state, .recentlyAdjusted)
+        XCTAssertNil(paused.calorieDelta)
+    }
+
+    func testAdaptivePlanRegressionUsesTrendAcrossAllWeights() throws {
+        let formatter = ISO8601DateFormatter()
+        let points = [
+            AdaptiveWeightPoint(date: formatter.date(from: "2026-07-01T08:00:00Z")!, weight: 80),
+            AdaptiveWeightPoint(date: formatter.date(from: "2026-07-08T08:00:00Z")!, weight: 79.5),
+            AdaptiveWeightPoint(date: formatter.date(from: "2026-07-15T08:00:00Z")!, weight: 79)
+        ]
+        XCTAssertEqual(try XCTUnwrap(AdaptivePlanEngine.weeklySlope(points)), -0.5, accuracy: 0.001)
+    }
+
+    @MainActor
+    func testAdaptivePlanBackupRoundTripAndLegacyDefaults() throws {
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, DailyPlanCheckIn.self, WorkoutEntry.self, CoachMessage.self])
+        let source = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        source.mainContext.insert(DailyPlanCheckIn(externalID: "plan-check-in:test", date: .now, hunger: 4, energy: 2))
+        try source.mainContext.save()
+        let settings = CaltrackBackup.PlanSettings(
+            goalMode: PlanGoalMode.lose.rawValue,
+            weeklyRate: 0.5,
+            targetWeight: 75,
+            lastAdjustmentTimestamp: 1_783_890_000,
+            calorieMin: 1_800,
+            calorieMax: 2_000,
+            proteinMin: 160,
+            proteinMax: 190
+        )
+        let backup = BackupService.make(
+            meals: [],
+            measurements: [],
+            activities: [],
+            checkIns: try source.mainContext.fetch(FetchDescriptor<DailyPlanCheckIn>()),
+            planSettings: settings,
+            workouts: [],
+            messages: []
+        )
+        let encoded = try JSONEncoder().encode(backup)
+        let decoded = try JSONDecoder().decode(CaltrackBackup.self, from: encoded)
+        XCTAssertEqual(decoded.planSettings, settings)
+        XCTAssertEqual(decoded.checkIns.first?.hunger, 4)
+
+        let destination = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
+        XCTAssertEqual(try BackupService.restore(decoded, into: destination.mainContext), 1)
+        XCTAssertEqual(try destination.mainContext.fetch(FetchDescriptor<DailyPlanCheckIn>()).first?.energy, 2)
+        XCTAssertEqual(UserDefaults.standard.double(forKey: "planLastAdjustmentTimestamp"), 1_783_890_000)
+
+        let legacy = #"{"version":1,"exportedAt":"2026-07-12T12:00:00Z","meals":[],"measurements":[],"activities":[],"workouts":[],"messages":[]}"#
+        let legacyBackup = try BackupService.decode(Data(legacy.utf8))
+        XCTAssertTrue(legacyBackup.checkIns.isEmpty)
+        XCTAssertNil(legacyBackup.planSettings)
+    }
+
+    private func adaptiveWeights(slope: Double, now: Date, calendar: Calendar) -> [AdaptiveWeightPoint] {
+        [-12, -8, -4, 0].map { offset in
+            AdaptiveWeightPoint(
+                date: calendar.date(byAdding: .day, value: offset, to: now)!,
+                weight: 80 + slope * Double(offset) / 7
+            )
+        }
     }
 }

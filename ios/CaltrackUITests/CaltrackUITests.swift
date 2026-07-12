@@ -52,6 +52,9 @@ final class CaltrackUITests: XCTestCase {
         }
         XCTAssertTrue(app.switches["Recordatorio diario"].exists)
         XCTAssertTrue(app.buttons["Exportar copia privada"].isHittable)
+        for _ in 0..<3 where !app.buttons["Restaurar o fusionar copia"].exists {
+            app.swipeUp()
+        }
         XCTAssertTrue(app.buttons["Restaurar o fusionar copia"].exists)
         app.buttons["Listo"].tap()
 
@@ -332,5 +335,65 @@ final class CaltrackUITests: XCTestCase {
         screenshot.name = "Caltrack recovery trends"
         screenshot.lifetime = .keepAlways
         add(screenshot)
+    }
+
+    func testAdaptivePlanClosesDayAndAppliesOnlyAfterConfirmation() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-seed-superapp",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.buttons["Fotografiar comida"].waitForExistence(timeout: 8))
+        let dailyCheckIn = app.buttons["dailyPlanCheckIn"]
+        for _ in 0..<8 where !dailyCheckIn.isHittable { app.swipeUp() }
+        XCTAssertTrue(dailyCheckIn.waitForExistence(timeout: 4))
+        dailyCheckIn.tap()
+
+        let dailySheet = app.navigationBars["Cierre del día"]
+        XCTAssertTrue(dailySheet.waitForExistence(timeout: 4))
+        let dailyScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        dailyScreenshot.name = "Caltrack daily close"
+        dailyScreenshot.lifetime = .keepAlways
+        add(dailyScreenshot)
+        XCTAssertTrue(app.buttons["reopenDailyCheckIn"].exists)
+        app.buttons["reopenDailyCheckIn"].tap()
+
+        XCTAssertTrue(dailyCheckIn.waitForExistence(timeout: 4))
+        dailyCheckIn.tap()
+        XCTAssertTrue(app.buttons["hunger5"].waitForExistence(timeout: 4))
+        app.buttons["hunger5"].tap()
+        app.buttons["energy2"].tap()
+        app.buttons["saveDailyCheckIn"].tap()
+        XCTAssertTrue(app.staticTexts["Hambre 5/5 · Energía 2/5"].waitForExistence(timeout: 4))
+
+        let stableTitle = app.staticTexts["Mantén el rango"]
+        for _ in 0..<4 where !stableTitle.isHittable { app.swipeUp() }
+        XCTAssertTrue(stableTitle.waitForExistence(timeout: 4))
+        XCTAssertTrue(stableTitle.isHittable)
+        let configure = app.buttons["configureAdaptivePlan"]
+        for _ in 0..<3 where !configure.isHittable { app.swipeUp() }
+        XCTAssertTrue(configure.waitForExistence(timeout: 4))
+        XCTAssertTrue(configure.isHittable)
+        let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        screenshot.name = "Caltrack adaptive weekly plan"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+        configure.tap()
+        XCTAssertTrue(app.navigationBars["Plan adaptativo"].waitForExistence(timeout: 4))
+        let settingsScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
+        settingsScreenshot.name = "Caltrack adaptive plan settings"
+        settingsScreenshot.lifetime = .keepAlways
+        add(settingsScreenshot)
+        app.buttons["Mantener"].tap()
+        app.buttons["savePlanSettings"].tap()
+
+        XCTAssertTrue(app.staticTexts["Propuesta para esta semana"].waitForExistence(timeout: 4))
+        app.buttons["applyAdaptivePlan"].tap()
+        XCTAssertTrue(app.alerts["Aplicar nuevo rango"].waitForExistence(timeout: 3))
+        app.alerts["Aplicar nuevo rango"].buttons["Aplicar"].tap()
+        XCTAssertTrue(app.staticTexts["Deja actuar el último cambio"].waitForExistence(timeout: 4))
     }
 }

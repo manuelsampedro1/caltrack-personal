@@ -117,3 +117,9 @@ El generador del proyecto usa identificadores deterministas. Regenerarlo dos vec
 Caltrack lee sueño, frecuencia cardiaca en reposo y HRV SDNN desde Apple Salud solo después del permiso en contexto. Las muestra como tendencias personales junto a dieta, cuerpo y entrenamiento, sin convertirlas en una orden para entrenar o descansar y sin aplicar umbrales clínicos universales.
 
 El cálculo cuenta solo intervalos dormidos, une solapamientos, atribuye la noche al día de despertar y conserva una fuente por noche. Esto evita sumar tiempo en cama junto a las fases o duplicar una noche registrada por varias aplicaciones. La caché diaria es local, restaurable desde la copia JSON y compatible con copias anteriores que no contienen recuperación.
+
+### Plan adaptativo bajo control
+
+El rango deja de ser un número manual sin seguimiento, pero Caltrack no se convierte en un piloto automático. Solo revisa días marcados como completos y exige siete cierres, tres pesos repartidos durante siete días y al menos 70% de adherencia al rango vigente. La tendencia usa regresión lineal sobre 14 días para reducir el efecto de una medición aislada.
+
+Una propuesta mueve ambos límites 100 kcal, se limita entre 1.000 y 6.000 kcal y requiere confirmación explícita con comparación anterior y nueva. Después espera seis días. No calcula metabolismo con sexo, edad o altura, ni promete un ritmo de cambio. Hambre y energía sirven como contexto agregado y permanecen locales salvo que el usuario pregunte voluntariamente a Grok.

@@ -11,6 +11,7 @@ struct SettingsView: View {
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
     @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
     @Query(sort: \RecoveryDay.date, order: .reverse) private var recoveryDays: [RecoveryDay]
+    @Query(sort: \DailyPlanCheckIn.date, order: .reverse) private var planCheckIns: [DailyPlanCheckIn]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \CoachMessage.date) private var messages: [CoachMessage]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
@@ -24,6 +25,10 @@ struct SettingsView: View {
     @AppStorage("reminderMinute") private var reminderMinute = 0
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
+    @AppStorage("planGoalMode") private var planGoalModeRaw = PlanGoalMode.notSet.rawValue
+    @AppStorage("planWeeklyRate") private var planWeeklyRate = 0.5
+    @AppStorage("planTargetWeight") private var planTargetWeight = 0.0
+    @AppStorage("planLastAdjustmentTimestamp") private var planLastAdjustmentTimestamp = 0.0
     @State private var apiKey = ""
     @State private var hevyKey = ""
     @State private var validatingGrok = false
@@ -142,10 +147,10 @@ struct SettingsView: View {
                 }
 
                 Section("Objetivos diarios") {
-                    numberRow("Calorías mínimas", value: $calorieMin, step: 50)
-                    numberRow("Calorías máximas", value: $calorieMax, step: 50)
-                    numberRow("Proteína mínima", value: $proteinMin, step: 5)
-                    numberRow("Proteína máxima", value: $proteinMax, step: 5)
+                    numberRow("Calorías mínimas", value: pairedMinimum($calorieMin, maximum: $calorieMax), range: 1_000...6_000, step: 50)
+                    numberRow("Calorías máximas", value: pairedMaximum($calorieMax, minimum: $calorieMin), range: 1_000...6_000, step: 50)
+                    numberRow("Proteína mínima", value: pairedMinimum($proteinMin, maximum: $proteinMax), range: 0...500, step: 5)
+                    numberRow("Proteína máxima", value: pairedMaximum($proteinMax, minimum: $proteinMin), range: 0...500, step: 5)
                 }
 
                 Section {
@@ -183,7 +188,25 @@ struct SettingsView: View {
 
                 Section {
                     Button {
-                        backupDocument = CaltrackBackupDocument(backup: BackupService.make(meals: meals, measurements: measurements, activities: activityDays, recovery: recoveryDays, workouts: workouts, messages: messages))
+                        backupDocument = CaltrackBackupDocument(backup: BackupService.make(
+                            meals: meals,
+                            measurements: measurements,
+                            activities: activityDays,
+                            recovery: recoveryDays,
+                            checkIns: planCheckIns,
+                            planSettings: .init(
+                                goalMode: planGoalModeRaw,
+                                weeklyRate: planWeeklyRate,
+                                targetWeight: planTargetWeight > 0 ? planTargetWeight : nil,
+                                lastAdjustmentTimestamp: planLastAdjustmentTimestamp > 0 ? planLastAdjustmentTimestamp : nil,
+                                calorieMin: calorieMin,
+                                calorieMax: calorieMax,
+                                proteinMin: proteinMin,
+                                proteinMax: proteinMax
+                            ),
+                            workouts: workouts,
+                            messages: messages
+                        ))
                         showingExporter = true
                     } label: {
                         Label("Exportar copia privada", systemImage: "square.and.arrow.up")
@@ -197,7 +220,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Tus datos")
                 } footer: {
-                    Text("El JSON incluye comidas, fotos, medidas, recuperación, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
+                    Text("El JSON incluye comidas, fotos, medidas, recuperación, cierres diarios, objetivos, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
                 }
 
                 Section("Privacidad") {
@@ -292,13 +315,31 @@ struct SettingsView: View {
             .foregroundStyle(success ? CaltrackTheme.green : CaltrackTheme.coral)
     }
 
-    private func numberRow(_ title: String, value: Binding<Double>, step: Double) -> some View {
-        Stepper(value: value, in: 0...6_000, step: step) {
+    private func numberRow(_ title: String, value: Binding<Double>, range: ClosedRange<Double>, step: Double) -> some View {
+        Stepper(value: value, in: range, step: step) {
             HStack {
                 Text(title)
                 Spacer()
                 Text(Int(value.wrappedValue).formatted()).foregroundStyle(.secondary)
             }
+        }
+    }
+
+    private func pairedMinimum(_ minimum: Binding<Double>, maximum: Binding<Double>) -> Binding<Double> {
+        Binding {
+            minimum.wrappedValue
+        } set: { newValue in
+            minimum.wrappedValue = newValue
+            if maximum.wrappedValue < newValue { maximum.wrappedValue = newValue }
+        }
+    }
+
+    private func pairedMaximum(_ maximum: Binding<Double>, minimum: Binding<Double>) -> Binding<Double> {
+        Binding {
+            maximum.wrappedValue
+        } set: { newValue in
+            maximum.wrappedValue = newValue
+            if minimum.wrappedValue > newValue { minimum.wrappedValue = newValue }
         }
     }
 

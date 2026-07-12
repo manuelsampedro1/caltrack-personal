@@ -7,12 +7,15 @@ struct CoachView: View {
     @Query(sort: \MealEntry.date, order: .reverse) private var meals: [MealEntry]
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
     @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
+    @Query(sort: \DailyPlanCheckIn.date, order: .reverse) private var planCheckIns: [DailyPlanCheckIn]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @Query(sort: \CoachMessage.date) private var messages: [CoachMessage]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
+    @AppStorage("planGoalMode") private var planGoalModeRaw = PlanGoalMode.notSet.rawValue
+    @AppStorage("planWeeklyRate") private var planWeeklyRate = 0.5
     @State private var question = ""
     @State private var isLoading = false
     @State private var errorMessage: String?
@@ -29,8 +32,8 @@ struct CoachView: View {
             meals: meals,
             measurements: measurements,
             workouts: workouts,
-            calorieRange: calorieMin...calorieMax,
-            proteinRange: proteinMin...proteinMax
+            calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
+            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
         )
     }
 
@@ -207,8 +210,11 @@ struct CoachView: View {
                 measurements: measurements,
                 workouts: workouts,
                 activities: activityDays,
-                calorieRange: calorieMin...calorieMax,
-                proteinRange: proteinMin...proteinMax
+                checkIns: planCheckIns,
+                planMode: PlanGoalMode(rawValue: planGoalModeRaw) ?? .notSet,
+                planWeeklyRate: planWeeklyRate,
+                calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
+                proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
             )
             let response = try await CoachService().ask(question: prompt, context: context, apiKey: apiKey)
             modelContext.insert(CoachMessage(role: "assistant", content: response))

@@ -140,6 +140,32 @@ final class RecoveryDay {
     }
 }
 
+@Model
+final class DailyPlanCheckIn {
+    var id: UUID
+    @Attribute(.unique) var externalID: String
+    var date: Date
+    var nutritionComplete: Bool
+    var hunger: Int
+    var energy: Int
+
+    init(
+        id: UUID = UUID(),
+        externalID: String,
+        date: Date,
+        nutritionComplete: Bool = true,
+        hunger: Int = 3,
+        energy: Int = 3
+    ) {
+        self.id = id
+        self.externalID = externalID
+        self.date = date
+        self.nutritionComplete = nutritionComplete
+        self.hunger = hunger
+        self.energy = energy
+    }
+}
+
 struct WorkoutExerciseSummary: Codable, Equatable, Identifiable {
     var id: String { name }
     let name: String
@@ -311,6 +337,10 @@ struct EditableMeal {
 }
 
 enum CaltrackMath {
+    static func orderedRange(_ first: Double, _ second: Double) -> ClosedRange<Double> {
+        Swift.min(first, second)...Swift.max(first, second)
+    }
+
     static func totals(for meals: [MealEntry]) -> (calories: Double, protein: Double) {
         meals.reduce((0, 0)) { ($0.0 + $1.calories, $0.1 + $1.protein) }
     }

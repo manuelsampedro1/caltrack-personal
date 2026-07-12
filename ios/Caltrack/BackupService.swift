@@ -85,6 +85,26 @@ struct CaltrackBackup: Codable, Sendable {
         let source: String
     }
 
+    struct DailyCheckIn: Codable, Sendable {
+        let id: UUID
+        let externalID: String
+        let date: Date
+        let nutritionComplete: Bool
+        let hunger: Int
+        let energy: Int
+    }
+
+    struct PlanSettings: Codable, Sendable, Equatable {
+        let goalMode: String
+        let weeklyRate: Double
+        let targetWeight: Double?
+        let lastAdjustmentTimestamp: Double?
+        let calorieMin: Double
+        let calorieMax: Double
+        let proteinMin: Double
+        let proteinMax: Double
+    }
+
     struct Workout: Codable, Sendable {
         let id: UUID
         let externalID: String
@@ -113,22 +133,26 @@ struct CaltrackBackup: Codable, Sendable {
     let measurements: [Body]
     let activities: [Activity]
     let recovery: [Recovery]
+    let checkIns: [DailyCheckIn]
+    let planSettings: PlanSettings?
     let workouts: [Workout]
     let messages: [Message]
 
-    init(version: Int, exportedAt: Date, meals: [Meal], measurements: [Body], activities: [Activity] = [], recovery: [Recovery] = [], workouts: [Workout], messages: [Message]) {
+    init(version: Int, exportedAt: Date, meals: [Meal], measurements: [Body], activities: [Activity] = [], recovery: [Recovery] = [], checkIns: [DailyCheckIn] = [], planSettings: PlanSettings? = nil, workouts: [Workout], messages: [Message]) {
         self.version = version
         self.exportedAt = exportedAt
         self.meals = meals
         self.measurements = measurements
         self.activities = activities
         self.recovery = recovery
+        self.checkIns = checkIns
+        self.planSettings = planSettings
         self.workouts = workouts
         self.messages = messages
     }
 
     private enum CodingKeys: String, CodingKey {
-        case version, exportedAt, meals, measurements, activities, recovery, workouts, messages
+        case version, exportedAt, meals, measurements, activities, recovery, checkIns, planSettings, workouts, messages
     }
 
     init(from decoder: Decoder) throws {
@@ -139,6 +163,8 @@ struct CaltrackBackup: Codable, Sendable {
         measurements = try container.decode([Body].self, forKey: .measurements)
         activities = try container.decodeIfPresent([Activity].self, forKey: .activities) ?? []
         recovery = try container.decodeIfPresent([Recovery].self, forKey: .recovery) ?? []
+        checkIns = try container.decodeIfPresent([DailyCheckIn].self, forKey: .checkIns) ?? []
+        planSettings = try container.decodeIfPresent(PlanSettings.self, forKey: .planSettings)
         workouts = try container.decode([Workout].self, forKey: .workouts)
         messages = try container.decode([Message].self, forKey: .messages)
     }
@@ -151,6 +177,8 @@ struct CaltrackBackup: Codable, Sendable {
         try container.encode(measurements, forKey: .measurements)
         try container.encode(activities, forKey: .activities)
         try container.encode(recovery, forKey: .recovery)
+        try container.encode(checkIns, forKey: .checkIns)
+        try container.encodeIfPresent(planSettings, forKey: .planSettings)
         try container.encode(workouts, forKey: .workouts)
         try container.encode(messages, forKey: .messages)
     }
@@ -184,6 +212,8 @@ enum BackupService {
         measurements: [BodyMeasurement],
         activities: [ActivityDay],
         recovery: [RecoveryDay] = [],
+        checkIns: [DailyPlanCheckIn] = [],
+        planSettings: CaltrackBackup.PlanSettings? = nil,
         workouts: [WorkoutEntry],
         messages: [CoachMessage]
     ) -> CaltrackBackup {
@@ -225,6 +255,17 @@ enum BackupService {
                     source: $0.source
                 )
             },
+            checkIns: checkIns.map {
+                .init(
+                    id: $0.id,
+                    externalID: $0.externalID,
+                    date: $0.date,
+                    nutritionComplete: $0.nutritionComplete,
+                    hunger: $0.hunger,
+                    energy: $0.energy
+                )
+            },
+            planSettings: planSettings,
             workouts: workouts.map { workout in
                 .init(
                     id: workout.id,
@@ -260,12 +301,14 @@ enum BackupService {
         let existingBodies = try context.fetch(FetchDescriptor<BodyMeasurement>())
         let existingActivities = try context.fetch(FetchDescriptor<ActivityDay>())
         let existingRecovery = try context.fetch(FetchDescriptor<RecoveryDay>())
+        let existingCheckIns = try context.fetch(FetchDescriptor<DailyPlanCheckIn>())
         let existingWorkouts = try context.fetch(FetchDescriptor<WorkoutEntry>())
         let existingMessages = try context.fetch(FetchDescriptor<CoachMessage>())
         var mealIDs = Set(existingMeals.map(\.id))
         var bodyIDs = Set(existingBodies.map(\.id))
         var activityIDs = Set(existingActivities.map(\.externalID))
         var recoveryIDs = Set(existingRecovery.map(\.externalID))
+        var checkInIDs = Set(existingCheckIns.map(\.externalID))
         var workoutIDs = Set(existingWorkouts.map(\.externalID))
         var messageIDs = Set(existingMessages.map(\.id))
         var inserted = 0
@@ -317,6 +360,17 @@ enum BackupService {
             ))
             inserted += 1
         }
+        for item in backup.checkIns where checkInIDs.insert(item.externalID).inserted {
+            context.insert(DailyPlanCheckIn(
+                id: item.id,
+                externalID: item.externalID,
+                date: item.date,
+                nutritionComplete: item.nutritionComplete,
+                hunger: item.hunger,
+                energy: item.energy
+            ))
+            inserted += 1
+        }
         for item in backup.workouts where workoutIDs.insert(item.externalID).inserted {
             let exercises = item.exercises.map {
                 WorkoutExerciseSummary(name: $0.name, setCount: $0.setCount, bestWeight: $0.bestWeight, bestReps: $0.bestReps, volumeKg: $0.volumeKg, rpe: $0.rpe)
@@ -343,6 +397,17 @@ enum BackupService {
         for item in backup.messages where messageIDs.insert(item.id).inserted {
             context.insert(CoachMessage(id: item.id, date: item.date, role: item.role, content: item.content))
             inserted += 1
+        }
+        if let settings = backup.planSettings {
+            let defaults = UserDefaults.standard
+            defaults.set(settings.goalMode, forKey: "planGoalMode")
+            defaults.set(settings.weeklyRate, forKey: "planWeeklyRate")
+            defaults.set(settings.targetWeight ?? 0, forKey: "planTargetWeight")
+            defaults.set(settings.lastAdjustmentTimestamp ?? 0, forKey: "planLastAdjustmentTimestamp")
+            defaults.set(settings.calorieMin, forKey: "calorieMin")
+            defaults.set(settings.calorieMax, forKey: "calorieMax")
+            defaults.set(settings.proteinMin, forKey: "proteinMin")
+            defaults.set(settings.proteinMax, forKey: "proteinMax")
         }
         try context.save()
         return inserted

@@ -82,12 +82,20 @@ La pantalla inicial muestra el estado de Salud, Hevy y Grok sin hacer scroll. La
 
 ### Áreas de la app
 
-- `Hoy`: foto, fototeca, código de barras, entrada manual, edición, objetivos, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
+- `Hoy`: foto, fototeca, código de barras, entrada manual, edición, objetivos, cierre del día, balance estimado, entrenamientos y seis comidas frecuentes para repetir con un toque.
 - `Progreso`: gráficos de 14 días, composición corporal, check-ins manuales con foto privada opcional, gasto, sueño, frecuencia cardiaca en reposo, HRV, búsqueda del historial y carga de entrenamiento.
-- `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días.
-- `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local, App Shortcuts y copia o restauración JSON.
+- `Entrenador`: análisis local sin coste y preguntas voluntarias a Grok usando un resumen privado de 30 días, incluido el promedio agregado de hambre y energía de los días cerrados.
+- `Ajustes`: claves validadas, escritura nutricional opcional en Salud, objetivos, recordatorio local, App Shortcuts y copia o restauración JSON con el plan adaptativo.
 
 La primera apertura incluye una introducción breve que se puede omitir. No solicita Salud, notificaciones ni claves automáticamente.
+
+### Plan semanal adaptativo
+
+Cada día con comidas se puede cerrar indicando hambre y energía de 1 a 5. Caltrack revisa únicamente los días cerrados y compara la tendencia de peso de los últimos 14 días con el rumbo elegido: perder, mantener o ganar.
+
+La revisión necesita al menos siete días cerrados, tres pesos repartidos durante siete días y un 70% de adherencia al rango actual. Si hay evidencia suficiente, propone como máximo 100 kcal arriba o abajo. Nunca aplica un cambio sin mostrar el rango anterior, el nuevo y pedir confirmación. Tras aceptarlo, espera seis días antes de plantear otro.
+
+El cálculo es local, usa regresión lineal para reducir el ruido y no estima metabolismo mediante edad, sexo o altura. Es una tendencia personal, no una recomendación médica.
 
 ### Siri, Spotlight y botón Acción
 

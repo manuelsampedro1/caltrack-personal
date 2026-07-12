@@ -24,6 +24,7 @@ struct DashboardView: View {
     @Query(sort: \BodyMeasurement.date, order: .reverse) private var measurements: [BodyMeasurement]
     @Query(sort: \ActivityDay.date, order: .reverse) private var activityDays: [ActivityDay]
     @Query(sort: \RecoveryDay.date, order: .reverse) private var recoveryDays: [RecoveryDay]
+    @Query(sort: \DailyPlanCheckIn.date, order: .reverse) private var planCheckIns: [DailyPlanCheckIn]
     @Query(sort: \WorkoutEntry.startDate, order: .reverse) private var workouts: [WorkoutEntry]
     @AppStorage("calorieMin") private var calorieMin = 1_800.0
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
@@ -33,6 +34,10 @@ struct DashboardView: View {
     @AppStorage("hevyConnected") private var hevyConnected = false
     @AppStorage("grokConnected") private var grokConnected = false
     @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
+    @AppStorage("planGoalMode") private var planGoalModeRaw = PlanGoalMode.notSet.rawValue
+    @AppStorage("planWeeklyRate") private var planWeeklyRate = 0.5
+    @AppStorage("planTargetWeight") private var planTargetWeight = 0.0
+    @AppStorage("planLastAdjustmentTimestamp") private var planLastAdjustmentTimestamp = 0.0
 
     @State private var health = HealthKitService()
     @State private var selectedImage: UIImage?
@@ -45,6 +50,9 @@ struct DashboardView: View {
     @State private var healthMessage: String?
     @State private var workoutMessage: String?
     @State private var workoutSyncing = false
+    @State private var showingDailyCheckIn = false
+    @State private var showingPlanSettings = false
+    @State private var showingPlanAdjustmentConfirmation = false
 
     private var todayMeals: [MealEntry] {
         meals.filter { Calendar.current.isDateInToday($0.date) }
@@ -56,6 +64,27 @@ struct DashboardView: View {
 
     private var frequentMeals: [FrequentMeal] {
         FoodLibrary.frequentMeals(meals: meals)
+    }
+
+    private var todayPlanCheckIn: DailyPlanCheckIn? {
+        planCheckIns.first { Calendar.current.isDateInToday($0.date) }
+    }
+
+    private var planGoalMode: PlanGoalMode {
+        PlanGoalMode(rawValue: planGoalModeRaw) ?? .notSet
+    }
+
+    private var adaptivePlanReview: AdaptivePlanReview {
+        AdaptivePlanEngine.review(
+            days: adaptivePlanDays(),
+            weights: measurements.compactMap { measurement in
+                measurement.weight.map { AdaptiveWeightPoint(date: measurement.date, weight: $0) }
+            },
+            mode: planGoalMode,
+            weeklyRate: planWeeklyRate,
+            calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
+            lastAdjustmentDate: planLastAdjustmentTimestamp > 0 ? Date(timeIntervalSince1970: planLastAdjustmentTimestamp) : nil
+        )
     }
 
     var body: some View {
@@ -74,6 +103,7 @@ struct DashboardView: View {
                             captureCard
                             if !frequentMeals.isEmpty { frequentMealsCard }
                             todayCard
+                            adaptivePlanCard
                             workoutCard
                             weeklyCard
                             coachCard
@@ -114,6 +144,34 @@ struct DashboardView: View {
             .sheet(isPresented: $showingManualEntry) {
                 ManualMealSheet { editable, date in
                     saveMeal(editable, imageData: nil, date: date, source: "manual")
+                }
+            }
+            .sheet(isPresented: $showingDailyCheckIn) {
+                DailyPlanCheckInSheet(
+                    date: .now,
+                    existing: todayPlanCheckIn,
+                    save: saveDailyPlanCheckIn,
+                    reopen: reopenTodayPlanCheckIn
+                )
+            }
+            .sheet(isPresented: $showingPlanSettings) {
+                PlanSettingsSheet(
+                    mode: planGoalMode,
+                    weeklyRate: planWeeklyRate,
+                    targetWeight: planTargetWeight > 0 ? planTargetWeight : nil
+                ) { mode, rate, targetWeight in
+                    planGoalModeRaw = mode.rawValue
+                    planWeeklyRate = rate
+                    planTargetWeight = targetWeight ?? 0
+                    planLastAdjustmentTimestamp = 0
+                }
+            }
+            .alert("Aplicar nuevo rango", isPresented: $showingPlanAdjustmentConfirmation) {
+                Button("Cancelar", role: .cancel) {}
+                Button("Aplicar") { applyAdaptivePlanAdjustment() }
+            } message: {
+                if let proposed = adaptivePlanReview.proposedRange {
+                    Text("Tu rango pasará de \(Int(calorieMin)) a \(Int(calorieMax)) kcal, a \(Int(proposed.lowerBound)) a \(Int(proposed.upperBound)) kcal. Podrás editarlo después en Ajustes.")
                 }
             }
             .sheet(item: $editingMeal) { meal in
@@ -500,12 +558,213 @@ struct DashboardView: View {
                         if meal.id != todayMeals.last?.id { Divider().overlay(CaltrackTheme.line) }
                     }
                 }
+
+                Divider().overlay(CaltrackTheme.line)
+                Button {
+                    showingDailyCheckIn = true
+                } label: {
+                    HStack(spacing: 11) {
+                        Image(systemName: todayPlanCheckIn?.nutritionComplete == true ? "checkmark.circle.fill" : "circle")
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(todayPlanCheckIn?.nutritionComplete == true ? CaltrackTheme.green : CaltrackTheme.muted)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(todayPlanCheckIn?.nutritionComplete == true ? "Día cerrado" : "Cerrar el día")
+                                .font(.subheadline.weight(.semibold))
+                            Text(todayPlanCheckIn?.nutritionComplete == true ? "Hambre \(todayPlanCheckIn?.hunger ?? 3)/5 · Energía \(todayPlanCheckIn?.energy ?? 3)/5" : "Confirma que has registrado todo")
+                                .font(.caption)
+                                .foregroundStyle(CaltrackTheme.muted)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(CaltrackTheme.muted)
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(minHeight: 54)
+                    .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .disabled(todayMeals.isEmpty)
+                .opacity(todayMeals.isEmpty ? 0.55 : 1)
+                .accessibilityIdentifier("dailyPlanCheckIn")
             }
         }
     }
 
+    private var adaptivePlanCard: some View {
+        let review = adaptivePlanReview
+        return Card {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Eyebrow(text: "Plan adaptativo")
+                        Text(review.title)
+                            .font(.title3.weight(.bold))
+                    }
+                    Spacer()
+                    Image(systemName: planStateIcon(review.state))
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(planStateColor(review.state))
+                        .frame(width: 38, height: 38)
+                        .background(planStateColor(review.state).opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+
+                Text(review.message)
+                    .font(.subheadline)
+                    .foregroundStyle(CaltrackTheme.muted)
+
+                if planGoalMode != .notSet {
+                    HStack(spacing: 8) {
+                        planMetric("\(review.completeDays)/14", label: "días")
+                        planMetric(review.actualWeeklyRate.map(formatWeeklyRate) ?? "-", label: "real")
+                        planMetric(formatWeeklyRate(review.targetWeeklyRate), label: "objetivo")
+                    }
+                    if let adherence = review.rangeAdherence {
+                        ProgressView(value: adherence)
+                            .tint(adherence >= AdaptivePlanEngine.minimumAdherence ? CaltrackTheme.green : CaltrackTheme.coral)
+                        Text("\(Int((adherence * 100).rounded()))% de días cerrados dentro del rango")
+                            .font(.caption)
+                            .foregroundStyle(CaltrackTheme.muted)
+                    }
+                }
+
+                if let proposed = review.proposedRange, let delta = review.calorieDelta {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Rango propuesto").font(.caption).foregroundStyle(CaltrackTheme.muted)
+                            Text("\(Int(proposed.lowerBound)) a \(Int(proposed.upperBound)) kcal")
+                                .font(.headline.monospacedDigit())
+                        }
+                        Spacer()
+                        MetricPill(text: "\(delta > 0 ? "+" : "")\(Int(delta)) kcal")
+                    }
+                    Button {
+                        showingPlanAdjustmentConfirmation = true
+                    } label: {
+                        Label("Revisar y aplicar", systemImage: "checkmark.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 46)
+                            .foregroundStyle(.black)
+                            .background(CaltrackTheme.green, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .accessibilityIdentifier("applyAdaptivePlan")
+                }
+
+                Button {
+                    showingPlanSettings = true
+                } label: {
+                    HStack {
+                        Label(planGoalMode == .notSet ? "Configurar mi plan" : "Editar objetivo", systemImage: "target")
+                        Spacer()
+                        if planTargetWeight > 0 {
+                            Text("\(planTargetWeight.formatted(.number.precision(.fractionLength(0...1)))) kg")
+                                .foregroundStyle(CaltrackTheme.muted)
+                        }
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(CaltrackTheme.muted)
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 14)
+                    .frame(height: 46)
+                    .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityIdentifier("configureAdaptivePlan")
+
+                Text("Tendencia personal, no consejo médico. Ningún cambio se aplica sin confirmación.")
+                    .font(.caption2)
+                    .foregroundStyle(CaltrackTheme.muted)
+            }
+        }
+    }
+
+    private func planMetric(_ value: String, label: String) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(value).font(.subheadline.monospacedDigit().weight(.bold))
+            Text(label).font(.caption2).foregroundStyle(CaltrackTheme.muted)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+    }
+
+    private func planStateIcon(_ state: AdaptivePlanState) -> String {
+        switch state {
+        case .needsConfiguration: "target"
+        case .collecting: "hourglass"
+        case .followCurrentPlan: "arrow.triangle.2.circlepath"
+        case .stable: "checkmark.circle.fill"
+        case .recentlyAdjusted: "clock.badge.checkmark"
+        case .adjustment: "slider.horizontal.3"
+        case .safetyLimit: "exclamationmark.shield.fill"
+        }
+    }
+
+    private func planStateColor(_ state: AdaptivePlanState) -> Color {
+        switch state {
+        case .stable, .recentlyAdjusted: CaltrackTheme.green
+        case .collecting, .needsConfiguration, .followCurrentPlan, .adjustment: CaltrackTheme.blue
+        case .safetyLimit: CaltrackTheme.coral
+        }
+    }
+
+    private func formatWeeklyRate(_ value: Double) -> String {
+        let sign = value > 0 ? "+" : ""
+        return "\(sign)\(value.formatted(.number.precision(.fractionLength(2)))) kg"
+    }
+
+    private func adaptivePlanDays() -> [AdaptivePlanDay] {
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
+        return (0..<AdaptivePlanEngine.windowDays).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
+            let calories = meals.filter { calendar.isDate($0.date, inSameDayAs: date) }.reduce(0) { $0 + $1.calories }
+            let complete = planCheckIns.contains { $0.nutritionComplete && calendar.isDate($0.date, inSameDayAs: date) }
+            return AdaptivePlanDay(date: date, calories: calories, isComplete: complete)
+        }
+    }
+
+    private func saveDailyPlanCheckIn(hunger: Int, energy: Int) {
+        let calendar = Calendar.current
+        let date = calendar.startOfDay(for: .now)
+        if let existing = todayPlanCheckIn {
+            existing.date = date
+            existing.nutritionComplete = true
+            existing.hunger = hunger
+            existing.energy = energy
+        } else {
+            modelContext.insert(DailyPlanCheckIn(
+                externalID: "plan-check-in:\(Int(date.timeIntervalSince1970))",
+                date: date,
+                hunger: hunger,
+                energy: energy
+            ))
+        }
+        try? modelContext.save()
+    }
+
+    private func reopenTodayPlanCheckIn() {
+        todayPlanCheckIn?.nutritionComplete = false
+        try? modelContext.save()
+    }
+
+    private func applyAdaptivePlanAdjustment() {
+        guard let proposed = adaptivePlanReview.proposedRange else { return }
+        calorieMin = proposed.lowerBound
+        calorieMax = proposed.upperBound
+        planLastAdjustmentTimestamp = Date.now.timeIntervalSince1970
+        UINotificationFeedbackGenerator().notificationOccurred(.success)
+    }
+
     private var coachCard: some View {
-        let score = todayMeals.isEmpty ? 0 : CaltrackMath.adherence(calories: todayTotals.calories, protein: todayTotals.protein, calorieRange: calorieMin...calorieMax, proteinRange: proteinMin...proteinMax)
+        let score = todayMeals.isEmpty ? 0 : CaltrackMath.adherence(
+            calories: todayTotals.calories,
+            protein: todayTotals.protein,
+            calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
+            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
+        )
         return Card {
             HStack(alignment: .top, spacing: 16) {
                 ZStack {
@@ -902,27 +1161,29 @@ struct DashboardView: View {
 #if DEBUG
     private func seedSuperAppTestingData() {
         let calendar = Calendar.current
+        let today = calendar.startOfDay(for: .now)
         for meal in (try? modelContext.fetch(FetchDescriptor<MealEntry>())) ?? [] { modelContext.delete(meal) }
         for measurement in (try? modelContext.fetch(FetchDescriptor<BodyMeasurement>())) ?? [] { modelContext.delete(measurement) }
         for activity in (try? modelContext.fetch(FetchDescriptor<ActivityDay>())) ?? [] { modelContext.delete(activity) }
         for recovery in (try? modelContext.fetch(FetchDescriptor<RecoveryDay>())) ?? [] { modelContext.delete(recovery) }
+        for checkIn in (try? modelContext.fetch(FetchDescriptor<DailyPlanCheckIn>())) ?? [] { modelContext.delete(checkIn) }
         for workout in (try? modelContext.fetch(FetchDescriptor<WorkoutEntry>())) ?? [] { modelContext.delete(workout) }
         for message in (try? modelContext.fetch(FetchDescriptor<CoachMessage>())) ?? [] { modelContext.delete(message) }
         try? modelContext.save()
 
         for offset in 0..<14 {
-            let day = calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now
+            let day = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
             let variation = Double((offset % 4) * 45)
-            modelContext.insert(MealEntry(date: day.addingTimeInterval(-28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
-            modelContext.insert(MealEntry(date: day.addingTimeInterval(-14_400), name: "Pollo con arroz", calories: 720, protein: 62, carbohydrates: 74, fat: 18, source: "Grok Vision", confidence: 0.91))
-            modelContext.insert(MealEntry(date: day.addingTimeInterval(-3_600), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(43_200), name: "Pollo con arroz", calories: 720, protein: 62, carbohydrates: 74, fat: 18, source: "Grok Vision", confidence: 0.91))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(64_800), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
         }
-        for index in 0..<6 {
-            let date = calendar.date(byAdding: .day, value: -(index * 7), to: .now) ?? .now
-            modelContext.insert(BodyMeasurement(date: date, weight: 79.4 + Double(index) * 0.35, bodyFat: 14.2 + Double(index) * 0.22, waist: 81.0 + Double(index) * 0.45, source: "HealthKit"))
+        for index in 0..<9 {
+            let date = calendar.date(byAdding: .day, value: -(index * 4), to: today)?.addingTimeInterval(43_200) ?? today
+            modelContext.insert(BodyMeasurement(date: date, weight: 79.4 + Double(index) * 0.23, bodyFat: 14.2 + Double(index) * 0.14, waist: 81.0 + Double(index) * 0.3, source: "HealthKit"))
         }
         for offset in 0..<14 {
-            let date = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -offset, to: .now) ?? .now)
+            let date = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
             modelContext.insert(ActivityDay(
                 externalID: "health-activity:super-ui-\(offset)",
                 date: date,
@@ -941,9 +1202,15 @@ struct DashboardView: View {
                 hrvSDNN: 46 + Double((offset % 5) * 3),
                 source: "Apple Watch"
             ))
+            modelContext.insert(DailyPlanCheckIn(
+                externalID: "plan-check-in:super-ui-\(offset)",
+                date: date,
+                hunger: 2 + (offset % 3),
+                energy: 3 + (offset % 2)
+            ))
         }
         for index in 0..<4 {
-            let start = calendar.date(byAdding: .day, value: -(index * 2), to: .now) ?? .now
+            let start = calendar.date(byAdding: .day, value: -(index * 2), to: today)?.addingTimeInterval(43_200) ?? today
             modelContext.insert(WorkoutEntry(
                 externalID: "hevy:super-ui-\(index)",
                 startDate: start.addingTimeInterval(-4_200),
@@ -961,6 +1228,14 @@ struct DashboardView: View {
         }
         modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-120), role: "user", content: "¿Qué patrón debería mejorar esta semana?"))
         modelContext.insert(CoachMessage(date: .now.addingTimeInterval(-60), role: "assistant", content: "Tu proteína es consistente y el entrenamiento está cubierto. La principal mejora es reducir la variación de calorías entre días. Acción para esta semana: deja planificada la cena antes de las 18:00."))
+        planGoalModeRaw = PlanGoalMode.lose.rawValue
+        planWeeklyRate = 0.5
+        planTargetWeight = 75
+        planLastAdjustmentTimestamp = 0
+        calorieMin = 1_800
+        calorieMax = 2_000
+        proteinMin = 160
+        proteinMax = 190
         try? modelContext.save()
     }
 #endif

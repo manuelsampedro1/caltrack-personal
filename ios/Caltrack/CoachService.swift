@@ -69,6 +69,9 @@ enum CoachContextBuilder {
         measurements: [BodyMeasurement],
         workouts: [WorkoutEntry],
         activities: [ActivityDay] = [],
+        checkIns: [DailyPlanCheckIn] = [],
+        planMode: PlanGoalMode = .notSet,
+        planWeeklyRate: Double = 0,
         calorieRange: ClosedRange<Double>,
         proteinRange: ClosedRange<Double>,
         now: Date = .now
@@ -80,6 +83,17 @@ enum CoachContextBuilder {
             "Objetivo de proteína: \(Int(proteinRange.lowerBound)) a \(Int(proteinRange.upperBound)) g.",
             "Días con comida registrada: \(days.count) de 30."
         ]
+        if planMode != .notSet {
+            lines.append("Plan personal: \(planMode.title), ritmo objetivo \(planMode.signedRate(planWeeklyRate).formatted(.number.precision(.fractionLength(2)))) kg por semana.")
+        }
+        let recentCheckIns = checkIns.filter {
+            $0.nutritionComplete && $0.date >= (Calendar.current.date(byAdding: .day, value: -30, to: now) ?? .distantPast)
+        }
+        if !recentCheckIns.isEmpty {
+            let hunger = Double(recentCheckIns.reduce(0) { $0 + $1.hunger }) / Double(recentCheckIns.count)
+            let energy = Double(recentCheckIns.reduce(0) { $0 + $1.energy }) / Double(recentCheckIns.count)
+            lines.append("Cierres completos: \(recentCheckIns.count) de 30. Hambre media \(hunger.formatted(.number.precision(.fractionLength(1)))) de 5 y energía media \(energy.formatted(.number.precision(.fractionLength(1)))) de 5.")
+        }
         lines += days.suffix(20).map {
             "\($0.date.formatted(.iso8601.year().month().day())): \(Int($0.calories)) kcal, \(Int($0.protein)) g proteína, \(Int($0.carbohydrates)) g carbohidratos, \(Int($0.fat)) g grasa."
         }

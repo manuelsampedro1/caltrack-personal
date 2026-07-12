@@ -57,8 +57,8 @@ struct ProgressDashboardView: View {
             meals: meals,
             measurements: measurements,
             workouts: workouts,
-            calorieRange: calorieMin...calorieMax,
-            proteinRange: proteinMin...proteinMax
+            calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
+            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
         )
     }
 
