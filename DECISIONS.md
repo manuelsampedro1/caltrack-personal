@@ -45,3 +45,9 @@ La foto es la acción principal. Grok devuelve un JSON estricto con componentes,
 ### Pase de diseño
 
 Las referencias son las capturas del tuit original, la PWA ya publicada y las guías de HealthKit de Apple. La app conserva carbón casi negro, verde para acciones y éxito, azul para proteína y coral para advertencias. Usa SF Symbols, tarjetas de 20 puntos, espacios de 14 a 18 puntos, haptics ligeros, sheets nativas y soporte de Reduce Motion sin dependencias de UI.
+
+### Salud como bandeja universal de entrenamientos
+
+Strava y Hevy pueden escribir entrenamientos en Apple Salud. Caltrack los consulta desde HealthKit para evitar OAuth, secretos de Strava y un backend. La fuente original se conserva para mostrar si una actividad viene de Hevy, Strava u otra aplicación.
+
+HealthKit no conserva las series, repeticiones y cargas completas de Hevy. Por eso Caltrack admite una clave opcional de Hevy Pro en Keychain, importa el detalle desde la API oficial y fusiona la sesión con su resumen de Salud mediante identificador y hora de inicio.

@@ -4,7 +4,7 @@ import SwiftUI
 @main
 struct CaltrackApp: App {
     private let container: ModelContainer = {
-        let schema = Schema([MealEntry.self, BodyMeasurement.self])
+        let schema = Schema([MealEntry.self, BodyMeasurement.self, WorkoutEntry.self])
         if let support = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first {
             try? FileManager.default.createDirectory(at: support, withIntermediateDirectories: true)
         }

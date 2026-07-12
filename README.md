@@ -77,6 +77,14 @@ El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posteri
 4. En Ajustes de Caltrack, guarda una clave de xAI. Se conserva en Keychain y nunca se añade a Git.
 5. Pulsa `Fotografiar comida`, revisa la estimación y confirma los macros.
 
+### Entrenamientos de Hevy y Strava
+
+- Strava: activa `Ajustes > Gestionar apps y dispositivos > Salud > Enviar a Salud`. Caltrack importará tipo de actividad, duración, distancia, calorías y fuente desde HealthKit.
+- Hevy: conecta Hevy con Apple Salud para importar el resumen de cada sesión.
+- Hevy Pro: añade la clave de la API oficial en Ajustes de Caltrack para recuperar ejercicios, series, repeticiones, cargas, RPE, volumen y mejores series.
+
+Caltrack detecta sesiones equivalentes de Salud y Hevy para no duplicarlas.
+
 Para regenerar el proyecto después de añadir archivos Swift:
 
 ```bash

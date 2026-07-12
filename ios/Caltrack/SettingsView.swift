@@ -7,7 +7,9 @@ struct SettingsView: View {
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
     @State private var apiKey = ""
+    @State private var hevyKey = ""
     @State private var keySaved = false
+    @State private var hevyKeySaved = false
     @State private var errorMessage: String?
 
     var body: some View {
@@ -31,6 +33,32 @@ struct SettingsView: View {
                     }
                 }
 
+                Section("Hevy Pro") {
+                    SecureField("Clave de API de Hevy", text: $hevyKey)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                    Text("Añade el detalle de ejercicios, series, repeticiones, cargas, RPE y volumen. La API oficial requiere Hevy Pro.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Button(hevyKeySaved ? "Clave de Hevy guardada" : "Guardar clave de Hevy") { saveHevyKey() }
+                        .disabled(hevyKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    Link("Crear o copiar clave en Hevy", destination: URL(string: "https://hevy.com/settings?developer")!)
+                    if KeychainStore.read(account: HevyService.apiKeyAccount) != nil {
+                        Button("Eliminar clave de Hevy", role: .destructive) {
+                            KeychainStore.remove(account: HevyService.apiKeyAccount)
+                            hevyKey = ""
+                            hevyKeySaved = false
+                        }
+                    }
+                }
+
+                Section("Strava") {
+                    Text("Caltrack importa Strava desde Apple Salud. En Strava activa Ajustes > Gestionar apps y dispositivos > Salud > Enviar a Salud.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Label("No necesita clave ni acceso a tu cuenta de Strava", systemImage: "checkmark.shield")
+                }
+
                 Section("Objetivos diarios") {
                     numberRow("Calorías mínimas", value: $calorieMin, step: 50)
                     numberRow("Calorías máximas", value: $calorieMax, step: 50)
@@ -40,7 +68,7 @@ struct SettingsView: View {
 
                 Section("Privacidad") {
                     Label("Las comidas y fotos se guardan en este iPhone", systemImage: "iphone.gen3")
-                    Label("Salud requiere permiso explícito de Apple", systemImage: "heart.text.square")
+                    Label("Medidas y entrenamientos de Salud requieren permiso explícito", systemImage: "heart.text.square")
                     Label("Cada estimación se confirma antes de guardar", systemImage: "checkmark.seal")
                 }
 
@@ -55,6 +83,7 @@ struct SettingsView: View {
             }
             .onAppear {
                 if KeychainStore.read(account: GrokService.apiKeyAccount) != nil { keySaved = true }
+                if KeychainStore.read(account: HevyService.apiKeyAccount) != nil { hevyKeySaved = true }
             }
         }
     }
@@ -73,6 +102,16 @@ struct SettingsView: View {
         do {
             try KeychainStore.save(apiKey.trimmingCharacters(in: .whitespacesAndNewlines), account: GrokService.apiKeyAccount)
             keySaved = true
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
+
+    private func saveHevyKey() {
+        do {
+            try KeychainStore.save(hevyKey.trimmingCharacters(in: .whitespacesAndNewlines), account: HevyService.apiKeyAccount)
+            hevyKeySaved = true
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription

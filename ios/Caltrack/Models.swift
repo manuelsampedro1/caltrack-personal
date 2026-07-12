@@ -61,6 +61,81 @@ final class BodyMeasurement {
     }
 }
 
+struct WorkoutExerciseSummary: Codable, Equatable, Identifiable {
+    var id: String { name }
+    let name: String
+    let setCount: Int
+    let bestWeight: Double?
+    let bestReps: Int?
+    let volumeKg: Double
+    let rpe: Double?
+}
+
+@Model
+final class WorkoutEntry {
+    var id: UUID
+    @Attribute(.unique) var externalID: String
+    var startDate: Date
+    var endDate: Date
+    var title: String
+    var activityType: String
+    var durationMinutes: Double
+    var calories: Double?
+    var distanceKm: Double?
+    var source: String
+    var sourceBundle: String
+    var exerciseCount: Int
+    var setCount: Int
+    var totalVolumeKg: Double
+    @Attribute(.externalStorage) var exerciseData: Data?
+
+    init(
+        id: UUID = UUID(),
+        externalID: String,
+        startDate: Date,
+        endDate: Date,
+        title: String,
+        activityType: String,
+        durationMinutes: Double,
+        calories: Double? = nil,
+        distanceKm: Double? = nil,
+        source: String,
+        sourceBundle: String = "",
+        exerciseCount: Int = 0,
+        setCount: Int = 0,
+        totalVolumeKg: Double = 0,
+        exercises: [WorkoutExerciseSummary] = []
+    ) {
+        self.id = id
+        self.externalID = externalID
+        self.startDate = startDate
+        self.endDate = endDate
+        self.title = title
+        self.activityType = activityType
+        self.durationMinutes = durationMinutes
+        self.calories = calories
+        self.distanceKm = distanceKm
+        self.source = source
+        self.sourceBundle = sourceBundle
+        self.exerciseCount = exerciseCount
+        self.setCount = setCount
+        self.totalVolumeKg = totalVolumeKg
+        self.exerciseData = try? JSONEncoder().encode(exercises)
+    }
+
+    var exercises: [WorkoutExerciseSummary] {
+        guard let exerciseData else { return [] }
+        return (try? JSONDecoder().decode([WorkoutExerciseSummary].self, from: exerciseData)) ?? []
+    }
+
+    func updateExercises(_ exercises: [WorkoutExerciseSummary]) {
+        exerciseData = try? JSONEncoder().encode(exercises)
+        exerciseCount = exercises.count
+        setCount = exercises.reduce(0) { $0 + $1.setCount }
+        totalVolumeKg = exercises.reduce(0) { $0 + $1.volumeKg }
+    }
+}
+
 struct FoodAnalysis: Codable, Equatable {
     struct Item: Codable, Equatable, Identifiable {
         var id: String { "\(name)-\(portion)" }
@@ -140,6 +215,16 @@ enum CaltrackMath {
         let calorieScore = calorieRange.contains(calories) ? 1.0 : max(0, 1 - abs(calories - calorieRange.clamped(calories)) / max(calorieRange.upperBound, 1))
         let proteinScore = min(1, protein / max(proteinRange.lowerBound, 1))
         return Int(((calorieScore + proteinScore) * 50).rounded())
+    }
+}
+
+enum WorkoutMatch {
+    static func isHevySource(name: String, bundle: String) -> Bool {
+        "\(name) \(bundle)".localizedCaseInsensitiveContains("hevy")
+    }
+
+    static func representsSameSession(sourceName: String, sourceBundle: String, startDate: Date, hevyStartDate: Date) -> Bool {
+        isHevySource(name: sourceName, bundle: sourceBundle) && abs(startDate.timeIntervalSince(hevyStartDate)) < 600
     }
 }
 

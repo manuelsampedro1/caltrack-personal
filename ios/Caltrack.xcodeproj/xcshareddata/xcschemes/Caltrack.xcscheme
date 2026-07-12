@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D63C02B29276B78650D4AD71"
+               BlueprintIdentifier = "14E08D04C8A27E6CF677D6D4"
                BuildableName = "Caltrack.app"
                BlueprintName = "Caltrack"
                ReferencedContainer = "container:Caltrack.xcodeproj">
@@ -30,7 +30,7 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D63C02B29276B78650D4AD71"
+            BlueprintIdentifier = "14E08D04C8A27E6CF677D6D4"
             BuildableName = "Caltrack.app"
             BlueprintName = "Caltrack"
             ReferencedContainer = "container:Caltrack.xcodeproj">
@@ -41,7 +41,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "CB8AC99FBDDE337838A10C0F"
+               BlueprintIdentifier = "DCB02199BD4C9F34670F5600"
                BuildableName = "CaltrackTests.xctest"
                BlueprintName = "CaltrackTests"
                ReferencedContainer = "container:Caltrack.xcodeproj">
@@ -51,7 +51,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "884FF0F2AA6FD0D063C62970"
+               BlueprintIdentifier = "B708DF796827B3BA1439E1B9"
                BuildableName = "CaltrackUITests.xctest"
                BlueprintName = "CaltrackUITests"
                ReferencedContainer = "container:Caltrack.xcodeproj">
@@ -73,7 +73,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D63C02B29276B78650D4AD71"
+            BlueprintIdentifier = "14E08D04C8A27E6CF677D6D4"
             BuildableName = "Caltrack.app"
             BlueprintName = "Caltrack"
             ReferencedContainer = "container:Caltrack.xcodeproj">
@@ -90,7 +90,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D63C02B29276B78650D4AD71"
+            BlueprintIdentifier = "14E08D04C8A27E6CF677D6D4"
             BuildableName = "Caltrack.app"
             BlueprintName = "Caltrack"
             ReferencedContainer = "container:Caltrack.xcodeproj">

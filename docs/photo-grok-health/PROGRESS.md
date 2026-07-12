@@ -18,12 +18,12 @@ Estado: completada en código. HealthKit lee peso, grasa corporal y cintura. La 
 
 ### Fase 4: Calidad y entrega
 
-Estado: completada salvo dispositivo real. Build de simulador correcto, dos tests unitarios y un test de interfaz pasan. La pantalla completa fue inspeccionada visualmente en iPhone 16.
+Estado: completada salvo dispositivo real. Build de simulador correcto, cuatro tests unitarios y un test de interfaz pasan. La pantalla completa fue inspeccionada visualmente en iPhone 16.
 
 ## Decisiones
 
 - SwiftUI y SwiftData, iOS 17+.
-- HealthKit solo lectura para peso, grasa y cintura.
+- HealthKit solo lectura para peso, grasa, cintura y entrenamientos.
 - xAI directo desde la app con clave en Keychain.
 - Cada estimación necesita revisión humana antes de guardarse.
 - La PWA continúa publicada como alternativa.
@@ -41,5 +41,5 @@ Estado: completada salvo dispositivo real. Build de simulador correcto, dos test
 - Se eligió la arquitectura nativa sin VPS.
 - Se implementó el proyecto iOS completo.
 - Build de simulador correcto y sin warnings propios.
-- Tests: 2 unitarios y 1 de interfaz, 0 fallos.
+- Tests: 4 unitarios y 1 de interfaz, 0 fallos.
 - Revisión visual a pantalla completa completada.
