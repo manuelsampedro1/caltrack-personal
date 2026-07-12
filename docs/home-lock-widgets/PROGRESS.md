@@ -1,6 +1,6 @@
 # Progreso de widgets de inicio y bloqueo
 
-## Estado: fase 4, validación y publicación
+## Estado: completado
 
 ## Decisiones
 
@@ -30,4 +30,9 @@
 - Capturas inspeccionadas de pequeño, vacío, mediano, bloqueo y privacidad.
 - La instalación de v1.8 sobre v1.7 conserva 42 comidas, 9 medidas, 14 días de actividad, 14 de recuperación, 4 entrenamientos, 14 cierres y 2 mensajes.
 - No hay un iPhone físico conectado a Xcode, así que la instalación real queda como prueba manual.
-- Pendiente únicamente la publicación de v1.8.
+
+## Publicación
+
+- Commit funcional: `cfe1aa9b30a62bf40486d013ebabb76347c77849`.
+- GitHub Pages: ejecución `29212963756`, resultado correcto para el mismo SHA.
+- Web pública: `https://manuelsampedro1.github.io/caltrack-personal/`, HTTP 200 después del despliegue.

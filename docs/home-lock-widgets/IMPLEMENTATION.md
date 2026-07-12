@@ -41,7 +41,7 @@ Guardar, editar, borrar o cerrar un día cambia el snapshot, y cada acción abre
 - [x] Añadir recorrido UI y capturas de tamaños clave.
 - [x] Inspeccionar visualmente estado normal, vacío y privado.
 - [x] Validar que el `.appex` queda embebido y con entitlements correctos.
-- [ ] Ejecutar suite limpia, actualizar documentación y publicar v1.8.
+- [x] Ejecutar suite limpia, actualizar documentación y publicar v1.8.
 
 ### Criterio
 
