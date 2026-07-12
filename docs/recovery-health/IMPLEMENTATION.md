@@ -40,4 +40,4 @@ La recuperación se entiende en menos de diez segundos y no desplaza la acción 
 - [x] Probar migración desde v1.5.
 - [x] Ejecutar build y suite completa.
 - [x] Actualizar privacidad, decisiones, README y TODO.
-- [ ] Publicar v1.6 y verificar el SHA exacto.
+- [x] Publicar v1.6 y verificar el SHA exacto.

@@ -1,6 +1,6 @@
 # Progreso de recuperación
 
-## Estado: implementación validada en simulador
+## Estado: v1.6 publicada y validada
 
 ## Decisiones
 
@@ -24,4 +24,5 @@
 - Migración real probada instalando v1.6 sobre v1.5: se conservaron 42 comidas, 6 mediciones, 14 días de actividad y 4 entrenamientos; se creó la nueva tabla de recuperación sin borrar datos.
 - Copia antigua sin campo de recuperación restaurada correctamente y copia nueva verificada en ida y vuelta.
 - Proyecto regenerado dos veces con hashes idénticos.
+- Versión publicada desde el commit `44e46e7`; el workflow de Pages `29209694714` terminó correctamente.
 - Pendiente fuera del simulador: permiso y contraste con datos reales de Salud en un iPhone firmado.
