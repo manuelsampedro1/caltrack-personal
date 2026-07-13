@@ -42,7 +42,7 @@ La app responde cuánto se ha registrado, cuánto falta y si el dato está incom
 - [x] Inspeccionar Hoy, Progreso y edición en iPhone 16.
 - [x] Validar migración v1.9 a v1.10.
 - [x] Ejecutar suite, build firmado y auditoría.
-- [ ] Actualizar documentación y publicar.
+- [x] Actualizar documentación y publicar.
 
 ### Criterio
 

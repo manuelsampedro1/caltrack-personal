@@ -1,6 +1,6 @@
 # Progreso de calidad nutricional y fibra
 
-## Estado: validación terminada, publicación en curso
+## Estado: completado y publicado
 
 ## Decisiones
 
@@ -19,7 +19,9 @@
 - Migración v1.9 a v1.10 con 42 comidas, 9 medidas, 4 entrenamientos y 14 registros de cada serie diaria intactos.
 - Las 42 comidas legacy quedan con fibra desconocida y la base añade `ZFIBER` sin inventar ceros.
 - Build Release 1.10 (11) firmado y verificado con HealthKit y App Group en la app, y App Group en el widget.
+- Commit funcional `792424a994e5741d48193aa7061f8cac9ed37494` publicado por GitHub Actions, ejecución `29215922571` terminada con éxito.
+- URL pública comprobada con HTTP 200 tras el despliegue.
 
-## Evidencia pendiente
+## Pendiente fuera de automatización
 
-- Publicar el SHA final y verificar Pages.
+- Confirmar en un iPhone real el permiso nuevo de fibra y los widgets instalados desde la pantalla de inicio.
