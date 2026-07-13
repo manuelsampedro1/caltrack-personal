@@ -65,6 +65,7 @@ def review_contact_for(caltrack)
 end
 
 def configure_store_metadata!(app, contact)
+  puts "  Versión y lanzamiento manual"
   app.ensure_version!(VERSION, platform: "IOS")
   version = app.get_edit_app_store_version(platform: "IOS", includes: nil)
   info = app.fetch_edit_app_info
@@ -79,6 +80,7 @@ def configure_store_metadata!(app, contact)
   info_localization = info.get_app_info_localizations.find { |item| item.locale == LOCALE }
   raise "No existe la localización #{LOCALE} de información" unless info_localization
 
+  puts "  Nombre, subtítulo y privacidad"
   info_localization.update(attributes: {
     name: read_metadata("name.txt"),
     subtitle: read_metadata("subtitle.txt"),
@@ -86,26 +88,33 @@ def configure_store_metadata!(app, contact)
     privacy_choices_url: read_metadata("privacy_url.txt")
   })
 
+  puts "  Categorías"
   info.update_categories(category_id_map: {
     primary_category_id: "HEALTH_AND_FITNESS",
     secondary_category_id: "FOOD_AND_DRINK"
   })
 
+  puts "  Derechos de contenido"
   app.update(attributes: {
     content_rights_declaration: Spaceship::ConnectAPI::App::ContentRightsDeclaration::USES_THIRD_PARTY_CONTENT
   })
 
+  puts "  Descripción, keywords y URLs"
   localization = version.get_app_store_version_localizations.find { |item| item.locale == LOCALE }
   localization ||= version.create_app_store_version_localization(attributes: { locale: LOCALE })
-  localization.update(attributes: {
+  localization_attributes = {
     description: read_metadata("description.txt"),
     keywords: read_metadata("keywords.txt"),
     marketing_url: read_metadata("marketing_url.txt"),
     promotional_text: read_metadata("promotional_text.txt"),
-    support_url: read_metadata("support_url.txt"),
-    whats_new: read_metadata("release_notes.txt")
-  })
+    support_url: read_metadata("support_url.txt")
+  }
+  if app.get_live_app_store_version(platform: "IOS", includes: nil)
+    localization_attributes[:whats_new] = read_metadata("release_notes.txt")
+  end
+  localization.update(attributes: localization_attributes)
 
+  puts "  Clasificación por edades"
   rating = info.fetch_age_rating_declaration
   rating.update(attributes: {
     alcohol_tobacco_or_drug_use_or_references: "NONE",
@@ -134,6 +143,7 @@ def configure_store_metadata!(app, contact)
     korea_age_rating_override: "NONE"
   })
 
+  puts "  Notas y contacto de revisión"
   review_attributes = {
     contact_first_name: contact.contact_first_name,
     contact_last_name: contact.contact_last_name,
@@ -142,7 +152,11 @@ def configure_store_metadata!(app, contact)
     demo_account_required: false,
     notes: File.read(File.join(ROOT, "ios", "app_store", "review_notes.txt"), encoding: "UTF-8").strip
   }
-  review = version.fetch_app_store_review_detail(includes: nil)
+  review = begin
+    version.fetch_app_store_review_detail(includes: nil)
+  rescue StandardError
+    nil
+  end
   review ? review.update(attributes: review_attributes) : version.create_app_store_review_detail(attributes: review_attributes)
 
   [version, info]
@@ -178,6 +192,7 @@ def configure_privacy!(app)
   config_path = File.join(ROOT, "ios", "app_store", "app_privacy_details.json")
   config = JSON.parse(File.read(config_path, encoding: "UTF-8"))
 
+  puts "  Limpiando respuestas anteriores"
   Spaceship::ConnectAPI::AppDataUsage.all(
     app_id: app.id,
     includes: "category,grouping,purpose,dataProtection",
@@ -185,6 +200,7 @@ def configure_privacy!(app)
   ).each(&:delete!)
 
   config.each do |usage|
+    puts "  Declarando #{usage.fetch('category')}"
     usage.fetch("purposes").each do |purpose|
       usage.fetch("data_protections").each do |protection|
         Spaceship::ConnectAPI::AppDataUsage.create(
@@ -197,21 +213,16 @@ def configure_privacy!(app)
     end
   end
 
+  puts "  Publicando respuestas de privacidad"
   publish_state = Spaceship::ConnectAPI::AppDataUsagesPublishState.get(app_id: app.id)
   publish_state.publish! unless publish_state.published
 end
 
-def verify!(app)
+def verify!(app, verify_privacy: true)
   version = app.get_edit_app_store_version(platform: "IOS", includes: nil)
   info = app.fetch_edit_app_info
   info_localization = info.get_app_info_localizations.find { |item| item.locale == LOCALE }
   version_localization = version.get_app_store_version_localizations.find { |item| item.locale == LOCALE }
-  privacy_usages = Spaceship::ConnectAPI::AppDataUsage.all(
-    app_id: app.id,
-    includes: "category,grouping,purpose,dataProtection",
-    limit: 500
-  )
-
   checks = {
     version: version.version_string == VERSION,
     release_manual: version.release_type == Spaceship::ConnectAPI::AppStoreVersion::ReleaseType::MANUAL,
@@ -220,15 +231,24 @@ def verify!(app)
     privacy_url: info_localization.privacy_policy_url == read_metadata("privacy_url.txt"),
     description: version_localization.description == read_metadata("description.txt"),
     keywords: version_localization.keywords == read_metadata("keywords.txt"),
-    support_url: version_localization.support_url == read_metadata("support_url.txt"),
-    privacy_answers: privacy_usages.any?
+    support_url: version_localization.support_url == read_metadata("support_url.txt")
   }
+
+  if verify_privacy
+    privacy_usages = Spaceship::ConnectAPI::AppDataUsage.all(
+      app_id: app.id,
+      includes: "category,grouping,purpose,dataProtection",
+      limit: 500
+    )
+    checks[:privacy_answers] = privacy_usages.any?
+  end
 
   failed = checks.reject { |_, value| value }.keys
   raise "Falló la verificación: #{failed.join(', ')}" unless failed.empty?
 
   puts "App Store configurado: app_id=#{app.id} version=#{version.version_string} locale=#{LOCALE}"
-  puts "Metadatos, categoría, edad, revisión, TestFlight y privacidad verificados"
+  verified = verify_privacy ? "Metadatos, categoría, edad, revisión, TestFlight y privacidad verificados" : "Metadatos, categoría, edad, revisión y TestFlight verificados; privacidad gestionada en la sesión web"
+  puts verified
 end
 
 begin
@@ -237,11 +257,21 @@ begin
   app = Spaceship::ConnectAPI::App.find(BUNDLE_ID)
   raise "No existe la ficha de Caltrack" unless app
 
+  puts "Configurando contacto de revisión"
   contact = review_contact_for(app)
+  puts "Configurando ficha de App Store"
   configure_store_metadata!(app, contact)
+  puts "Configurando información de TestFlight"
   configure_testflight_metadata!(app, contact)
-  configure_privacy!(app)
-  verify!(app)
+  skip_privacy = ENV["SKIP_APP_PRIVACY"] == "1"
+  if skip_privacy
+    puts "Omitiendo la API de privacidad; se verificará en la sesión web de App Store Connect"
+  else
+    puts "Configurando privacidad de App Store"
+    configure_privacy!(app)
+  end
+  puts "Verificando App Store Connect"
+  verify!(app, verify_privacy: !skip_privacy)
 rescue StandardError => error
   warn "No se pudo configurar App Store Connect: #{error.class}"
   exit 1

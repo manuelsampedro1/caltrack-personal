@@ -27,6 +27,9 @@
 - Icono aplanado sobre su fondo original, sin cambiar la composición visual, y preflight añadido al script de release.
 - Suite posterior al arreglo: 36 pruebas unitarias y 14 UI, 50 sin fallos.
 - Metadatos ASO, privacidad, soporte, edad, categoría, revisión y TestFlight preparados de forma reproducible.
+- Páginas públicas de privacidad y soporte desplegadas en GitHub Pages y verificadas con HTTP 200.
+- Privacidad publicada en App Store Connect con foto, contenido, Salud y fitness para funcionalidad, vinculados y sin tracking.
+- Declaración de dispositivo médico regulado completada como no aplicable.
 
 ## Pendiente de la release corregida
 
@@ -35,7 +38,5 @@
 
 ## Siguiente acción segura
 
-- Publicar las páginas de soporte y privacidad.
-- Ejecutar `ios/scripts/configure_app_store.rb` con la credencial activa no expuesta.
 - Archivar, validar y subir de nuevo la build 13 con el icono opaco.
 - Esperar el procesamiento y añadirla al grupo interno de TestFlight.
