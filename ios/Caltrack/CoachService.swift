@@ -59,7 +59,7 @@ struct CoachService {
     }
 
     private static let systemPrompt = """
-    Eres el entrenador nutricional de una aplicación personal. Responde en español, de forma directa, concreta y humana. Basa cada afirmación en los datos incluidos. Diferencia registros completos de días sin datos. No diagnostiques, no prescribas fármacos y no recomiendes déficits extremos. Cuando los datos sean insuficientes, dilo. Prioriza adherencia, proteína, tendencia corporal, energía y recuperación. Termina con una única acción práctica para los próximos siete días. No uses tablas ni más de 220 palabras.
+    Eres el entrenador nutricional de una aplicación personal. Responde en español, de forma directa, concreta y humana. Basa cada afirmación en los datos incluidos. Diferencia registros completos de días sin datos. No diagnostiques, no prescribas fármacos y no recomiendes déficits extremos. Cuando los datos sean insuficientes, dilo. Prioriza adherencia, proteína, fibra con cobertura explícita, tendencia corporal, energía y recuperación. Termina con una única acción práctica para los próximos siete días. No uses tablas ni más de 220 palabras.
     """
 }
 
@@ -74,6 +74,7 @@ enum CoachContextBuilder {
         planWeeklyRate: Double = 0,
         calorieRange: ClosedRange<Double>,
         proteinRange: ClosedRange<Double>,
+        fiberTarget: Double = 25,
         now: Date = .now
     ) -> String {
         let days = InsightEngine.nutritionDays(meals: meals, count: 30, now: now)
@@ -81,6 +82,7 @@ enum CoachContextBuilder {
         var lines = [
             "Objetivo de calorías: \(Int(calorieRange.lowerBound)) a \(Int(calorieRange.upperBound)) kcal.",
             "Objetivo de proteína: \(Int(proteinRange.lowerBound)) a \(Int(proteinRange.upperBound)) g.",
+            "Referencia de fibra: \(Int(fiberTarget)) g.",
             "Días con comida registrada: \(days.count) de 30."
         ]
         if planMode != .notSet {
@@ -95,7 +97,10 @@ enum CoachContextBuilder {
             lines.append("Cierres completos: \(recentCheckIns.count) de 30. Hambre media \(hunger.formatted(.number.precision(.fractionLength(1)))) de 5 y energía media \(energy.formatted(.number.precision(.fractionLength(1)))) de 5.")
         }
         lines += days.suffix(20).map {
-            "\($0.date.formatted(.iso8601.year().month().day())): \(Int($0.calories)) kcal, \(Int($0.protein)) g proteína, \(Int($0.carbohydrates)) g carbohidratos, \(Int($0.fat)) g grasa."
+            let fiber = $0.fiberKnownMeals > 0
+                ? "\(Int($0.fiber)) g fibra, cobertura \($0.fiberKnownMeals) de \($0.mealCount) comidas"
+                : "fibra sin registrar"
+            return "\($0.date.formatted(.iso8601.year().month().day())): \(Int($0.calories)) kcal, \(Int($0.protein)) g proteína, \(Int($0.carbohydrates)) g carbohidratos, \(Int($0.fat)) g grasa, \(fiber)."
         }
 
         let body = measurements.sorted { $0.date > $1.date }.prefix(12)

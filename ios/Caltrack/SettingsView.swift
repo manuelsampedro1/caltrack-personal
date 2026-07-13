@@ -18,6 +18,7 @@ struct SettingsView: View {
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
+    @AppStorage("fiberTarget") private var fiberTarget = 25.0
     @AppStorage("hevyConnected") private var hevyConnected = false
     @AppStorage("grokConnected") private var grokConnected = false
     @AppStorage("reminderEnabled") private var reminderEnabled = false
@@ -72,7 +73,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Apple Salud")
                 } footer: {
-                    Text("La escritura es opcional. Caltrack guarda como comida las calorías, proteína, carbohidratos y grasa que confirmes. Desactivarla no borra datos ya guardados. Safari y la PWA no pueden acceder a HealthKit.")
+                    Text("La escritura es opcional. Caltrack guarda como comida las calorías, proteína, carbohidratos, grasa y fibra que confirmes. Si no autorizas fibra, los cuatro nutrientes anteriores siguen sincronizando. Desactivarla no borra datos ya guardados.")
                 }
 
                 Section {
@@ -151,6 +152,7 @@ struct SettingsView: View {
                     numberRow("Calorías máximas", value: pairedMaximum($calorieMax, minimum: $calorieMin), range: 1_000...6_000, step: 50)
                     numberRow("Proteína mínima", value: pairedMinimum($proteinMin, maximum: $proteinMax), range: 0...500, step: 5)
                     numberRow("Proteína máxima", value: pairedMaximum($proteinMax, minimum: $proteinMin), range: 0...500, step: 5)
+                    numberRow("Fibra", value: $fiberTarget, range: 5...60, step: 1)
                 }
 
                 Section {
@@ -202,7 +204,8 @@ struct SettingsView: View {
                                 calorieMin: calorieMin,
                                 calorieMax: calorieMax,
                                 proteinMin: proteinMin,
-                                proteinMax: proteinMax
+                                proteinMax: proteinMax,
+                                fiberTarget: fiberTarget
                             ),
                             workouts: workouts,
                             messages: messages
@@ -220,7 +223,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Tus datos")
                 } footer: {
-                    Text("El JSON incluye comidas, fotos, medidas, recuperación, cierres diarios, objetivos, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
+                    Text("El JSON incluye comidas, componentes, fibra, fotos, medidas, recuperación, cierres diarios, objetivos, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
                 }
 
                 Section("Privacidad") {

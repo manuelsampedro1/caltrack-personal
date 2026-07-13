@@ -31,6 +31,7 @@ struct DashboardView: View {
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
+    @AppStorage("fiberTarget") private var fiberTarget = 25.0
     @AppStorage("healthConnected") private var healthConnected = false
     @AppStorage("hevyConnected") private var hevyConnected = false
     @AppStorage("grokConnected") private var grokConnected = false
@@ -61,6 +62,10 @@ struct DashboardView: View {
 
     private var todayTotals: (calories: Double, protein: Double) {
         CaltrackMath.totals(for: todayMeals)
+    }
+
+    private var todayFiber: FiberSummary {
+        CaltrackMath.fiberSummary(for: todayMeals)
     }
 
     private var frequentMeals: [FrequentMeal] {
@@ -95,9 +100,11 @@ struct DashboardView: View {
             generatedAt: .now,
             calories: todayTotals.calories,
             protein: todayTotals.protein,
+            fiber: todayFiber.hasData ? todayFiber.value : nil,
             calorieMin: calories.lowerBound,
             calorieMax: calories.upperBound,
             proteinMin: min(proteinMin, proteinMax),
+            fiberTarget: fiberTarget,
             mealCount: todayMeals.count,
             nutritionComplete: todayPlanCheckIn?.nutritionComplete == true,
             planTitle: adaptivePlanReview.title
@@ -545,13 +552,31 @@ struct DashboardView: View {
                 }
                 ProgressView(value: min(todayTotals.calories, calorieMax), total: calorieMax)
                     .tint(todayTotals.calories > calorieMax ? CaltrackTheme.coral : CaltrackTheme.green)
-                HStack {
-                    Text("\(Int(todayTotals.protein)) g proteína")
-                    Spacer()
-                    Text("objetivo \(Int(proteinMin))-\(Int(proteinMax)) g")
+                nutrientProgress(
+                    title: "Proteína",
+                    value: todayTotals.protein,
+                    target: proteinMin,
+                    suffix: "g",
+                    color: CaltrackTheme.blue
+                )
+                if todayFiber.hasData {
+                    nutrientProgress(
+                        title: "Fibra",
+                        value: todayFiber.value,
+                        target: fiberTarget,
+                        suffix: "g",
+                        color: CaltrackTheme.amber
+                    )
+                    if !todayFiber.isComplete {
+                        Label("Fibra disponible en \(todayFiber.knownMeals) de \(todayFiber.totalMeals) comidas", systemImage: "exclamationmark.circle")
+                            .font(.caption2)
+                            .foregroundStyle(CaltrackTheme.muted)
+                    }
+                } else if !todayMeals.isEmpty {
+                    Label("Añade fibra al editar una comida para ver su progreso", systemImage: "leaf")
+                        .font(.caption2)
+                        .foregroundStyle(CaltrackTheme.muted)
                 }
-                .font(.caption)
-                .foregroundStyle(CaltrackTheme.muted)
 
                 if let activity = activityDays.first(where: { Calendar.current.isDateInToday($0.date) }), activity.totalEnergy > 0 {
                     let balance = todayTotals.calories - activity.totalEnergy
@@ -611,6 +636,24 @@ struct DashboardView: View {
                 .accessibilityIdentifier("dailyPlanCheckIn")
             }
         }
+    }
+
+    private func nutrientProgress(title: String, value: Double, target: Double, suffix: String, color: Color) -> some View {
+        VStack(spacing: 5) {
+            HStack {
+                Text(title)
+                Spacer()
+                Text("\(value.formatted(.number.precision(.fractionLength(0...1)))) / \(target.formatted(.number.precision(.fractionLength(0...1)))) \(suffix)")
+                    .monospacedDigit()
+            }
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(CaltrackTheme.muted)
+            ProgressView(value: min(max(value, 0), max(target, 1)), total: max(target, 1))
+                .tint(color)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(title == "Fibra" ? "todayFiberProgress" : "todayProteinProgress")
+        .accessibilityValue("\(Int(value.rounded())) de \(Int(target.rounded())) \(suffix)")
     }
 
     private var adaptivePlanCard: some View {
@@ -850,6 +893,7 @@ struct DashboardView: View {
             protein: editable.number(editable.protein),
             carbohydrates: editable.number(editable.carbohydrates),
             fat: editable.number(editable.fat),
+            fiber: editable.fiberValue,
             photoData: imageData,
             components: editable.persistedComponents,
             source: source,
@@ -869,6 +913,7 @@ struct DashboardView: View {
         meal.protein = editable.number(editable.protein)
         meal.carbohydrates = editable.number(editable.carbohydrates)
         meal.fat = editable.number(editable.fat)
+        meal.fiber = editable.fiberValue
         meal.confidence = editable.confidence
         meal.assumption = editable.assumption
         meal.updateComponents(editable.persistedComponents)
@@ -884,21 +929,23 @@ struct DashboardView: View {
             protein: suggestion.protein,
             carbohydrates: suggestion.carbohydrates,
             fat: suggestion.fat,
+            fiber: suggestion.fiber,
             components: suggestion.components
         )
     }
 
     private func repeatMeal(_ meal: MealEntry) {
-        insertRepeatedMeal(name: meal.name, calories: meal.calories, protein: meal.protein, carbohydrates: meal.carbohydrates, fat: meal.fat, components: meal.components)
+        insertRepeatedMeal(name: meal.name, calories: meal.calories, protein: meal.protein, carbohydrates: meal.carbohydrates, fat: meal.fat, fiber: meal.fiber, components: meal.components)
     }
 
-    private func insertRepeatedMeal(name: String, calories: Double, protein: Double, carbohydrates: Double, fat: Double, components: [MealComponent] = []) {
+    private func insertRepeatedMeal(name: String, calories: Double, protein: Double, carbohydrates: Double, fat: Double, fiber: Double? = nil, components: [MealComponent] = []) {
         let meal = MealEntry(
             name: name,
             calories: calories,
             protein: protein,
             carbohydrates: carbohydrates,
             fat: fat,
+            fiber: fiber,
             components: components,
             source: "repeated",
             assumption: "Repetida desde el historial"
@@ -1151,7 +1198,13 @@ struct DashboardView: View {
         if todayMeals.isEmpty { return "Grok hará la primera estimación. Tú corriges y confirmas." }
         if todayTotals.protein < proteinMin { return "Te faltan aproximadamente \(Int(proteinMin - todayTotals.protein)) g de proteína para el mínimo." }
         if todayTotals.calories > calorieMax { return "Has superado el máximo configurado. Revisa aceites, salsas y porciones estimadas." }
-        return "Proteína cubierta y calorías dentro del rango configurado."
+        if todayFiber.hasData, todayFiber.isComplete, todayFiber.value < fiberTarget {
+            return "Proteína cubierta. Te faltan aproximadamente \(Int((fiberTarget - todayFiber.value).rounded())) g de fibra para la referencia diaria."
+        }
+        if !todayFiber.isComplete {
+            return "Proteína cubierta y calorías dentro del rango. Completa la fibra de las comidas para comparar con la referencia."
+        }
+        return "Proteína cubierta, calorías dentro del rango y fibra revisada."
     }
 
     private func seedTestingDataIfNeeded() {
@@ -1200,7 +1253,7 @@ struct DashboardView: View {
         for offset in 0..<14 {
             let day = calendar.date(byAdding: .day, value: -offset, to: today) ?? today
             let variation = Double((offset % 4) * 45)
-            modelContext.insert(MealEntry(date: day.addingTimeInterval(28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, source: "Grok Vision", confidence: 0.88))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(28_800), name: "Yogur, fruta y proteína", calories: 430 + variation, protein: 42, carbohydrates: 48, fat: 9, fiber: 9, source: "Grok Vision", confidence: 0.88))
             modelContext.insert(MealEntry(
                 date: day.addingTimeInterval(43_200),
                 name: "Pollo con arroz",
@@ -1208,15 +1261,16 @@ struct DashboardView: View {
                 protein: 62,
                 carbohydrates: 74,
                 fat: 18,
+                fiber: 2,
                 components: [
-                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000101")!, name: "Pechuga de pollo", portion: "220 g", calories: 330, protein: 55, carbohydrates: 0, fat: 8),
-                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000102")!, name: "Arroz cocido", portion: "250 g", calories: 330, protein: 7, carbohydrates: 74, fat: 2),
-                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000103")!, name: "Aceite de oliva", portion: "7 g", calories: 60, protein: 0, carbohydrates: 0, fat: 8)
+                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000101")!, name: "Pechuga de pollo", portion: "220 g", calories: 330, protein: 55, carbohydrates: 0, fat: 8, fiber: 0),
+                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000102")!, name: "Arroz cocido", portion: "250 g", calories: 330, protein: 7, carbohydrates: 74, fat: 2, fiber: 2),
+                    MealComponent(id: UUID(uuidString: "00000000-0000-0000-0000-000000000103")!, name: "Aceite de oliva", portion: "7 g", calories: 60, protein: 0, carbohydrates: 0, fat: 8, fiber: 0)
                 ],
                 source: "Grok Vision",
                 confidence: 0.91
             ))
-            modelContext.insert(MealEntry(date: day.addingTimeInterval(64_800), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, source: "manual"))
+            modelContext.insert(MealEntry(date: day.addingTimeInterval(64_800), name: "Salmón y verduras", calories: 610, protein: 55, carbohydrates: 32, fat: 28, fiber: 8, source: "manual"))
         }
         for index in 0..<9 {
             let date = calendar.date(byAdding: .day, value: -(index * 4), to: today)?.addingTimeInterval(43_200) ?? today
@@ -1276,6 +1330,7 @@ struct DashboardView: View {
         calorieMax = 2_000
         proteinMin = 160
         proteinMax = 190
+        fiberTarget = 25
         try? modelContext.save()
     }
 #endif
@@ -1308,7 +1363,7 @@ private struct MealRow: View {
             .clipShape(RoundedRectangle(cornerRadius: 11, style: .continuous))
             VStack(alignment: .leading, spacing: 3) {
                 Text(meal.name).font(.subheadline.weight(.semibold)).lineLimit(1)
-                Text("\(Int(meal.protein)) g P · \(Int(meal.carbohydrates)) g C · \(Int(meal.fat)) g G")
+                Text(mealMacroSummary)
                     .font(.caption2).foregroundStyle(CaltrackTheme.muted)
             }
             Spacer()
@@ -1322,6 +1377,12 @@ private struct MealRow: View {
             }
             .accessibilityLabel("Opciones de \(meal.name)")
         }
+    }
+
+    private var mealMacroSummary: String {
+        let base = "\(Int(meal.protein)) g P · \(Int(meal.carbohydrates)) g C · \(Int(meal.fat)) g G"
+        guard let fiber = meal.fiber else { return base }
+        return "\(base) · \(fiber.formatted(.number.precision(.fractionLength(0...1)))) g F"
     }
 }
 

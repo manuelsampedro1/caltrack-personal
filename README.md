@@ -42,7 +42,7 @@ Caltrack reconoce alimentos frecuentes en español e inglés. Si estima valores,
 ## Funciones
 
 - calorías contra objetivo y mantenimiento
-- rangos diarios de calorías y proteína
+- rangos diarios de calorías, proteína y fibra
 - gráficos de siete días
 - historial diario detallado
 - tendencia de grasa corporal, peso y cintura
@@ -91,9 +91,15 @@ La primera apertura incluye una introducción breve que se puede omitir. No soli
 
 ### Revisión precisa de una foto
 
-Grok propone el nombre del plato, confianza, supuestos y un desglose por componentes. Cada componente conserva nombre, porción, calorías, proteína, carbohidratos y grasa. Se puede corregir, añadir o borrar antes de guardar, y Caltrack recalcula el total de forma local e inmediata.
+Grok propone el nombre del plato, confianza, supuestos y un desglose por componentes. Cada componente conserva nombre, porción, calorías, proteína, carbohidratos, grasa y fibra. Se puede corregir, añadir o borrar antes de guardar, y Caltrack recalcula el total de forma local e inmediata.
 
 El desglose queda unido a la comida y vuelve a aparecer al editarla desde Hoy o Progreso. También se conserva al repetir una comida y en la copia JSON privada. Los registros de versiones anteriores siguen abriendo normalmente, solo aparecen sin desglose.
+
+### Fibra y calidad nutricional
+
+Caltrack usa una referencia inicial editable de 25 g de fibra al día. Hoy muestra el avance junto a proteína y calorías. Progreso añade una gráfica de 14 días y aclara cuántas comidas contienen el dato, para no tratar registros antiguos o etiquetas incompletas como cero.
+
+Grok estima fibra en la misma petición de la foto. Open Food Facts aporta el valor declarado cuando está disponible. La entrada manual permite dejarlo vacío. El entrenador local y las preguntas voluntarias a Grok reciben tanto el total como su cobertura.
 
 ### Plan semanal adaptativo
 
@@ -111,7 +117,7 @@ En `Ajustes > Atajos y Siri` aparecen las frases sugeridas y el enlace nativo a 
 
 ### Widgets de inicio y pantalla de bloqueo
 
-La app nativa incluye widgets pequeño y mediano para ver calorías, proteína y cierre del día, además de accesos directos a Foto, Código y Peso. También ofrece formatos inline, circular y rectangular para la pantalla de bloqueo y StandBy.
+La app nativa incluye widgets pequeño y mediano para ver calorías, proteína, fibra y cierre del día, además de accesos directos a Foto, Código y Peso. También ofrece formatos inline, circular y rectangular para la pantalla de bloqueo y StandBy.
 
 La app prepara un resumen mínimo en un App Group. La extensión no abre la base completa, no consulta Salud, no usa Keychain y no hace peticiones de red. Los valores nutricionales se marcan como privados para que iOS pueda ocultarlos cuando corresponda. Si el resumen pertenece a ayer, el widget reinicia el consumo y conserva solo los objetivos.
 
@@ -131,7 +137,7 @@ No requiere cuenta, clave, SDK ni servidor. Si la cámara no está disponible, s
 
 ### Nutrición en Apple Salud
 
-En `Ajustes > Apple Salud` se puede activar `Guardar nutrición en Salud`. Caltrack solicita ese permiso en contexto y guarda cada comida confirmada con calorías, proteína, carbohidratos y grasa. La opción está desactivada por defecto, no lee la dieta creada por otras apps y permite sincronizar el historial solo mediante una acción explícita.
+En `Ajustes > Apple Salud` se puede activar `Guardar nutrición en Salud`. Caltrack solicita ese permiso en contexto y guarda cada comida confirmada con calorías, proteína, carbohidratos, grasa y fibra cuando se conoce. La opción está desactivada por defecto, no lee la dieta creada por otras apps y permite sincronizar el historial solo mediante una acción explícita. Si se rechaza únicamente fibra, los cuatro nutrientes anteriores siguen guardándose.
 
 ### Recuperación en Apple Salud
 

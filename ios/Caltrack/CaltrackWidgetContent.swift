@@ -8,6 +8,7 @@ enum WidgetPalette {
     static let muted = Color(red: 0.57, green: 0.60, blue: 0.66)
     static let green = Color(red: 0.45, green: 0.88, blue: 0.53)
     static let blue = Color(red: 0.40, green: 0.58, blue: 0.98)
+    static let amber = Color(red: 0.96, green: 0.72, blue: 0.32)
     static let coral = Color(red: 0.98, green: 0.43, blue: 0.42)
 }
 
@@ -49,6 +50,12 @@ struct CaltrackWidgetContent: View {
                         .font(.caption2.weight(.semibold))
                         .foregroundStyle(WidgetPalette.blue)
                         .lineLimit(1)
+                    if let fiber = snapshot.fiber {
+                        Text("\(Int(fiber)) g fibra")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(WidgetPalette.amber)
+                            .lineLimit(1)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -87,10 +94,21 @@ struct CaltrackWidgetContent: View {
                     VStack(alignment: .leading, spacing: 5) {
                         Text("\(Int(snapshot.calories)) / \(Int(snapshot.calorieMax)) kcal")
                             .font(.subheadline.weight(.bold).monospacedDigit())
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
                         progress(value: calorieProgress, color: calorieColor)
                         Text("\(Int(snapshot.protein)) / \(Int(snapshot.proteinMin)) g proteína")
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(WidgetPalette.blue)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.72)
+                        if let fiber = snapshot.fiber {
+                            Text("\(Int(fiber)) / \(Int(snapshot.fiberTarget ?? 25)) g fibra")
+                                .font(.caption2.weight(.semibold))
+                                .foregroundStyle(WidgetPalette.amber)
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.72)
+                        }
                     }
                 }
                 .privacySensitive()

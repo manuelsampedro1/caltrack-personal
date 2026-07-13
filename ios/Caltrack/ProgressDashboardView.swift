@@ -35,6 +35,7 @@ struct ProgressDashboardView: View {
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
+    @AppStorage("fiberTarget") private var fiberTarget = 25.0
     @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
     @State private var nutritionMetric = "Calorías"
     @State private var recoveryMetric: RecoveryMetric = .sleep
@@ -58,7 +59,8 @@ struct ProgressDashboardView: View {
             measurements: measurements,
             workouts: workouts,
             calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
-            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
+            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax),
+            fiberTarget: fiberTarget
         )
     }
 
@@ -115,6 +117,7 @@ struct ProgressDashboardView: View {
                         meal.protein = editable.number(editable.protein)
                         meal.carbohydrates = editable.number(editable.carbohydrates)
                         meal.fat = editable.number(editable.fat)
+                        meal.fiber = editable.fiberValue
                         meal.confidence = editable.confidence
                         meal.assumption = editable.assumption
                         meal.updateComponents(editable.persistedComponents)
@@ -189,6 +192,7 @@ struct ProgressDashboardView: View {
                 Picker("Métrica", selection: $nutritionMetric) {
                     Text("Calorías").tag("Calorías")
                     Text("Proteína").tag("Proteína")
+                    Text("Fibra").tag("Fibra")
                 }
                 .pickerStyle(.segmented)
 
@@ -196,12 +200,12 @@ struct ProgressDashboardView: View {
                     ForEach(nutritionDays) { day in
                         BarMark(
                             x: .value("Día", day.date, unit: .day),
-                            y: .value(nutritionMetric, nutritionMetric == "Calorías" ? day.calories : day.protein)
+                            y: .value(nutritionMetric, nutritionMetricValue(day))
                         )
                         .foregroundStyle(barColor(for: day))
                         .cornerRadius(4)
                     }
-                    RuleMark(y: .value("Objetivo", nutritionMetric == "Calorías" ? calorieMax : proteinMin))
+                    RuleMark(y: .value("Objetivo", nutritionTarget))
                         .foregroundStyle(.white.opacity(0.5))
                         .lineStyle(.init(lineWidth: 1, dash: [4]))
                 }
@@ -218,6 +222,16 @@ struct ProgressDashboardView: View {
                     }
                 }
                 .frame(height: 190)
+                if nutritionMetric == "Fibra" {
+                    let known = nutritionDays.reduce(0) { $0 + $1.fiberKnownMeals }
+                    let total = nutritionDays.reduce(0) { $0 + $1.mealCount }
+                    Label(
+                        total == 0 ? "Todavía no hay comidas registradas" : "Fibra disponible en \(known) de \(total) comidas",
+                        systemImage: known == total && total > 0 ? "checkmark.circle.fill" : "info.circle"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(known == total && total > 0 ? CaltrackTheme.green : CaltrackTheme.muted)
+                }
             }
         }
     }
@@ -526,6 +540,11 @@ struct ProgressDashboardView: View {
                             VStack(alignment: .trailing, spacing: 2) {
                                 Text("\(Int(meal.calories)) kcal").font(.subheadline.weight(.bold))
                                 Text("\(Int(meal.protein)) g proteína").font(.caption2).foregroundStyle(CaltrackTheme.blue)
+                                if let fiber = meal.fiber {
+                                    Text("\(fiber.formatted(.number.precision(.fractionLength(0...1)))) g fibra")
+                                        .font(.caption2)
+                                        .foregroundStyle(CaltrackTheme.amber)
+                                }
                             }
                             Menu {
                                 Button("Repetir ahora", systemImage: "plus.circle") { repeatMeal(meal) }
@@ -702,8 +721,28 @@ struct ProgressDashboardView: View {
     }
 
     private func barColor(for day: NutritionDay) -> Color {
+        if nutritionMetric == "Fibra" {
+            if day.mealCount > 0, day.fiberKnownMeals < day.mealCount { return CaltrackTheme.amber.opacity(0.52) }
+            return day.fiber >= fiberTarget ? CaltrackTheme.green : CaltrackTheme.amber
+        }
         if nutritionMetric == "Proteína" { return day.protein >= proteinMin ? CaltrackTheme.green : CaltrackTheme.blue }
         return day.calories > calorieMax ? CaltrackTheme.coral : CaltrackTheme.green
+    }
+
+    private func nutritionMetricValue(_ day: NutritionDay) -> Double {
+        switch nutritionMetric {
+        case "Proteína": day.protein
+        case "Fibra": day.fiber
+        default: day.calories
+        }
+    }
+
+    private var nutritionTarget: Double {
+        switch nutritionMetric {
+        case "Proteína": proteinMin
+        case "Fibra": fiberTarget
+        default: calorieMax
+        }
     }
 
     private func repeatMeal(_ meal: MealEntry) {
@@ -713,6 +752,7 @@ struct ProgressDashboardView: View {
             protein: meal.protein,
             carbohydrates: meal.carbohydrates,
             fat: meal.fat,
+            fiber: meal.fiber,
             components: meal.components,
             source: "repeated",
             assumption: "Repetida desde el historial"

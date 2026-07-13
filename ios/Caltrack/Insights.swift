@@ -6,6 +6,9 @@ struct NutritionDay: Identifiable, Equatable {
     let protein: Double
     let carbohydrates: Double
     let fat: Double
+    let fiber: Double
+    let fiberKnownMeals: Int
+    let mealCount: Int
 
     var id: Date { date }
 }
@@ -23,12 +26,16 @@ enum InsightEngine {
         return (0..<count).reversed().compactMap { offset in
             guard let date = calendar.date(byAdding: .day, value: -offset, to: today) else { return nil }
             let entries = meals.filter { calendar.isDate($0.date, inSameDayAs: date) }
+            let fiber = CaltrackMath.fiberSummary(for: entries)
             return NutritionDay(
                 date: date,
                 calories: entries.reduce(0) { $0 + $1.calories },
                 protein: entries.reduce(0) { $0 + $1.protein },
                 carbohydrates: entries.reduce(0) { $0 + $1.carbohydrates },
-                fat: entries.reduce(0) { $0 + $1.fat }
+                fat: entries.reduce(0) { $0 + $1.fat },
+                fiber: fiber.value,
+                fiberKnownMeals: fiber.knownMeals,
+                mealCount: fiber.totalMeals
             )
         }
     }
@@ -39,6 +46,7 @@ enum InsightEngine {
         workouts: [WorkoutEntry],
         calorieRange: ClosedRange<Double>,
         proteinRange: ClosedRange<Double>,
+        fiberTarget: Double = 25,
         now: Date = .now,
         calendar: Calendar = .current
     ) -> InsightReport {
@@ -73,6 +81,14 @@ enum InsightEngine {
             observations.append("Tu media de \(Int(averageCalories)) kcal está dentro del rango configurado.")
         }
         observations.append("Cubres al menos el 95% del objetivo de proteína en \(proteinDays) de \(logged.count) días registrados.")
+
+        let completeFiberDays = logged.filter { $0.mealCount > 0 && $0.fiberKnownMeals == $0.mealCount }
+        if !completeFiberDays.isEmpty {
+            let targetDays = completeFiberDays.filter { $0.fiber >= fiberTarget }.count
+            observations.append("La fibra está completa en \(completeFiberDays.count) días y alcanza \(Int(fiberTarget)) g en \(targetDays) de ellos.")
+        } else if logged.contains(where: { $0.fiberKnownMeals > 0 }) {
+            observations.append("Hay fibra registrada, pero todavía faltan comidas por completar antes de comparar días.")
+        }
 
         let weightedMeasurements = measurements
             .filter { $0.weight != nil }

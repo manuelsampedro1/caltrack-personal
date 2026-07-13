@@ -175,6 +175,11 @@ struct BarcodeLookupSheet: View {
                         Text("Por 100 g: \(Int(product.caloriesPer100)) kcal · \(product.proteinPer100.formatted(.number.precision(.fractionLength(0...1)))) g P · \(product.carbohydratesPer100.formatted(.number.precision(.fractionLength(0...1)))) g C · \(product.fatPer100.formatted(.number.precision(.fractionLength(0...1)))) g G")
                             .font(.caption)
                             .foregroundStyle(CaltrackTheme.muted)
+                        if let fiber = product.fiberPer100 {
+                            Label("\(fiber.formatted(.number.precision(.fractionLength(0...1)))) g de fibra por 100 g", systemImage: "leaf.fill")
+                                .font(.caption.weight(.semibold))
+                                .foregroundStyle(CaltrackTheme.amber)
+                        }
                     }
                 }
 
@@ -202,6 +207,7 @@ struct BarcodeLookupSheet: View {
                             macroField("Carbohidratos", text: $editable.carbohydrates)
                             macroField("Grasa", text: $editable.fat)
                         }
+                        macroField("Fibra", text: $editable.fiber)
                         Label("Open Food Facts es una base colaborativa. Contrasta el resultado con la etiqueta y corrige cualquier dato dudoso.", systemImage: "checkmark.shield")
                             .font(.caption)
                             .foregroundStyle(CaltrackTheme.muted)
@@ -323,7 +329,8 @@ struct BarcodeLookupSheet: View {
         case "Kcal": "barcodeCaloriesField"
         case "Proteína": "barcodeProteinField"
         case "Carbohidratos": "barcodeCarbohydratesField"
-        default: "barcodeFatField"
+        case "Grasa": "barcodeFatField"
+        default: "barcodeFiberField"
         }
     }
 }

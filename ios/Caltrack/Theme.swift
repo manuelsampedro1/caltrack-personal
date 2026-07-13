@@ -9,6 +9,7 @@ enum CaltrackTheme {
     static let green = Color(red: 0.45, green: 0.88, blue: 0.53)
     static let coral = Color(red: 0.98, green: 0.43, blue: 0.42)
     static let blue = Color(red: 0.40, green: 0.58, blue: 0.98)
+    static let amber = Color(red: 0.96, green: 0.72, blue: 0.32)
 }
 
 struct Card<Content: View>: View {

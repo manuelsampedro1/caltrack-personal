@@ -7,6 +7,7 @@ struct FrequentMeal: Identifiable, Equatable {
     let protein: Double
     let carbohydrates: Double
     let fat: Double
+    let fiber: Double?
     let components: [MealComponent]
     let count: Int
     let lastUsed: Date
@@ -28,6 +29,7 @@ enum FoodLibrary {
                 protein: latest.protein,
                 carbohydrates: latest.carbohydrates,
                 fat: latest.fat,
+                fiber: latest.fiber,
                 components: latest.components,
                 count: entries.count,
                 lastUsed: latest.date

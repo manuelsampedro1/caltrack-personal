@@ -86,7 +86,7 @@ La primera apertura explica foto, Salud, Hevy y tendencias en una pantalla que s
 
 ### Escritura nutricional explícita en Salud
 
-Caltrack no lee nutrición. La escritura está desactivada por defecto y usa una correlación de comida con energía, proteína, carbohidratos y grasa. El UUID local se guarda como identificador externo para actualizar sin duplicar y eliminar solo objetos creados por Caltrack. La sincronización del historial necesita una acción explícita.
+Caltrack no lee nutrición. La escritura está desactivada por defecto y usa una correlación de comida con energía, proteína, carbohidratos, grasa y fibra cuando existe. El UUID local se guarda como identificador externo para actualizar sin duplicar y eliminar solo objetos creados por Caltrack. La sincronización del historial necesita una acción explícita.
 
 ### Etiqueta antes que IA para productos envasados
 
@@ -140,8 +140,18 @@ Los valores, el recuento de comidas y el estado del plan se marcan como sensible
 
 ### Corrección por ingrediente antes y después de guardar
 
-La estimación de una foto deja de ser una lista informativa. Cada componente detectado conserva nombre, porción y cuatro macros, y se puede corregir, añadir o borrar. El total se suma localmente en cada cambio y también admite una corrección final cuando el usuario conoce una cifra más precisa.
+La estimación de una foto deja de ser una lista informativa. Cada componente detectado conserva nombre, porción, macros y fibra, y se puede corregir, añadir o borrar. El total se suma localmente en cada cambio y también admite una corrección final cuando el usuario conoce una cifra más precisa.
 
 El mismo editor aparece abierto en el análisis fotográfico y mediante divulgación progresiva al editar una comida guardada. Esto mantiene una sola acción principal y evita una pantalla nueva. Los componentes se guardan como JSON Codable con almacenamiento externo dentro de `MealEntry`, una ampliación opcional y ligera que no introduce otra tabla ni una llamada adicional a Grok.
 
 La copia JSON mantiene su versión actual y añade `components` como campo opcional. Las copias y bases anteriores se interpretan como comidas sin desglose. Una migración v1.8 a v1.9 en simulador confirmó que todos los registros previos permanecen intactos.
+
+### Fibra sin falsa precisión
+
+Caltrack añade fibra como valor opcional, no como cero por defecto. Una comida antigua, una etiqueta incompleta y un alimento con cero fibra son estados distintos. Hoy y Progreso suman lo conocido y muestran cuántas comidas tienen dato. El score no penaliza fibra incompleta.
+
+La referencia inicial es 25 g al día, basada en la ingesta adecuada para adultos de EFSA, y se puede editar. Se presenta como referencia nutricional, no como prescripción. El color ámbar la separa de proteína, éxito y exceso sin crear otra pantalla.
+
+Grok añade `fiber_g` a la misma salida estructurada. Open Food Facts aporta `fiber_100g` cuando existe. HealthKit recibe `dietaryFiber` si está autorizado. En una actualización, Caltrack pide el permiso nuevo al guardar en contexto; rechazar solo fibra no bloquea los cuatro nutrientes anteriores.
+
+La base y el backup v1 conservan compatibilidad mediante campos opcionales. La migración v1.9 a v1.10 mantiene las comidas anteriores con fibra desconocida, sin reescribir su historia.

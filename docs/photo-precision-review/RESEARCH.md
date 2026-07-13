@@ -34,7 +34,7 @@ Evita una migración compleja, pero no permite reconstruir campos editables ni v
 
 ### Guardar componentes Codable en almacenamiento externo
 
-Cada comida conserva una lista pequeña de componentes con nombre, porción, calorías, proteína, carbohidratos y grasa. SwiftData guarda el JSON opcional mediante `externalStorage`, como ya hace con fotos y ejercicios. Las comidas antiguas siguen siendo válidas con una lista vacía.
+Cada comida conserva una lista pequeña de componentes con nombre, porción, calorías, proteína, carbohidratos, grasa y fibra opcional. SwiftData guarda el JSON opcional mediante `externalStorage`, como ya hace con fotos y ejercicios. Las comidas antiguas siguen siendo válidas con una lista vacía.
 
 Esta es la opción elegida. Mantiene la base local, no añade tablas relacionadas ni backend y permite una migración ligera.
 

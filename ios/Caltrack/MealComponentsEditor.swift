@@ -134,6 +134,7 @@ struct MealComponentsEditor: View {
                 metricField("Carbos", text: component.carbohydrates, identifier: "mealComponentCarbs-\(identifier)")
                 metricField("Grasa", text: component.fat, identifier: "mealComponentFat-\(identifier)")
             }
+            metricField("Fibra", text: component.fiber, identifier: "mealComponentFiber-\(identifier)")
         }
         .padding(12)
         .background(CaltrackTheme.cardRaised, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
@@ -159,6 +160,8 @@ struct MealComponentsEditor: View {
     private var componentCountText: String {
         guard !meal.components.isEmpty else { return "Añade el desglose si lo necesitas" }
         let count = meal.components.count == 1 ? "1 componente" : "\(meal.components.count) componentes"
-        return "\(count) · \(Int(EditableMeal.number(meal.calories))) kcal · \(Int(EditableMeal.number(meal.protein))) g P"
+        let base = "\(count) · \(Int(EditableMeal.number(meal.calories))) kcal · \(Int(EditableMeal.number(meal.protein))) g P"
+        guard let fiber = EditableMeal.optionalNumber(meal.fiber) else { return base }
+        return "\(base) · \(fiber.formatted(.number.precision(.fractionLength(0...1)))) g F"
     }
 }

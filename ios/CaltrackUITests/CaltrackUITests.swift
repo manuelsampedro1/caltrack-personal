@@ -47,10 +47,14 @@ final class CaltrackUITests: XCTestCase {
             let connected = app.staticTexts.matching(NSPredicate(format: "label BEGINSWITH 'Conectado.'")).firstMatch
             XCTAssertTrue(connected.waitForExistence(timeout: 15))
         }
+        let reminder = app.switches["Recordatorio diario"]
+        for _ in 0..<8 where !reminder.isHittable {
+            app.swipeUp()
+        }
+        XCTAssertTrue(reminder.isHittable)
         for _ in 0..<8 where !app.buttons["Exportar copia privada"].isHittable {
             app.swipeUp()
         }
-        XCTAssertTrue(app.switches["Recordatorio diario"].exists)
         XCTAssertTrue(app.buttons["Exportar copia privada"].isHittable)
         for _ in 0..<3 where !app.buttons["Restaurar o fusionar copia"].exists {
             app.swipeUp()
@@ -85,12 +89,25 @@ final class CaltrackUITests: XCTestCase {
         app.textFields["Kcal"].typeText("520")
         app.textFields["Proteína"].tap()
         app.textFields["Proteína"].typeText("38")
+        app.textFields["Fibra opcional"].tap()
+        app.textFields["Fibra opcional"].typeText("12")
         app.buttons["Guardar comida"].tap()
         XCTAssertTrue(app.staticTexts["Avena de prueba"].waitForExistence(timeout: 4))
+        let fiberProgress = app.descendants(matching: .any)["todayFiberProgress"]
+        for _ in 0..<4 where !fiberProgress.isHittable { app.swipeUp() }
+        XCTAssertTrue(fiberProgress.waitForExistence(timeout: 4))
+        XCTAssertTrue(fiberProgress.value as? String == "31 de 25 g")
+        let fiberTodayScreenshot = XCTAttachment(screenshot: app.screenshot())
+        fiberTodayScreenshot.name = "Caltrack daily fiber progress"
+        fiberTodayScreenshot.lifetime = .keepAlways
+        add(fiberTodayScreenshot)
 
         app.tabBars.buttons["Progreso"].tap()
         XCTAssertTrue(app.navigationBars["Progreso"].waitForExistence(timeout: 4))
         XCTAssertTrue(app.staticTexts["Últimos 14 días"].exists)
+        XCTAssertTrue(app.buttons["Fibra"].exists)
+        app.buttons["Fibra"].tap()
+        XCTAssertTrue(app.staticTexts["Fibra disponible en 43 de 43 comidas"].waitForExistence(timeout: 4))
         let progressScreenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         progressScreenshot.name = "Caltrack progress"
         progressScreenshot.lifetime = .keepAlways
@@ -186,7 +203,7 @@ final class CaltrackUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["ESTIMACIÓN DE GROK"].waitForExistence(timeout: 6))
         XCTAssertTrue(app.staticTexts["4 componentes detectados"].exists)
-        XCTAssertTrue(app.staticTexts["4 componentes · 810 kcal · 67 g P"].exists)
+        XCTAssertTrue(app.staticTexts["4 componentes · 810 kcal · 67 g P · 9 g F"].exists)
         let componentNames = app.textFields.matching(NSPredicate(format: "identifier BEGINSWITH 'mealComponentName-'"))
         XCTAssertEqual(componentNames.count, 4)
         let screenshot = XCTAttachment(screenshot: app.screenshot())
@@ -259,6 +276,7 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["Nutella"].waitForExistence(timeout: 4))
         XCTAssertEqual(app.textFields["barcodeAmountField"].value as? String, "15")
         XCTAssertFalse((app.textFields["barcodeCaloriesField"].value as? String ?? "").isEmpty)
+        XCTAssertFalse((app.textFields["barcodeFiberField"].value as? String ?? "").isEmpty)
         let screenshot = XCTAttachment(screenshot: XCUIScreen.main.screenshot())
         screenshot.name = "Caltrack barcode confirmation"
         screenshot.lifetime = .keepAlways

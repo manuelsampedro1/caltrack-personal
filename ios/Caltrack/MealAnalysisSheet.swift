@@ -117,6 +117,7 @@ struct MealAnalysisSheet: View {
                     numberField("carbos", text: $editable.carbohydrates)
                     numberField("grasa", text: $editable.fat)
                 }
+                numberField("fibra", text: $editable.fiber)
                 if !editable.assumption.isEmpty {
                     Text("Supuestos: \(editable.assumption)")
                         .font(.caption)
@@ -210,15 +211,16 @@ enum MealAnalysisFixture {
     static let analysis = FoodAnalysis(
         title: "Pollo, arroz y verduras",
         items: [
-            .init(name: "Pechuga de pollo", portion: "220 g", calories: 330, proteinG: 55, carbsG: 0, fatG: 8),
-            .init(name: "Arroz cocido", portion: "250 g", calories: 330, proteinG: 7, carbsG: 74, fatG: 2),
-            .init(name: "Brócoli y zanahoria", portion: "180 g", calories: 90, proteinG: 5, carbsG: 15, fatG: 1),
-            .init(name: "Aceite de oliva", portion: "7 g", calories: 60, proteinG: 0, carbsG: 0, fatG: 7)
+            .init(name: "Pechuga de pollo", portion: "220 g", calories: 330, proteinG: 55, carbsG: 0, fatG: 8, fiberG: 0),
+            .init(name: "Arroz cocido", portion: "250 g", calories: 330, proteinG: 7, carbsG: 74, fatG: 2, fiberG: 2),
+            .init(name: "Brócoli y zanahoria", portion: "180 g", calories: 90, proteinG: 5, carbsG: 15, fatG: 1, fiberG: 7),
+            .init(name: "Aceite de oliva", portion: "7 g", calories: 60, proteinG: 0, carbsG: 0, fatG: 7, fiberG: 0)
         ],
         calories: 810,
         proteinG: 67,
         carbsG: 89,
         fatG: 18,
+        fiberG: 9,
         confidence: 0.86,
         assumptions: ["Arroz cocido", "Una cucharada pequeña de aceite"],
         warning: "Comprueba el aceite y la cantidad de arroz."

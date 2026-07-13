@@ -48,7 +48,7 @@ struct CaltrackTodayWidget: Widget {
             CaltrackWidgetEntryView(entry: entry)
         }
         .configurationDisplayName("Caltrack Hoy")
-        .description("Calorías, proteína, cierre y accesos rápidos del día.")
+        .description("Calorías, proteína, fibra y accesos rápidos del día.")
         .supportedFamilies([
             .systemSmall,
             .systemMedium,

@@ -26,7 +26,7 @@ La copia sigue siendo retrocompatible y una restauración mantiene el plato edit
 ## Fase 3: Editor nativo
 
 - [x] Crear una vista reutilizable con divulgación progresiva.
-- [x] Editar nombre, porción, calorías, proteína, carbohidratos y grasa.
+- [x] Editar nombre, porción, calorías, proteína, carbohidratos, grasa y fibra opcional.
 - [x] Añadir y eliminar componentes.
 - [x] Sincronizar totales al editar y ofrecer recálculo explícito.
 - [x] Reutilizar el editor al modificar comidas guardadas.

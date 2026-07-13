@@ -12,6 +12,7 @@ struct CaltrackBackup: Codable, Sendable {
         let protein: Double
         let carbohydrates: Double
         let fat: Double
+        let fiber: Double?
         let photoData: Data?
         let components: [MealComponent]?
         let source: String
@@ -26,6 +27,7 @@ struct CaltrackBackup: Codable, Sendable {
             protein: Double,
             carbohydrates: Double,
             fat: Double,
+            fiber: Double? = nil,
             photoData: Data?,
             components: [MealComponent]? = nil,
             source: String,
@@ -39,6 +41,7 @@ struct CaltrackBackup: Codable, Sendable {
             self.protein = protein
             self.carbohydrates = carbohydrates
             self.fat = fat
+            self.fiber = fiber
             self.photoData = photoData
             self.components = components
             self.source = source
@@ -132,6 +135,7 @@ struct CaltrackBackup: Codable, Sendable {
         let calorieMax: Double
         let proteinMin: Double
         let proteinMax: Double
+        let fiberTarget: Double?
     }
 
     struct Workout: Codable, Sendable {
@@ -258,6 +262,7 @@ enum BackupService {
                     protein: $0.protein,
                     carbohydrates: $0.carbohydrates,
                     fat: $0.fat,
+                    fiber: $0.fiber,
                     photoData: $0.photoData,
                     components: $0.components.isEmpty ? nil : $0.components,
                     source: $0.source,
@@ -352,6 +357,7 @@ enum BackupService {
                 protein: item.protein,
                 carbohydrates: item.carbohydrates,
                 fat: item.fat,
+                fiber: item.fiber,
                 photoData: item.photoData,
                 components: item.components ?? [],
                 source: item.source,
@@ -439,6 +445,9 @@ enum BackupService {
             defaults.set(settings.calorieMax, forKey: "calorieMax")
             defaults.set(settings.proteinMin, forKey: "proteinMin")
             defaults.set(settings.proteinMax, forKey: "proteinMax")
+            if let fiberTarget = settings.fiberTarget {
+                defaults.set(fiberTarget, forKey: "fiberTarget")
+            }
         }
         try context.save()
         return inserted

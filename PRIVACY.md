@@ -14,6 +14,8 @@ Una foto se envía a la API de xAI únicamente cuando el usuario decide analizar
 
 La respuesta de xAI incluye una estimación por componentes. Caltrack permite corregir nombre, porción y macros de cada componente en el iPhone. El recálculo posterior es local y no genera otra petición a xAI.
 
+La misma respuesta incluye fibra estimada. Puede corregirse o dejarse sin dato antes de guardar. Caltrack no hace una segunda petición para calcularla.
+
 El entrenador funciona localmente por defecto. Solo cuando el usuario envía una pregunta, Caltrack manda a xAI un resumen limitado de hasta 30 días con totales nutricionales, medidas, actividad, objetivo del plan y promedios agregados de hambre y energía. No incluye el detalle diario de esos cierres, fotos, claves, identificadores de muestras o identificadores de aplicaciones de Salud. La conversación se guarda localmente.
 
 ## Fotos de progreso
@@ -51,8 +53,9 @@ De forma separada y desactivada por defecto, el usuario puede permitir que Caltr
 - proteína
 - carbohidratos
 - grasa total
+- fibra dietética, solo cuando la comida contiene un valor confirmado
 
-Caltrack no solicita lectura de nutrición ni importa comidas creadas por otras aplicaciones. Editar o borrar una comida actualiza o elimina el registro creado por Caltrack mientras la opción está activa. Desactivar la opción detiene escrituras futuras y no borra silenciosamente el historial ya guardado en Salud. La sincronización de comidas anteriores requiere pulsar un botón explícito.
+Caltrack no solicita lectura de nutrición ni importa comidas creadas por otras aplicaciones. Si el usuario no autoriza fibra, calorías y los otros macros pueden seguir guardándose. Editar o borrar una comida actualiza o elimina el registro creado por Caltrack mientras la opción está activa. Desactivar la opción detiene escrituras futuras y no borra silenciosamente el historial ya guardado en Salud. La sincronización de comidas anteriores requiere pulsar un botón explícito.
 
 ## Hevy y Strava
 
@@ -72,7 +75,7 @@ Caltrack ofrece cuatro acciones del sistema para abrir cámara de comida, lector
 
 ## Widgets
 
-La app comparte con su extensión un resumen local del día que contiene calorías, proteína, objetivos, número de comidas, estado de cierre y un título breve del plan. Se guarda en el App Group privado de Caltrack y caduca al cambiar de día.
+La app comparte con su extensión un resumen local del día que contiene calorías, proteína, fibra, objetivos, número de comidas, estado de cierre y un título breve del plan. Se guarda en el App Group privado de Caltrack y caduca al cambiar de día.
 
 La extensión no recibe fotos, conversación, historial completo, identificadores de Salud ni claves de xAI o Hevy. Tampoco consulta internet. Las métricas se declaran sensibles para que iOS pueda redactarlas en superficies protegidas.
 

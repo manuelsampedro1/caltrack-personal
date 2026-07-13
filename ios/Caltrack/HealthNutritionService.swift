@@ -15,15 +15,26 @@ struct HealthNutritionService {
         guard isAvailable else { throw HealthNutritionError.unavailable }
         let types = try Self.shareTypes()
         try await store.requestAuthorization(toShare: types, read: [])
-        guard types.allSatisfy({ store.authorizationStatus(for: $0) == .sharingAuthorized }) else {
+        guard try Self.coreShareTypes().allSatisfy({ store.authorizationStatus(for: $0) == .sharingAuthorized }) else {
             throw HealthNutritionError.permissionDenied
         }
     }
 
     func upsert(_ meal: MealEntry) async throws {
         guard isAvailable else { throw HealthNutritionError.unavailable }
+        let types = try Self.shareTypes()
+        if types.contains(where: { store.authorizationStatus(for: $0) == .notDetermined }) {
+            try await requestAuthorization()
+        }
+        guard try Self.coreShareTypes().allSatisfy({ store.authorizationStatus(for: $0) == .sharingAuthorized }) else {
+            throw HealthNutritionError.permissionDenied
+        }
         try await delete(mealID: meal.id)
-        let correlation = try Self.makeCorrelation(for: meal)
+        let fiberType = HKQuantityType(.dietaryFiber)
+        let correlation = try Self.makeCorrelation(
+            for: meal,
+            includeFiber: store.authorizationStatus(for: fiberType) == .sharingAuthorized
+        )
         try await save(correlation)
     }
 
@@ -47,19 +58,23 @@ struct HealthNutritionService {
         return meals.count
     }
 
-    static func makeCorrelation(for meal: MealEntry) throws -> HKCorrelation {
+    static func makeCorrelation(for meal: MealEntry, includeFiber: Bool = true) throws -> HKCorrelation {
         let foodType = try correlationType()
         let energyType = HKQuantityType(.dietaryEnergyConsumed)
         let proteinType = HKQuantityType(.dietaryProtein)
         let carbohydrateType = HKQuantityType(.dietaryCarbohydrates)
         let fatType = HKQuantityType(.dietaryFatTotal)
+        let fiberType = HKQuantityType(.dietaryFiber)
         let date = meal.date
-        let objects: Set<HKSample> = [
+        var objects: Set<HKSample> = [
             HKQuantitySample(type: energyType, quantity: HKQuantity(unit: .kilocalorie(), doubleValue: max(0, meal.calories)), start: date, end: date),
             HKQuantitySample(type: proteinType, quantity: HKQuantity(unit: .gram(), doubleValue: max(0, meal.protein)), start: date, end: date),
             HKQuantitySample(type: carbohydrateType, quantity: HKQuantity(unit: .gram(), doubleValue: max(0, meal.carbohydrates)), start: date, end: date),
             HKQuantitySample(type: fatType, quantity: HKQuantity(unit: .gram(), doubleValue: max(0, meal.fat)), start: date, end: date)
         ]
+        if includeFiber, let fiber = meal.fiber {
+            objects.insert(HKQuantitySample(type: fiberType, quantity: HKQuantity(unit: .gram(), doubleValue: max(0, fiber)), start: date, end: date))
+        }
         return HKCorrelation(
             type: foodType,
             start: date,
@@ -74,6 +89,12 @@ struct HealthNutritionService {
     }
 
     private static func shareTypes() throws -> Set<HKSampleType> {
+        try coreShareTypes().union([
+            HKQuantityType(.dietaryFiber)
+        ])
+    }
+
+    private static func coreShareTypes() throws -> Set<HKSampleType> {
         [
             try correlationType(),
             HKQuantityType(.dietaryEnergyConsumed),

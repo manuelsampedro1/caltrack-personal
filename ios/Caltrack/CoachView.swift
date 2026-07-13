@@ -14,6 +14,7 @@ struct CoachView: View {
     @AppStorage("calorieMax") private var calorieMax = 2_000.0
     @AppStorage("proteinMin") private var proteinMin = 160.0
     @AppStorage("proteinMax") private var proteinMax = 190.0
+    @AppStorage("fiberTarget") private var fiberTarget = 25.0
     @AppStorage("planGoalMode") private var planGoalModeRaw = PlanGoalMode.notSet.rawValue
     @AppStorage("planWeeklyRate") private var planWeeklyRate = 0.5
     @State private var question = ""
@@ -33,7 +34,8 @@ struct CoachView: View {
             measurements: measurements,
             workouts: workouts,
             calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
-            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
+            proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax),
+            fiberTarget: fiberTarget
         )
     }
 
@@ -214,7 +216,8 @@ struct CoachView: View {
                 planMode: PlanGoalMode(rawValue: planGoalModeRaw) ?? .notSet,
                 planWeeklyRate: planWeeklyRate,
                 calorieRange: CaltrackMath.orderedRange(calorieMin, calorieMax),
-                proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax)
+                proteinRange: CaltrackMath.orderedRange(proteinMin, proteinMax),
+                fiberTarget: fiberTarget
             )
             let response = try await CoachService().ask(question: prompt, context: context, apiKey: apiKey)
             modelContext.insert(CoachMessage(role: "assistant", content: response))

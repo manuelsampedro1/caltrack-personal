@@ -84,14 +84,14 @@ struct GrokService {
     }
 
     private static let prompt = """
-    Analiza esta comida como asistente de registro nutricional. Identifica cada componente visible, estima porciones realistas y calcula calorías, proteína, carbohidratos y grasa. Ten en cuenta aceites, salsas y bebidas visibles. No inventes certeza: usa confidence entre 0 y 1, explica los supuestos de cantidad y añade una advertencia breve cuando un ingrediente oculto pueda cambiar mucho el total. Responde únicamente con el esquema solicitado. Los valores son estimaciones para que el usuario los corrija antes de guardar.
+    Analiza esta comida como asistente de registro nutricional. Identifica cada componente visible, estima porciones realistas y calcula calorías, proteína, carbohidratos, grasa y fibra. Ten en cuenta aceites, salsas y bebidas visibles. No inventes certeza: usa confidence entre 0 y 1, explica los supuestos de cantidad y añade una advertencia breve cuando un ingrediente oculto pueda cambiar mucho el total. Responde únicamente con el esquema solicitado. Los valores son estimaciones para que el usuario los corrija antes de guardar.
     """
 
     private static let number: [String: Any] = ["type": "number", "minimum": 0]
     private static let schema: [String: Any] = [
         "type": "object",
         "additionalProperties": false,
-        "required": ["title", "items", "calories", "protein_g", "carbs_g", "fat_g", "confidence", "assumptions", "warning"],
+        "required": ["title", "items", "calories", "protein_g", "carbs_g", "fat_g", "fiber_g", "confidence", "assumptions", "warning"],
         "properties": [
             "title": ["type": "string"],
             "items": [
@@ -99,14 +99,15 @@ struct GrokService {
                 "items": [
                     "type": "object",
                     "additionalProperties": false,
-                    "required": ["name", "portion", "calories", "protein_g", "carbs_g", "fat_g"],
+                    "required": ["name", "portion", "calories", "protein_g", "carbs_g", "fat_g", "fiber_g"],
                     "properties": [
                         "name": ["type": "string"],
                         "portion": ["type": "string"],
                         "calories": number,
                         "protein_g": number,
                         "carbs_g": number,
-                        "fat_g": number
+                        "fat_g": number,
+                        "fiber_g": number
                     ]
                 ]
             ],
@@ -114,6 +115,7 @@ struct GrokService {
             "protein_g": number,
             "carbs_g": number,
             "fat_g": number,
+            "fiber_g": number,
             "confidence": ["type": "number", "minimum": 0, "maximum": 1],
             "assumptions": ["type": "array", "items": ["type": "string"]],
             "warning": ["type": "string"]

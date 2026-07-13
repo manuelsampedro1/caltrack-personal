@@ -9,6 +9,7 @@ struct MealComponent: Codable, Equatable, Identifiable, Sendable {
     let protein: Double
     let carbohydrates: Double
     let fat: Double
+    let fiber: Double?
 
     init(
         id: UUID = UUID(),
@@ -17,7 +18,8 @@ struct MealComponent: Codable, Equatable, Identifiable, Sendable {
         calories: Double,
         protein: Double,
         carbohydrates: Double,
-        fat: Double
+        fat: Double,
+        fiber: Double? = nil
     ) {
         self.id = id
         self.name = name
@@ -26,6 +28,7 @@ struct MealComponent: Codable, Equatable, Identifiable, Sendable {
         self.protein = protein
         self.carbohydrates = carbohydrates
         self.fat = fat
+        self.fiber = fiber
     }
 }
 
@@ -38,6 +41,7 @@ final class MealEntry {
     var protein: Double
     var carbohydrates: Double
     var fat: Double
+    var fiber: Double?
     @Attribute(.externalStorage) var photoData: Data?
     @Attribute(.externalStorage) var componentData: Data?
     var source: String
@@ -52,6 +56,7 @@ final class MealEntry {
         protein: Double,
         carbohydrates: Double = 0,
         fat: Double = 0,
+        fiber: Double? = nil,
         photoData: Data? = nil,
         components: [MealComponent] = [],
         source: String = "manual",
@@ -65,6 +70,7 @@ final class MealEntry {
         self.protein = protein
         self.carbohydrates = carbohydrates
         self.fat = fat
+        self.fiber = fiber
         self.photoData = photoData
         self.componentData = components.isEmpty ? nil : try? JSONEncoder().encode(components)
         self.source = source
@@ -305,12 +311,14 @@ struct FoodAnalysis: Codable, Equatable {
         let proteinG: Double
         let carbsG: Double
         let fatG: Double
+        var fiberG: Double? = nil
 
         enum CodingKeys: String, CodingKey {
             case name, portion, calories
             case proteinG = "protein_g"
             case carbsG = "carbs_g"
             case fatG = "fat_g"
+            case fiberG = "fiber_g"
         }
     }
 
@@ -320,6 +328,7 @@ struct FoodAnalysis: Codable, Equatable {
     let proteinG: Double
     let carbsG: Double
     let fatG: Double
+    var fiberG: Double? = nil
     let confidence: Double
     let assumptions: [String]
     let warning: String
@@ -329,6 +338,7 @@ struct FoodAnalysis: Codable, Equatable {
         case proteinG = "protein_g"
         case carbsG = "carbs_g"
         case fatG = "fat_g"
+        case fiberG = "fiber_g"
     }
 }
 
@@ -340,6 +350,7 @@ struct EditableMealComponent: Identifiable, Equatable {
     var protein = ""
     var carbohydrates = ""
     var fat = ""
+    var fiber = ""
 
     init() {}
 
@@ -350,6 +361,7 @@ struct EditableMealComponent: Identifiable, Equatable {
         protein = EditableMeal.format(item.proteinG)
         carbohydrates = EditableMeal.format(item.carbsG)
         fat = EditableMeal.format(item.fatG)
+        fiber = item.fiberG.map(EditableMeal.format) ?? ""
     }
 
     init(component: MealComponent) {
@@ -360,6 +372,7 @@ struct EditableMealComponent: Identifiable, Equatable {
         protein = EditableMeal.format(component.protein)
         carbohydrates = EditableMeal.format(component.carbohydrates)
         fat = EditableMeal.format(component.fat)
+        fiber = component.fiber.map(EditableMeal.format) ?? ""
     }
 
     var persisted: MealComponent? {
@@ -372,8 +385,14 @@ struct EditableMealComponent: Identifiable, Equatable {
             calories: EditableMeal.number(calories),
             protein: EditableMeal.number(protein),
             carbohydrates: EditableMeal.number(carbohydrates),
-            fat: EditableMeal.number(fat)
+            fat: EditableMeal.number(fat),
+            fiber: EditableMeal.optionalNumber(fiber)
         )
+    }
+
+    var hasValidFiber: Bool {
+        let trimmed = fiber.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty || (EditableMeal.optionalNumber(trimmed) ?? -1) >= 0
     }
 }
 
@@ -383,6 +402,7 @@ struct EditableMeal {
     var protein = ""
     var carbohydrates = ""
     var fat = ""
+    var fiber = ""
     var confidence = 0.0
     var assumption = ""
     var components = [EditableMealComponent]()
@@ -395,6 +415,7 @@ struct EditableMeal {
         protein = Self.format(analysis.proteinG)
         carbohydrates = Self.format(analysis.carbsG)
         fat = Self.format(analysis.fatG)
+        fiber = analysis.fiberG.map(Self.format) ?? ""
         confidence = analysis.confidence
         assumption = analysis.assumptions.joined(separator: " · ")
         components = analysis.items.map(EditableMealComponent.init)
@@ -406,6 +427,7 @@ struct EditableMeal {
         protein = Self.format(meal.protein)
         carbohydrates = Self.format(meal.carbohydrates)
         fat = Self.format(meal.fat)
+        fiber = meal.fiber.map(Self.format) ?? ""
         confidence = meal.confidence
         assumption = meal.assumption
         components = meal.components.map(EditableMealComponent.init)
@@ -416,6 +438,8 @@ struct EditableMeal {
             && Self.number(calories) >= 0
             && Self.number(protein) >= 0
             && components.allSatisfy { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+            && components.allSatisfy(\.hasValidFiber)
+            && hasValidFiber
     }
 
     func number(_ value: String) -> Double {
@@ -426,27 +450,54 @@ struct EditableMeal {
         components.compactMap(\.persisted)
     }
 
+    var fiberValue: Double? {
+        Self.optionalNumber(fiber)
+    }
+
     mutating func recalculateFromComponents() {
         guard !components.isEmpty else {
             calories = "0"
             protein = "0"
             carbohydrates = "0"
             fat = "0"
+            fiber = ""
             return
         }
         calories = Self.format(components.reduce(0) { $0 + Self.number($1.calories) })
         protein = Self.format(components.reduce(0) { $0 + Self.number($1.protein) })
         carbohydrates = Self.format(components.reduce(0) { $0 + Self.number($1.carbohydrates) })
         fat = Self.format(components.reduce(0) { $0 + Self.number($1.fat) })
+        let componentFiber = components.compactMap { Self.optionalNumber($0.fiber) }
+        fiber = componentFiber.count == components.count ? Self.format(componentFiber.reduce(0, +)) : ""
     }
 
     static func number(_ value: String) -> Double {
         Double(value.replacingOccurrences(of: ",", with: ".")) ?? 0
     }
 
+    static func optionalNumber(_ value: String) -> Double? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return Double(trimmed.replacingOccurrences(of: ",", with: "."))
+    }
+
     static func format(_ value: Double) -> String {
         value.formatted(.number.precision(.fractionLength(0...1)))
     }
+
+    private var hasValidFiber: Bool {
+        let trimmed = fiber.trimmingCharacters(in: .whitespacesAndNewlines)
+        return trimmed.isEmpty || (Self.optionalNumber(trimmed) ?? -1) >= 0
+    }
+}
+
+struct FiberSummary: Equatable {
+    let value: Double
+    let knownMeals: Int
+    let totalMeals: Int
+
+    var hasData: Bool { knownMeals > 0 }
+    var isComplete: Bool { totalMeals > 0 && knownMeals == totalMeals }
 }
 
 enum CaltrackMath {
@@ -456,6 +507,11 @@ enum CaltrackMath {
 
     static func totals(for meals: [MealEntry]) -> (calories: Double, protein: Double) {
         meals.reduce((0, 0)) { ($0.0 + $1.calories, $0.1 + $1.protein) }
+    }
+
+    static func fiberSummary(for meals: [MealEntry]) -> FiberSummary {
+        let known = meals.compactMap(\.fiber)
+        return FiberSummary(value: known.reduce(0, +), knownMeals: known.count, totalMeals: meals.count)
     }
 
     static func adherence(calories: Double, protein: Double, calorieRange: ClosedRange<Double>, proteinRange: ClosedRange<Double>) -> Int {

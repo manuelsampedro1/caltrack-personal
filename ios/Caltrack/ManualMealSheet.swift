@@ -53,6 +53,7 @@ struct ManualMealSheet: View {
                                     manualField("Carbohidratos", text: $editable.carbohydrates)
                                     manualField("Grasa", text: $editable.fat)
                                 }
+                                manualField("Fibra opcional", text: $editable.fiber)
 
                                 Button {
                                     onSave(editable, date)

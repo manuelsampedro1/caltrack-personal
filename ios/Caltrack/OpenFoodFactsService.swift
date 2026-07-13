@@ -10,6 +10,7 @@ struct BarcodeProduct: Equatable {
     let proteinPer100: Double
     let carbohydratesPer100: Double
     let fatPer100: Double
+    let fiberPer100: Double?
 
     func editableMeal(amount: Double) -> EditableMeal {
         let factor = max(0, amount) / 100
@@ -19,6 +20,7 @@ struct BarcodeProduct: Equatable {
         meal.protein = Self.format(proteinPer100 * factor)
         meal.carbohydrates = Self.format(carbohydratesPer100 * factor)
         meal.fat = Self.format(fatPer100 * factor)
+        meal.fiber = fiberPer100.map { Self.format($0 * factor) } ?? ""
         meal.confidence = 1
         meal.assumption = "Código \(code), \(Self.format(amount)) g o ml consumidos. Datos colaborativos de Open Food Facts."
         return meal
@@ -34,7 +36,8 @@ struct BarcodeProduct: Equatable {
         caloriesPer100: 539,
         proteinPer100: 6.3,
         carbohydratesPer100: 57.5,
-        fatPer100: 30.9
+        fatPer100: 30.9,
+        fiberPer100: 3.4
     )
 #endif
 
@@ -103,7 +106,8 @@ struct OpenFoodFactsService {
             caloriesPer100: max(0, calories),
             proteinPer100: max(0, protein),
             carbohydratesPer100: max(0, carbohydrates),
-            fatPer100: max(0, fat)
+            fatPer100: max(0, fat),
+            fiberPer100: (product.nutriments.fiber100 ?? product.nutriments.fiber).map { max(0, $0) }
         )
     }
 
@@ -148,6 +152,8 @@ private struct OpenFoodFactsEnvelope: Decodable {
         let carbohydrates: Double?
         let fat100: Double?
         let fat: Double?
+        let fiber100: Double?
+        let fiber: Double?
 
         enum CodingKeys: String, CodingKey {
             case energyKcal100 = "energy-kcal_100g"
@@ -158,6 +164,8 @@ private struct OpenFoodFactsEnvelope: Decodable {
             case carbohydrates
             case fat100 = "fat_100g"
             case fat
+            case fiber100 = "fiber_100g"
+            case fiber
         }
     }
 }

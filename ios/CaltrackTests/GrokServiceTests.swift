@@ -6,7 +6,7 @@ import UIKit
 
 final class GrokServiceTests: XCTestCase {
     func testDecodesStructuredFoodAnalysis() throws {
-        let analysis = #"{"title":"Pollo con arroz","items":[{"name":"Pechuga de pollo","portion":"180 g","calories":297,"protein_g":55.8,"carbs_g":0,"fat_g":6.5}],"calories":510,"protein_g":60,"carbs_g":45,"fat_g":10,"confidence":0.82,"assumptions":["Una cucharadita de aceite"],"warning":"La salsa puede cambiar el total."}"#
+        let analysis = #"{"title":"Pollo con arroz","items":[{"name":"Pechuga de pollo","portion":"180 g","calories":297,"protein_g":55.8,"carbs_g":0,"fat_g":6.5,"fiber_g":0}],"calories":510,"protein_g":60,"carbs_g":45,"fat_g":10,"fiber_g":4.8,"confidence":0.82,"assumptions":["Una cucharadita de aceite"],"warning":"La salsa puede cambiar el total."}"#
         let escaped = analysis
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "\"", with: "\\\"")
@@ -16,6 +16,7 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(result.title, "Pollo con arroz")
         XCTAssertEqual(result.calories, 510)
         XCTAssertEqual(result.proteinG, 60)
+        XCTAssertEqual(result.fiberG, 4.8)
         XCTAssertEqual(result.items.first?.portion, "180 g")
         XCTAssertEqual(EditableMeal(analysis: result).components.first?.name, "Pechuga de pollo")
     }
@@ -29,6 +30,7 @@ final class GrokServiceTests: XCTestCase {
         chicken.calories = "330"
         chicken.protein = "55"
         chicken.fat = "8"
+        chicken.fiber = "0"
         var rice = EditableMealComponent()
         rice.name = "Arroz cocido"
         rice.portion = "250 g"
@@ -36,6 +38,7 @@ final class GrokServiceTests: XCTestCase {
         rice.protein = "7"
         rice.carbohydrates = "74"
         rice.fat = "2"
+        rice.fiber = "2"
         meal.components = [chicken, rice]
         meal.recalculateFromComponents()
 
@@ -43,6 +46,7 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(meal.number(meal.protein), 62)
         XCTAssertEqual(meal.number(meal.carbohydrates), 74)
         XCTAssertEqual(meal.number(meal.fat), 10)
+        XCTAssertEqual(meal.fiberValue, 2)
         XCTAssertTrue(meal.isValid)
 
         let entry = MealEntry(
@@ -51,10 +55,33 @@ final class GrokServiceTests: XCTestCase {
             protein: meal.number(meal.protein),
             carbohydrates: meal.number(meal.carbohydrates),
             fat: meal.number(meal.fat),
+            fiber: meal.fiberValue,
             components: meal.persistedComponents
         )
         XCTAssertEqual(entry.components.map(\.name), ["Pechuga de pollo", "Arroz cocido"])
+        XCTAssertEqual(entry.fiber, 2)
+        XCTAssertEqual(entry.components.last?.fiber, 2)
         XCTAssertEqual(EditableMeal(meal: entry).components.count, 2)
+    }
+
+    func testFiberSummaryKeepsUnknownMealsSeparateFromZero() {
+        let meals = [
+            MealEntry(name: "Verduras", calories: 120, protein: 5, fiber: 7),
+            MealEntry(name: "Aceite", calories: 90, protein: 0, fiber: 0),
+            MealEntry(name: "Legacy", calories: 300, protein: 20)
+        ]
+
+        let summary = CaltrackMath.fiberSummary(for: meals)
+        XCTAssertEqual(summary.value, 7)
+        XCTAssertEqual(summary.knownMeals, 2)
+        XCTAssertEqual(summary.totalMeals, 3)
+        XCTAssertTrue(summary.hasData)
+        XCTAssertFalse(summary.isComplete)
+
+        let legacyComponent = #"[{"id":"00000000-0000-0000-0000-000000000001","name":"Arroz","portion":"100 g","calories":130,"protein":2.7,"carbohydrates":28,"fat":0.3}]"#
+        let decoded = try? JSONDecoder().decode([MealComponent].self, from: Data(legacyComponent.utf8))
+        XCTAssertEqual(decoded?.first?.name, "Arroz")
+        XCTAssertNil(decoded?.first?.fiber)
     }
 
     func testAdherenceRewardsConfiguredRanges() {
@@ -97,8 +124,8 @@ final class GrokServiceTests: XCTestCase {
         let now = Date(timeIntervalSince1970: 1_788_739_200)
         let yesterday = calendar.date(byAdding: .day, value: -1, to: now)!
         let meals = [
-            MealEntry(date: now, name: "Día uno", calories: 1_900, protein: 170),
-            MealEntry(date: yesterday, name: "Día dos", calories: 1_850, protein: 165)
+            MealEntry(date: now, name: "Día uno", calories: 1_900, protein: 170, fiber: 28),
+            MealEntry(date: yesterday, name: "Día dos", calories: 1_850, protein: 165, fiber: 21)
         ]
         let report = InsightEngine.report(
             meals: meals,
@@ -113,10 +140,11 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertGreaterThan(report.score, 80)
         XCTAssertTrue(report.summary.contains("2 días"))
         XCTAssertTrue(report.observations.contains { $0.contains("dentro del rango") })
+        XCTAssertTrue(report.observations.contains { $0.contains("fibra está completa") })
     }
 
     func testCoachContextContainsAggregatesWithoutPhotosOrHealthIdentifiers() {
-        let meal = MealEntry(name: "Pollo", calories: 500, protein: 55, photoData: Data("private-photo".utf8))
+        let meal = MealEntry(name: "Pollo", calories: 500, protein: 55, fiber: 8, photoData: Data("private-photo".utf8))
         let workout = WorkoutEntry(
             externalID: "health:secret-identifier",
             startDate: .now.addingTimeInterval(-3_600),
@@ -142,6 +170,8 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertTrue(context.contains("Torso"))
         XCTAssertTrue(context.contains("Hambre media 4"))
         XCTAssertTrue(context.contains("Perder peso"))
+        XCTAssertTrue(context.contains("8 g fibra"))
+        XCTAssertTrue(context.contains("Referencia de fibra: 25 g"))
         XCTAssertFalse(context.contains("private-photo"))
         XCTAssertFalse(context.contains("secret-identifier"))
         XCTAssertFalse(context.contains("private.bundle"))
@@ -204,6 +234,7 @@ final class GrokServiceTests: XCTestCase {
 
         XCTAssertFalse(String(decoding: data, as: UTF8.self).contains("components"))
         XCTAssertNil(try BackupService.decode(data).meals.first?.components)
+        XCTAssertNil(try BackupService.decode(data).meals.first?.fiber)
     }
 
     @MainActor
@@ -211,12 +242,12 @@ final class GrokServiceTests: XCTestCase {
         let schema = Schema([MealEntry.self, BodyMeasurement.self, ActivityDay.self, RecoveryDay.self, DailyPlanCheckIn.self, WorkoutEntry.self, CoachMessage.self])
         let container = try ModelContainer(for: schema, configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)])
         let mealID = UUID()
-        let component = MealComponent(name: "Arroz cocido", portion: "250 g", calories: 330, protein: 7, carbohydrates: 74, fat: 2)
+        let component = MealComponent(name: "Arroz cocido", portion: "250 g", calories: 330, protein: 7, carbohydrates: 74, fat: 2, fiber: 2)
         let backup = CaltrackBackup(
             version: 1,
             exportedAt: .now,
             meals: [
-                .init(id: mealID, date: .now, name: "Comida restaurada", calories: 600, protein: 50, carbohydrates: 60, fat: 18, photoData: nil, components: [component], source: "manual", confidence: 1, assumption: "")
+                .init(id: mealID, date: .now, name: "Comida restaurada", calories: 600, protein: 50, carbohydrates: 60, fat: 18, fiber: 9, photoData: nil, components: [component], source: "manual", confidence: 1, assumption: "")
             ],
             measurements: [],
             activities: [],
@@ -228,6 +259,7 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(try BackupService.restore(backup, into: container.mainContext), 0)
         let restored = try container.mainContext.fetch(FetchDescriptor<MealEntry>())
         XCTAssertEqual(restored.map(\.id), [mealID])
+        XCTAssertEqual(restored.first?.fiber, 9)
         XCTAssertEqual(restored.first?.components, [component])
     }
 
@@ -240,7 +272,7 @@ final class GrokServiceTests: XCTestCase {
         let now = Date(timeIntervalSince1970: 1_788_739_200)
         let meals = [
             MealEntry(date: now.addingTimeInterval(-300), name: "  Pollo   con arroz ", calories: 700, protein: 60, carbohydrates: 70, fat: 18),
-            MealEntry(date: now.addingTimeInterval(-100), name: "POLLO CON ARROZ", calories: 740, protein: 64, carbohydrates: 74, fat: 19),
+            MealEntry(date: now.addingTimeInterval(-100), name: "POLLO CON ARROZ", calories: 740, protein: 64, carbohydrates: 74, fat: 19, fiber: 6),
             MealEntry(date: now.addingTimeInterval(-200), name: "Salmón", calories: 610, protein: 55)
         ]
 
@@ -250,28 +282,37 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(first.key, "pollo con arroz")
         XCTAssertEqual(first.count, 2)
         XCTAssertEqual(first.calories, 740)
+        XCTAssertEqual(first.fiber, 6)
         XCTAssertEqual(FoodLibrary.normalizedName("  SALMÓN  "), "salmon")
     }
 
     func testHealthNutritionCorrelationContainsConfirmedMacrosAndStableIdentifier() throws {
         let id = UUID()
         let date = Date(timeIntervalSince1970: 1_788_739_200)
-        let meal = MealEntry(id: id, date: date, name: "Bowl", calories: 640, protein: 52, carbohydrates: 68, fat: 18)
+        let meal = MealEntry(id: id, date: date, name: "Bowl", calories: 640, protein: 52, carbohydrates: 68, fat: 18, fiber: 11)
         let correlation = try HealthNutritionService.makeCorrelation(for: meal)
 
         XCTAssertEqual(correlation.startDate, date)
         XCTAssertEqual(correlation.metadata?[HKMetadataKeyExternalUUID] as? String, id.uuidString)
-        XCTAssertEqual(correlation.objects.count, 4)
+        XCTAssertEqual(correlation.objects.count, 5)
 
         let samples = correlation.objects.compactMap { $0 as? HKQuantitySample }
         let energy = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryEnergyConsumed.rawValue })
         let protein = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryProtein.rawValue })
+        let fiber = try XCTUnwrap(samples.first { $0.quantityType.identifier == HKQuantityTypeIdentifier.dietaryFiber.rawValue })
         XCTAssertEqual(energy.quantity.doubleValue(for: .kilocalorie()), 640)
         XCTAssertEqual(protein.quantity.doubleValue(for: .gram()), 52)
+        XCTAssertEqual(fiber.quantity.doubleValue(for: .gram()), 11)
+
+        let withoutFiberPermission = try HealthNutritionService.makeCorrelation(for: meal, includeFiber: false)
+        XCTAssertEqual(withoutFiberPermission.objects.count, 4)
+
+        let legacy = try HealthNutritionService.makeCorrelation(for: MealEntry(name: "Sin fibra", calories: 200, protein: 10))
+        XCTAssertEqual(legacy.objects.count, 4)
     }
 
     func testOpenFoodFactsDecodesV3ProductAndScalesServing() throws {
-        let fixture = #"{"status":"success","code":"3017620422003","product":{"code":"3017620422003","product_name":"Nutella","product_name_es":"Nutella","brands":"Ferrero","serving_size":"15 g","nutriscore_grade":"e","nutriments":{"energy-kcal_100g":539,"proteins_100g":6.3,"carbohydrates_100g":57.5,"fat_100g":30.9}}}"#
+        let fixture = #"{"status":"success","code":"3017620422003","product":{"code":"3017620422003","product_name":"Nutella","product_name_es":"Nutella","brands":"Ferrero","serving_size":"15 g","nutriscore_grade":"e","nutriments":{"energy-kcal_100g":539,"proteins_100g":6.3,"carbohydrates_100g":57.5,"fat_100g":30.9,"fiber_100g":3.4}}}"#
         let product = try OpenFoodFactsService.decodeProduct(Data(fixture.utf8))
         let meal = product.editableMeal(amount: 30)
 
@@ -279,6 +320,7 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(product.servingSize, "15 g")
         XCTAssertEqual(meal.number(meal.calories), 161.7, accuracy: 0.01)
         XCTAssertEqual(meal.number(meal.protein), 1.9, accuracy: 0.01)
+        XCTAssertEqual(try XCTUnwrap(meal.fiberValue), 1, accuracy: 0.01)
         XCTAssertTrue(meal.assumption.contains("3017620422003"))
     }
 
@@ -365,9 +407,11 @@ final class GrokServiceTests: XCTestCase {
             generatedAt: day,
             calories: 1_760,
             protein: 159,
+            fiber: 22,
             calorieMin: 1_800,
             calorieMax: 2_000,
             proteinMin: 160,
+            fiberTarget: 25,
             mealCount: 3,
             nutritionComplete: true,
             planTitle: "Mantén el rango"
@@ -380,6 +424,7 @@ final class GrokServiceTests: XCTestCase {
         let expired = WidgetSnapshotStore.load(defaults: defaults, now: tomorrow, calendar: calendar)
         XCTAssertEqual(expired.calories, 0)
         XCTAssertEqual(expired.protein, 0)
+        XCTAssertNil(expired.fiber)
         XCTAssertEqual(expired.mealCount, 0)
         XCTAssertFalse(expired.nutritionComplete)
         XCTAssertEqual(expired.calorieMax, 2_000)
@@ -579,7 +624,8 @@ final class GrokServiceTests: XCTestCase {
             calorieMin: 1_800,
             calorieMax: 2_000,
             proteinMin: 160,
-            proteinMax: 190
+            proteinMax: 190,
+            fiberTarget: 25
         )
         let backup = BackupService.make(
             meals: [],
@@ -599,11 +645,15 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(try BackupService.restore(decoded, into: destination.mainContext), 1)
         XCTAssertEqual(try destination.mainContext.fetch(FetchDescriptor<DailyPlanCheckIn>()).first?.energy, 2)
         XCTAssertEqual(UserDefaults.standard.double(forKey: "planLastAdjustmentTimestamp"), 1_783_890_000)
+        XCTAssertEqual(UserDefaults.standard.double(forKey: "fiberTarget"), 25)
 
         let legacy = #"{"version":1,"exportedAt":"2026-07-12T12:00:00Z","meals":[],"measurements":[],"activities":[],"workouts":[],"messages":[]}"#
         let legacyBackup = try BackupService.decode(Data(legacy.utf8))
         XCTAssertTrue(legacyBackup.checkIns.isEmpty)
         XCTAssertNil(legacyBackup.planSettings)
+
+        let legacySettings = #"{"version":1,"exportedAt":"2026-07-12T12:00:00Z","meals":[],"measurements":[],"activities":[],"planSettings":{"goalMode":"maintain","weeklyRate":0.5,"targetWeight":null,"lastAdjustmentTimestamp":null,"calorieMin":1800,"calorieMax":2000,"proteinMin":160,"proteinMax":190},"workouts":[],"messages":[]}"#
+        XCTAssertNil(try BackupService.decode(Data(legacySettings.utf8)).planSettings?.fiberTarget)
     }
 
     private func adaptiveWeights(slope: Double, now: Date, calendar: Calendar) -> [AdaptiveWeightPoint] {

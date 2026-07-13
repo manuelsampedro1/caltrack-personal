@@ -5,9 +5,11 @@ struct WidgetSnapshot: Codable, Sendable, Hashable {
     let generatedAt: Date
     let calories: Double
     let protein: Double
+    let fiber: Double?
     let calorieMin: Double
     let calorieMax: Double
     let proteinMin: Double
+    let fiberTarget: Double?
     let mealCount: Int
     let nutritionComplete: Bool
     let planTitle: String
@@ -16,9 +18,11 @@ struct WidgetSnapshot: Codable, Sendable, Hashable {
         lhs.day == rhs.day
             && lhs.calories == rhs.calories
             && lhs.protein == rhs.protein
+            && lhs.fiber == rhs.fiber
             && lhs.calorieMin == rhs.calorieMin
             && lhs.calorieMax == rhs.calorieMax
             && lhs.proteinMin == rhs.proteinMin
+            && lhs.fiberTarget == rhs.fiberTarget
             && lhs.mealCount == rhs.mealCount
             && lhs.nutritionComplete == rhs.nutritionComplete
             && lhs.planTitle == rhs.planTitle
@@ -28,9 +32,11 @@ struct WidgetSnapshot: Codable, Sendable, Hashable {
         hasher.combine(day)
         hasher.combine(calories)
         hasher.combine(protein)
+        hasher.combine(fiber)
         hasher.combine(calorieMin)
         hasher.combine(calorieMax)
         hasher.combine(proteinMin)
+        hasher.combine(fiberTarget)
         hasher.combine(mealCount)
         hasher.combine(nutritionComplete)
         hasher.combine(planTitle)
@@ -43,9 +49,11 @@ struct WidgetSnapshot: Codable, Sendable, Hashable {
             generatedAt: date,
             calories: 0,
             protein: 0,
+            fiber: nil,
             calorieMin: calorieMin,
             calorieMax: calorieMax,
             proteinMin: proteinMin,
+            fiberTarget: fiberTarget,
             mealCount: 0,
             nutritionComplete: false,
             planTitle: "Empieza el día"
@@ -58,9 +66,11 @@ struct WidgetSnapshot: Codable, Sendable, Hashable {
             generatedAt: date,
             calories: 0,
             protein: 0,
+            fiber: nil,
             calorieMin: 1_800,
             calorieMax: 2_000,
             proteinMin: 160,
+            fiberTarget: 25,
             mealCount: 0,
             nutritionComplete: false,
             planTitle: "Abre Caltrack"
@@ -73,9 +83,11 @@ struct WidgetSnapshot: Codable, Sendable, Hashable {
             generatedAt: .now,
             calories: 1_760,
             protein: 159,
+            fiber: 23,
             calorieMin: 1_800,
             calorieMax: 2_000,
             proteinMin: 160,
+            fiberTarget: 25,
             mealCount: 3,
             nutritionComplete: false,
             planTitle: "Mantén el rango"
