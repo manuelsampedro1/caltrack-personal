@@ -179,6 +179,12 @@ SKIP_APP_PRIVACY=1 ios/scripts/configure_app_store.rb
 
 El script mantiene el lanzamiento manual y configura español de España. La clave activa no tiene permiso para el endpoint de privacidad, por eso `SKIP_APP_PRIVACY=1` conserva las respuestas publicadas desde la sesión web. Sin esa variable, el script también intenta publicar la privacidad por API. Las credenciales `ASC_*` siguen fuera del repositorio. Las páginas públicas usadas por Apple son `privacy.html` y `support.html` dentro de GitHub Pages.
 
+Las nueve capturas reales de iPhone 6,5 pulgadas están versionadas en `ios/app_store/screenshots`. Para reemplazarlas en la ficha, verificar su orden y vincular la build 13 sin enviarla a revisión:
+
+```bash
+ruby ios/scripts/finalize_app_store.rb
+```
+
 La foto elegida se envía directamente a `api.x.ai` para el análisis. Solo cuando el usuario pregunta al entrenador se envía también a xAI un resumen nutricional, corporal, de Salud y entrenamiento de los últimos 30 días. No se incluyen fotos, claves ni identificadores de Salud en ese resumen. Consulta [PRIVACY.md](PRIVACY.md).
 
 No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Grok, para visión, salida nutricional estructurada y preguntas voluntarias al entrenador. El cálculo de objetivos, adherencia, tendencias y avisos básicos se ejecuta localmente.

@@ -22,11 +22,15 @@
 - [x] Preparar nombre, subtítulo, descripción, keywords, privacidad, soporte y notas de revisión.
 - [x] Corregir el canal alfa del icono y añadir un preflight para evitar otra entrega inválida.
 - [x] Publicar la privacidad y declarar que no es un dispositivo médico regulado.
-- [ ] Validar y subir el IPA.
-- [ ] Esperar procesamiento de Apple.
-- [ ] Crear o reutilizar grupo interno y añadir la build.
+- [x] Validar y subir el IPA.
+- [x] Esperar procesamiento de Apple.
+- [x] Crear el grupo interno, añadir el tester y confirmar acceso a la build.
+- [x] Subir nueve capturas reales y vincular la build 13 a la versión 1.11.
+- [x] Configurar precio gratis y disponibilidad en 175 países y regiones.
+- [x] Actualizar las preguntas de redes sociales y mensajería de la clasificación por edad.
+- [x] Preparar la declaración conservadora de accesibilidad en estado borrador.
 
 ## Fase 4: Evidencia
 
-- [ ] Registrar app ID, build, delivery ID, checksum y estado final.
-- [ ] Publicar el SHA de documentación.
+- [x] Registrar app ID, build, delivery ID, checksum y estado final.
+- [x] Publicar el SHA de documentación.

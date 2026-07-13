@@ -189,3 +189,19 @@ Crear y completar la ficha no autoriza una publicación pública. La versión de
 El icono conservaba transparencia en las esquinas porque incluía una máscara redondeada. App Store Connect rechazó la validación antes de subir el IPA. El diseño se aplanó sobre el mismo carbón y se mantiene cuadrado para que iOS aplique su propia máscara.
 
 El script de release comprueba ahora `hasAlpha: no` antes de archivar. Una app con el mismo defecto vuelve a fallar localmente y no consume otra entrega remota.
+
+### Capturas reales y reproducibles
+
+La ficha usa nueve capturas obtenidas de pruebas UI sobre la aplicación real, a 1242 por 2688 píxeles. La primera enseña el resultado editable del análisis fotográfico y las siguientes cubren conexiones, macros, plan, entrenamientos, progreso, recuperación, entrenador, cierre diario e introducción.
+
+No se añaden titulares ni marcos generados sobre la imagen. Así la ficha representa exactamente el producto que recibe el tester. Los archivos quedan versionados y un script idempotente valida tamaño, reemplaza la secuencia remota y vincula la build seleccionada.
+
+### Distribución gratuita y global preparada
+
+La primera ficha queda gratis, con España como territorio base y disponibilidad preparada en los 175 países y regiones actuales. Esto elimina fricción para la prueba personal y no introduce StoreKit, RevenueCat ni una monetización sin validar. La versión sigue sin enviarse a revisión pública.
+
+### Clasificación y accesibilidad conservadoras
+
+El entrenador de Grok no es mensajería entre usuarios. Caltrack declara que no tiene redes sociales, contenido público, publicidad ni chat entre personas. Salud y bienestar permanece activo porque la app sí ofrece recomendaciones de estilo de vida, con una clasificación calculada de 9+ en la mayoría de territorios.
+
+La declaración de accesibilidad de iPhone solo afirma interfaz oscura, que está verificada. Se conserva como borrador porque Apple bloquea su publicación hasta que la app esté disponible, y no se declaran capacidades que aún no se hayan auditado de extremo a extremo.

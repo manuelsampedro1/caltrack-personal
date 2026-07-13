@@ -1,5 +1,7 @@
 .DS_Store
 screenshots/
+!ios/app_store/screenshots/
+!ios/app_store/screenshots/**
 private/
 DerivedData/
 build/

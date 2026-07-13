@@ -1,6 +1,6 @@
 # Progreso de distribución por TestFlight
 
-## Estado: ficha creada, icono corregido y nueva release en preparación
+## Estado: build 13 disponible en TestFlight interno
 
 ## Completado
 
@@ -30,13 +30,24 @@
 - Páginas públicas de privacidad y soporte desplegadas en GitHub Pages y verificadas con HTTP 200.
 - Privacidad publicada en App Store Connect con foto, contenido, Salud y fitness para funcionalidad, vinculados y sin tracking.
 - Declaración de dispositivo médico regulado completada como no aplicable.
+- Release 1.11 (13) archivada, validada y subida desde `d94f3cff2af1331b046aa69b9519190a20982f61`.
+- Delivery y build ID: `d1887bc9-f4f6-4b98-bc9a-a70445886c58`.
+- SHA-256 del IPA subido: `13c47af13e2d769bbdb2ecd79e9b0bce86471ad6166d91c276231fddfba26dd4`.
+- Apple procesó la build como `VALID`, sin cifrado no exento y con estado interno `IN_BETA_TESTING`.
+- Grupo interno `Caltrack Internal` creado con acceso a todas las builds, un tester y la build 13 disponible.
+- Nueve capturas reales de 1242 por 2688 píxeles subidas y verificadas en el orden versionado.
+- La build 13 está vinculada a la versión 1.11 de App Store, que permanece en `PREPARE_FOR_SUBMISSION` y lanzamiento manual.
+- Precio configurado como gratis con España como territorio base.
+- Disponibilidad preparada en los 175 países y regiones actuales, con alta automática en territorios nuevos.
+- Clasificación por edad actualizada: sin redes sociales, contenido público, publicidad ni mensajería entre usuarios; Salud y bienestar permanece activo.
+- Declaración de accesibilidad de iPhone preparada en borrador con interfaz oscura. Apple no permite publicarla hasta que la app esté disponible en App Store.
 
-## Pendiente de la release corregida
+## Pendiente fuera de la release
 
 - Una clave secundaria debe revocarse porque apareció en una traza de diagnóstico.
 - El iPhone de Manolo sigue `unavailable`, así que tampoco se puede instalar directamente desde Xcode.
 
 ## Siguiente acción segura
 
-- Archivar, validar y subir de nuevo la build 13 con el icono opaco.
-- Esperar el procesamiento y añadirla al grupo interno de TestFlight.
+- Aceptar la invitación interna o abrir TestFlight con `manuel0507@gmail.com` e instalar la build 13.
+- Probar una comida real, Salud y sincronización de Hevy en el iPhone antes de plantear una revisión pública.

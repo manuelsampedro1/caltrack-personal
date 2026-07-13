@@ -135,7 +135,7 @@ def configure_store_metadata!(app, contact)
     gambling: false,
     health_or_wellness_topics: true,
     loot_box: false,
-    messaging_and_chat: true,
+    messaging_and_chat: false,
     parental_controls: false,
     unrestricted_web_access: false,
     user_generated_content: false,
