@@ -1,0 +1,8 @@
+01 | Registra una comida con una foto
+02 | Corrige ingredientes, porciones y macros
+03 | Tu día claro, sin ruido
+04 | Peso, composición y nutrición en contexto
+05 | Hevy y Strava junto a Apple Salud
+06 | Recuperación sin scores opacos
+07 | Un entrenador basado en tus datos
+08 | Widgets y accesos para registrar antes

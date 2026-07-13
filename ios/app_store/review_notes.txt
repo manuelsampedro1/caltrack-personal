@@ -1,0 +1,9 @@
+Caltrack funciona sin cuenta y no solicita permisos al abrirse.
+
+La entrada manual, el historial, los objetivos, los check-ins y el entrenador local se pueden probar sin claves. El lector de productos permite introducir un código manualmente si la cámara no está disponible.
+
+El análisis real de una foto y las preguntas remotas al entrenador requieren que el usuario añada su propia clave de xAI desde Ajustes. La clave se valida antes de guardarse en Keychain. La integración detallada con Hevy es opcional y requiere Hevy Pro. Strava y Hevy también pueden compartir resúmenes mediante Apple Salud.
+
+Apple Salud solo se solicita después de pulsar la acción correspondiente. Los permisos de lectura y la escritura opcional de nutrición se pueden conceder por separado.
+
+No existe un servidor de Caltrack, publicidad, seguimiento ni cuenta de demostración.

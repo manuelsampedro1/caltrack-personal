@@ -1,0 +1,42 @@
+Registra una comida con una foto. Revisa cada ingrediente. Entiende tu progreso con tus propios datos.
+
+Caltrack une nutrición, cuerpo y entrenamiento en una app nativa, rápida y privada.
+
+REGISTRO POR FOTO
+
+• Fotografía un plato o elige una imagen.
+• Grok estima ingredientes, porciones, calorías, proteína, carbohidratos, grasa y fibra.
+• Corrige cada componente antes de guardar. El total se recalcula al instante.
+• Escanea productos envasados con su código de barras y revisa la información de Open Food Facts.
+• Repite tus comidas frecuentes con un toque.
+
+APPLE SALUD
+
+• Importa peso, grasa corporal, cintura, pasos, gasto y entrenamientos con tu permiso.
+• Consulta tendencias personales de sueño, frecuencia cardiaca en reposo y HRV.
+• Guarda opcionalmente las comidas confirmadas en Salud.
+• Tus datos de Salud no se envían al analizar una foto.
+
+HEVY Y STRAVA
+
+• Importa resúmenes de entrenamientos compartidos con Apple Salud.
+• Con Hevy Pro puedes recuperar ejercicios, series, repeticiones, cargas, RPE y volumen.
+• Caltrack detecta sesiones equivalentes para evitar duplicados.
+
+PROGRESO QUE PUEDES REVISAR
+
+• Rangos diarios de calorías, proteína y fibra.
+• Gráficas de nutrición, peso, composición corporal, recuperación y carga de entrenamiento.
+• Check-ins manuales con foto privada opcional.
+• Cierre del día con hambre y energía.
+• Propuestas semanales de hasta 100 kcal, siempre con evidencia y confirmación explícita.
+• Entrenador local y preguntas opcionales a Grok.
+• Widgets y accesos desde Siri, Spotlight, Atajos y el botón Acción.
+
+LOCAL Y BAJO TU CONTROL
+
+No necesitas una cuenta de Caltrack. El historial se guarda en tu iPhone. Las claves personales permanecen en Keychain. Puedes descargar una copia privada y restaurarla cuando quieras. No hay anuncios ni seguimiento entre apps.
+
+El análisis por foto y las preguntas a Grok requieren una clave personal de xAI. El detalle de series de Hevy requiere Hevy Pro y su clave. Apple Salud, Strava y Hevy dependen de los permisos que concedas.
+
+Las estimaciones nutricionales deben revisarse. Caltrack no sustituye consejo médico o nutricional.

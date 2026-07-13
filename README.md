@@ -171,6 +171,14 @@ ios/scripts/release_testflight.sh 13 archive
 
 La acción `upload` valida y sube el mismo IPA cuando la ficha de App Store Connect ya existe. El script deja commit, versión, build y SHA-256 en `build/release-13/manifest.txt`.
 
+La ficha, la privacidad y los textos de TestFlight se configuran desde archivos versionados, sin enviar la app a revisión pública:
+
+```bash
+ios/scripts/configure_app_store.rb
+```
+
+El script mantiene el lanzamiento manual, configura español de España y publica las respuestas de privacidad. Las credenciales `ASC_*` siguen fuera del repositorio. Las páginas públicas usadas por Apple son `privacy.html` y `support.html` dentro de GitHub Pages.
+
 La foto elegida se envía directamente a `api.x.ai` para el análisis. Los datos de Salud no se envían a xAI. Consulta [PRIVACY.md](PRIVACY.md).
 
 No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Grok, para visión, salida nutricional estructurada y preguntas voluntarias al entrenador. El cálculo de objetivos, adherencia, tendencias y avisos básicos se ejecuta localmente.

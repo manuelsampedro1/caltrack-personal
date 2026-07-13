@@ -18,7 +18,9 @@
 
 ## Fase 3: App Store Connect
 
-- [ ] Crear ficha de Caltrack con nombre, idioma, bundle ID y SKU.
+- [x] Crear ficha de Caltrack con nombre, idioma, bundle ID y SKU.
+- [x] Preparar nombre, subtítulo, descripción, keywords, privacidad, soporte y notas de revisión.
+- [x] Corregir el canal alfa del icono y añadir un preflight para evitar otra entrega inválida.
 - [ ] Validar y subir el IPA.
 - [ ] Esperar procesamiento de Apple.
 - [ ] Crear o reutilizar grupo interno y añadir la build.

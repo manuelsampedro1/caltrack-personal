@@ -1,0 +1,1 @@
+Primera versión de Caltrack para iPhone, con registro de comida por foto, revisión editable de macros, Apple Salud, Hevy, Strava, códigos de barras, recuperación, widgets y entrenador privado.

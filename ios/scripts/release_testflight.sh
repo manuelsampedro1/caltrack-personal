@@ -4,6 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 PROJECT="$ROOT/ios/Caltrack.xcodeproj"
 SCHEME="Caltrack"
+APP_ICON="$ROOT/ios/Caltrack/Assets.xcassets/AppIcon.appiconset/AppIcon.png"
 BUILD_NUMBER="${1:-}"
 ACTION="${2:-archive}"
 
@@ -28,6 +29,15 @@ for name in ASC_KEY_PATH ASC_KEY_ID ASC_ISSUER_ID; do
 done
 if [[ ! -f "$ASC_KEY_PATH" ]]; then
   echo "ASC_KEY_PATH no apunta a un archivo existente." >&2
+  exit 1
+fi
+if [[ ! -f "$APP_ICON" ]]; then
+  echo "Falta el icono principal de App Store." >&2
+  exit 1
+fi
+ICON_ALPHA="$(sips -g hasAlpha "$APP_ICON" 2>/dev/null | awk '/hasAlpha:/{print $2}')"
+if [[ "$ICON_ALPHA" != "no" ]]; then
+  echo "El icono principal contiene transparencia y App Store Connect lo rechazará." >&2
   exit 1
 fi
 

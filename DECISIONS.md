@@ -173,3 +173,19 @@ La creación de la ficha y la subida quedan separadas. Así se puede verificar e
 El manifiesto declara cero tracking y ningún uso publicitario. Incluye los dos motivos aprobados de `UserDefaults`, datos privados de la propia app y datos compartidos con la extensión mediante App Group. Como el usuario puede enviar voluntariamente una foto o un resumen al entrenador de xAI, se declaran foto, contenido, salud y fitness como vinculados y usados solo para funcionalidad.
 
 Caltrack usa HTTPS y Keychain proporcionados por iOS, no implementa criptografía propia. `ITSAppUsesNonExemptEncryption` queda en `NO` para evitar preguntas repetidas de export compliance sin ocultar el uso de las APIs seguras del sistema.
+
+### Ficha enfocada en el primer valor
+
+La ficha de España usa `Caltrack: Calorías y Macros` y abre con el registro por foto. Los competidores repiten promesas genéricas de dieta y pérdida de peso. Caltrack se diferencia con revisión por ingrediente, Apple Salud, Hevy, Strava y almacenamiento local sin cuenta.
+
+La primera captura debe mostrar la acción principal y el resultado editable. Las siguientes explican el día, progreso, entrenamientos, recuperación y entrenador. No se promete precisión automática ni pérdida de peso rápida.
+
+### TestFlight primero y release manual
+
+Crear y completar la ficha no autoriza una publicación pública. La versión de App Store queda en lanzamiento manual y no se envía a revisión. El objetivo inmediato es una build procesada en un grupo interno de TestFlight.
+
+### Icono opaco como puerta de distribución
+
+El icono conservaba transparencia en las esquinas porque incluía una máscara redondeada. App Store Connect rechazó la validación antes de subir el IPA. El diseño se aplanó sobre el mismo carbón y se mantiene cuadrado para que iOS aplique su propia máscara.
+
+El script de release comprueba ahora `hasAlpha: no` antes de archivar. Una app con el mismo defecto vuelve a fallar localmente y no consume otra entrega remota.

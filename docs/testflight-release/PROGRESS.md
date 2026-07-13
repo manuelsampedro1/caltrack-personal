@@ -1,6 +1,6 @@
 # Progreso de distribución por TestFlight
 
-## Estado: IPA verificado, pendiente de ficha en App Store Connect
+## Estado: ficha creada, icono corregido y nueva release en preparación
 
 ## Completado
 
@@ -22,14 +22,20 @@
 - `ITSAppUsesNonExemptEncryption=false` comprobado dentro del IPA.
 - SHA-256 definitivo: `36c63f8a3f7eeb748e1c951ef35950ce57a27980d462f761610d8b990733f1ed`.
 - La build 12 anterior queda reemplazada por la 13 y no debe subirse.
+- Ficha creada en App Store Connect con Apple ID `6790503627`, bundle `com.manuelsampedro.caltrack`, español de España, SKU `caltrack-personal-ios` y acceso completo.
+- La primera validación remota de la build 13 detectó el canal alfa del icono antes de subir el binario.
+- Icono aplanado sobre su fondo original, sin cambiar la composición visual, y preflight añadido al script de release.
+- Suite posterior al arreglo: 36 pruebas unitarias y 14 UI, 50 sin fallos.
+- Metadatos ASO, privacidad, soporte, edad, categoría, revisión y TestFlight preparados de forma reproducible.
 
-## Bloqueos externos actuales
+## Pendiente de la release corregida
 
-- La ficha de Caltrack no existe y la credencial activa no tiene permiso para crear apps.
 - Una clave secundaria debe revocarse porque apareció en una traza de diagnóstico.
 - El iPhone de Manolo sigue `unavailable`, así que tampoco se puede instalar directamente desde Xcode.
 
 ## Siguiente acción segura
 
-- Con una cuenta Admin o App Manager, crear una app iOS llamada `Caltrack`, idioma `Español (España)`, bundle ID `com.manuelsampedro.caltrack` y SKU `caltrack-personal-ios`.
-- Después ejecutar `ios/scripts/release_testflight.sh 13 upload` con la credencial activa no expuesta.
+- Publicar las páginas de soporte y privacidad.
+- Ejecutar `ios/scripts/configure_app_store.rb` con la credencial activa no expuesta.
+- Archivar, validar y subir de nuevo la build 13 con el icono opaco.
+- Esperar el procesamiento y añadirla al grupo interno de TestFlight.
