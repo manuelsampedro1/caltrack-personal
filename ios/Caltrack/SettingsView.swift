@@ -31,6 +31,7 @@ struct SettingsView: View {
     @AppStorage("planWeeklyRate") private var planWeeklyRate = 0.5
     @AppStorage("planTargetWeight") private var planTargetWeight = 0.0
     @AppStorage("planLastAdjustmentTimestamp") private var planLastAdjustmentTimestamp = 0.0
+    @AppStorage("lastBackupExportTimestamp") private var lastBackupExportTimestamp = 0.0
     @State private var apiKey = ""
     @State private var hevyKey = ""
     @State private var validatingGrok = false
@@ -93,7 +94,6 @@ struct SettingsView: View {
                         validationButton(title: "Validar y guardar xAI", loading: validatingGrok)
                     }
                     .disabled(apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || validatingGrok)
-                    Link("Crear clave en xAI", destination: URL(string: "https://console.x.ai/")!)
                     if let grokMessage { statusText(grokMessage, success: grokConnected) }
                     if KeychainStore.read(account: GrokService.apiKeyAccount) != nil {
                         Button("Eliminar clave de xAI", role: .destructive) {
@@ -106,7 +106,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Grok Vision")
                 } footer: {
-                    Text("Grok analiza la foto y devuelve alimentos, porciones y macros editables. No necesitas una segunda clave de OpenAI.")
+                    Text("La clave personal es opcional y permanece en Keychain. Sin ella puedes ver un ejemplo local, registrar manualmente o usar códigos de barras. Caltrack no vende ni gestiona créditos de xAI.")
                 }
 
                 Section {
@@ -125,7 +125,6 @@ struct SettingsView: View {
                         validationButton(title: "Validar y conectar Hevy", loading: validatingHevy)
                     }
                     .disabled(hevyKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || validatingHevy)
-                    Link("Crear o copiar clave en Hevy", destination: URL(string: "https://hevy.com/settings?developer")!)
                     if let hevyMessage { statusText(hevyMessage, success: hevyConnected) }
                     if KeychainStore.read(account: HevyService.apiKeyAccount) != nil {
                         Button("Desconectar Hevy", role: .destructive) {
@@ -139,7 +138,7 @@ struct SettingsView: View {
                 } header: {
                     Text("Hevy Pro")
                 } footer: {
-                    Text("La primera sincronización recupera hasta 100 entrenamientos. Después solo consulta los más recientes. La clave se valida antes de guardarse y permanece en Keychain.")
+                    Text("Pega una clave personal que ya tengas. La primera sincronización recupera hasta 100 entrenamientos. Después solo consulta los más recientes. La clave permanece en Keychain.")
                 }
 
                 Section("Strava") {
@@ -222,16 +221,25 @@ struct SettingsView: View {
                     if let backupMessage {
                         Text(backupMessage).font(.caption).foregroundStyle(.secondary)
                     }
+                    if lastBackupExportTimestamp > 0 {
+                        Label("Última copia: \(backupDate.formatted(date: .abbreviated, time: .shortened))", systemImage: "checkmark.icloud")
+                            .font(.caption)
+                            .foregroundStyle(CaltrackTheme.green)
+                    }
                 } header: {
                     Text("Tus datos")
                 } footer: {
-                    Text("El JSON incluye comidas, componentes, fibra, fotos, medidas, recuperación, cierres diarios, objetivos, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy.")
+                    Text("El JSON incluye comidas, componentes, fibra, fotos, medidas, recuperación, cierres diarios, objetivos, entrenamientos y conversación. Nunca incluye claves de xAI o Hevy. Guárdalo en una ubicación privada que controles.")
                 }
 
                 Section("Privacidad") {
                     Label("Comidas, recuperación, fotos y entrenamientos se guardan en este iPhone", systemImage: "iphone.gen3")
                     Label("Salud requiere permiso explícito", systemImage: "heart.text.square")
                     Label("Cada estimación se confirma antes de guardar", systemImage: "checkmark.seal")
+                    Label("Caltrack no sustituye consejo médico o nutricional", systemImage: "cross.case")
+                    Link(destination: CaltrackLinks.privacy) {
+                        Label("Política de privacidad", systemImage: "hand.raised.fill")
+                    }
                 }
 
                 Section("Ayuda") {
@@ -241,6 +249,10 @@ struct SettingsView: View {
                     } label: {
                         Label("Ver introducción", systemImage: "questionmark.circle")
                     }
+                    Link(destination: CaltrackLinks.support) {
+                        Label("Soporte", systemImage: "lifepreserver.fill")
+                    }
+                    LabeledContent("Versión", value: appVersion)
                 }
             }
             .navigationTitle("Ajustes")
@@ -261,6 +273,7 @@ struct SettingsView: View {
         ) { result in
             switch result {
             case .success:
+                lastBackupExportTimestamp = Date.now.timeIntervalSince1970
                 backupMessage = "Copia exportada correctamente"
                 UINotificationFeedbackGenerator().notificationOccurred(.success)
             case .failure(let error):
@@ -292,6 +305,16 @@ struct SettingsView: View {
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(connected ? color : .secondary)
         }
+    }
+
+    private var backupDate: Date {
+        Date(timeIntervalSince1970: lastBackupExportTimestamp)
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "1.11"
+        let build = Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "14"
+        return "\(version) (\(build))"
     }
 
     private func shortcutRow(_ title: String, phrase: String, icon: String) -> some View {

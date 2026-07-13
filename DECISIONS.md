@@ -205,3 +205,27 @@ La primera ficha queda gratis, con España como territorio base y disponibilidad
 El entrenador de Grok no es mensajería entre usuarios. Caltrack declara que no tiene redes sociales, contenido público, publicidad ni chat entre personas. Salud y bienestar permanece activo porque la app sí ofrece recomendaciones de estilo de vida, con una clasificación calculada de 9+ en la mayoría de territorios.
 
 La declaración de accesibilidad de iPhone solo afirma interfaz oscura, que está verificada. Se conserva como borrador porque Apple bloquea su publicación hasta que la app esté disponible, y no se declaran capacidades que aún no se hayan auditado de extremo a extremo.
+
+### Continuidad después de TestFlight
+
+Una build de TestFlight deja de estar disponible 90 días después de subirse. La vía permanente elegida pasa a ser la PWA de GitHub Pages, accesible mediante un enlace estable e instalable desde Safari. No requiere App Review y no caduca por el límite de TestFlight. La distribución nativa queda pausada.
+
+Antes de esa revisión, Ajustes enlaza privacidad y soporte dentro de la app, elimina llamadas externas para crear claves y explica que xAI y Hevy son conexiones personales opcionales. El análisis fotográfico incluye un ejemplo local claramente ficticio que permite revisar toda la interfaz sin credenciales ni transmisión de datos.
+
+Si SwiftData no puede abrir el almacén, Caltrack deja de usar un cierre forzado. Muestra un estado de recuperación que protege el historial, evita escribir una base temporal y dirige al soporte antes de reinstalar.
+
+### Web principal fiel al tuit
+
+La acción principal de la PWA es fotografiar la comida. La web envía la imagen directamente a xAI con `store: false`, recibe una salida estructurada y exige una revisión editable por componente antes de guardar. Texto y macros exactos quedan como alternativas secundarias.
+
+El dashboard conserva la densidad visual del tuit: calorías y proteína semanales, día actual, filas de comidas, fotos, entrenamientos y preguntas sobre el progreso. En móvil hay una barra inferior para Foto, Texto y Más.
+
+### Integraciones directas sin servidor
+
+xAI y Hevy permiten peticiones directas desde el navegador. Las claves se guardan en un registro separado de IndexedDB, nunca se renderizan después de guardarse y quedan fuera de copias y CSV. Esto mantiene la arquitectura estática y evita un VPS solo para ocultar claves personales.
+
+Hevy se pagina hasta 100 entrenamientos en la primera importación. Cada sesión y cada mejor serie usan un identificador externo estable para que repetir la sincronización no duplique datos. Como Hevy no devuelve gasto calórico en esta respuesta, la web lo guarda como desconocido y no altera el mantenimiento.
+
+### Límite veraz de Apple Salud
+
+Una web no puede leer HealthKit. Caltrack no muestra un botón de conexión falso. La PWA permite registrar peso y medidas manualmente, mientras el cliente iOS queda como puente opcional para Apple Salud y Strava. Este límite no justifica convertir TestFlight en el producto principal.

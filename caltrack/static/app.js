@@ -1,4 +1,4 @@
-const state = { data: null, photoEntryId: null };
+const state = { data: null, integrations: null, photoEntryId: null, photoData: null, photoAnalysis: null, returnToPhoto: false };
 
 const $ = (selector) => document.querySelector(selector);
 const esc = (value) => String(value ?? "").replace(/[&<>'"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[c]));
@@ -30,7 +30,7 @@ function setBusy(form, busy) {
 async function load() {
   $("#syncState").textContent = "cargando";
   try {
-    state.data = await api("/api/dashboard?days=7");
+    [state.data,state.integrations] = await Promise.all([api("/api/dashboard?days=7"),api("/api/integrations")]);
     render();
     $("#syncState").textContent = "guardado en este dispositivo";
     if (!state.data.settings.configured) $("#settingsDialog").showModal();
@@ -52,6 +52,7 @@ function render() {
   renderCoach(analysis);
   $("#history").innerHTML = days.slice(0, -1).reverse().map(historyDay).join("");
   populateSettings(settings);
+  renderConnections();
 }
 
 function renderBody(body, training) {
@@ -98,7 +99,7 @@ function dayCard(day, expanded) {
   const proteinPercent = Math.min(100, day.protein_g / Math.max(day.protein_goal_g, 1) * 100);
   const over = day.calories > day.target_kcal;
   const deficitClass = day.deficit_kcal >= state.data.settings.deficit_kcal ? "good" : "warn";
-  const exercises = day.exercises.map(exercise => `<div class="workout"><strong>🏋 ${esc(exercise.name)} · ${number(exercise.duration_min)} min · ~${number(exercise.calories_burned)} kcal</strong><span>${esc(exercise.note || "Entrenamiento añadido al mantenimiento del día")}</span></div>`).join("");
+  const exercises = day.exercises.map(exercise => `<div class="workout"><strong>🏋 ${esc(exercise.name)} · ${number(exercise.duration_min)} min ${exercise.source ? `· ${esc(exercise.source)}` : ""}</strong><span>${esc(exercise.note || (exercise.calories_burned ? `~${number(exercise.calories_burned)} kcal añadidas al mantenimiento` : "Entrenamiento registrado sin estimar gasto"))}</span></div>`).join("");
   const photos = day.entries.filter(entry => entry.photo_path).map(entry => `<img src="${esc(photoUrl(entry.photo_path))}" alt="${esc(entry.name)}" loading="lazy">`).join("");
   return `<div class="day-head">
       <div class="day-title"><h2>${esc(dayName(day.day, true))}</h2><span class="pill">${day.exercises.length ? "ENTRENO" : "DÍA BASE"}</span>${day.weight_kg != null ? `<span class="muted">⚖ ${number(day.weight_kg, 2)} kg</span>` : ""}</div>
@@ -149,7 +150,7 @@ function wireEntryActions(root) {
   }));
   root.querySelectorAll(".photo-button").forEach(button => button.addEventListener("click", () => {
     state.photoEntryId = Number(button.closest(".entry").dataset.entryId);
-    $("#photoInput").click();
+    $("#photoAttachInput").click();
   }));
   root.querySelector("[data-open-tools]")?.addEventListener("click", () => $("#toolsDialog").showModal());
 }
@@ -165,6 +166,33 @@ function previewPlan() {
   const kcalMin = Number(form.elements.calorie_goal_min.value || 0), kcalMax = Number(form.elements.calorie_goal_max.value || 0);
   const proteinMin = Number(form.elements.protein_goal_min.value || 0), proteinMax = Number(form.elements.protein_goal_max.value || 0);
   $("#planPreview").innerHTML = `Rango diario: <strong>${number(kcalMin)}-${number(kcalMax)} kcal</strong> · <strong>${number(proteinMin)}-${number(proteinMax)} g proteína</strong> · meta ${number(form.elements.body_fat_goal.value,1)}% grasa`;
+}
+
+function renderConnections() {
+  const xaiConnected = Boolean(state.integrations?.xai_api_key);
+  const hevyConnected = Boolean(state.integrations?.hevy_api_key);
+  $("#xaiStatus").textContent = xaiConnected ? "Conectado" : "Sin conectar";
+  $("#xaiStatus").classList.toggle("connected", xaiConnected);
+  $("#xaiKeyInput").placeholder = xaiConnected ? "Conectado, pega otra clave para reemplazar" : "xai-...";
+  $("#xaiDisconnectButton").hidden = !xaiConnected;
+  $("#grokCaptureState").textContent = xaiConnected ? "Grok preparado" : "Grok sin conectar";
+  $("#grokCaptureState").classList.toggle("connected", xaiConnected);
+  $("#coachMode").textContent = xaiConnected ? "GROK" : "LOCAL";
+  $("#coachMode").classList.toggle("connected", xaiConnected);
+
+  $("#hevyStatus").textContent = hevyConnected ? "Conectado" : "Sin conectar";
+  $("#hevyStatus").classList.toggle("connected", hevyConnected);
+  $("#hevyKeyInput").placeholder = hevyConnected ? "Conectado, pega otra clave para reemplazar" : "Clave de API";
+  $("#hevySyncButton").hidden = !hevyConnected;
+  $("#hevyDisconnectButton").hidden = !hevyConnected;
+  $("#hevyLastSync").textContent = state.integrations?.hevy_last_sync ? `Última sincronización: ${new Intl.DateTimeFormat("es-ES",{dateStyle:"medium",timeStyle:"short"}).format(new Date(state.integrations.hevy_last_sync))}` : "";
+}
+
+function openConnections(returnToPhoto = false) {
+  state.returnToPhoto = returnToPhoto;
+  if ($("#mealPhotoDialog").open) $("#mealPhotoDialog").close();
+  if (!$("#settingsDialog").open) $("#settingsDialog").showModal();
+  setTimeout(() => $("#connectionsPanel").scrollIntoView({behavior:"smooth",block:"start"}), 50);
 }
 
 $("#quickAddForm").addEventListener("submit", async event => {
@@ -197,7 +225,9 @@ $("#manualForm").addEventListener("submit", async event => {
   finally { setBusy(form, false); }
 });
 
-$("#settingsButton").addEventListener("click", () => $("#settingsDialog").showModal());
+$("#settingsButton").addEventListener("click", () => { state.returnToPhoto = false; $("#settingsDialog").showModal(); });
+$("#openConnectionsButton").addEventListener("click", () => openConnections(false));
+$("#photoOpenSettingsButton").addEventListener("click", () => openConnections(true));
 $("#settingsForm").addEventListener("input", previewPlan);
 $("#settingsForm").addEventListener("submit", async event => {
   event.preventDefault();
@@ -209,6 +239,58 @@ $("#settingsForm").addEventListener("submit", async event => {
   try { await api("/api/settings", {method:"POST", body:JSON.stringify(data)}); $("#settingsDialog").close(); toast("Plan guardado"); await load(); }
   catch (error) { toast(error.message, true); }
   finally { setBusy(form, false); }
+});
+
+$("#xaiConnectButton").addEventListener("click", async event => {
+  const button = event.currentTarget, input = $("#xaiKeyInput"), candidate = input.value.trim();
+  button.disabled = true; button.textContent = "Validando...";
+  try {
+    await window.caltrackIntegrations.validateXAI(candidate);
+    state.integrations = await api("/api/integrations", {method:"POST",body:JSON.stringify({xai_api_key:candidate})});
+    input.value = ""; renderConnections(); toast("Grok conectado en este dispositivo");
+    if (state.returnToPhoto && state.photoData) {
+      state.returnToPhoto = false; $("#settingsDialog").close(); $("#mealPhotoDialog").showModal(); await analyzeCurrentPhoto();
+    }
+  } catch (error) { toast(error.message, true); }
+  finally { button.disabled = false; button.textContent = "Validar y guardar"; }
+});
+
+$("#xaiDisconnectButton").addEventListener("click", async () => {
+  if (!confirm("¿Desconectar Grok de este navegador?")) return;
+  state.integrations = await api("/api/integrations", {method:"POST",body:JSON.stringify({xai_api_key:""})});
+  renderConnections(); toast("Grok desconectado");
+});
+
+async function syncHevy() {
+  const button = $("#hevySyncButton"), apiKey = state.integrations?.hevy_api_key;
+  if (!apiKey) throw new Error("Conecta Hevy primero.");
+  button.hidden = false; button.disabled = true; button.textContent = "Sincronizando...";
+  try {
+    const maxPages = state.integrations?.hevy_last_sync ? 1 : 10;
+    const batch = await window.caltrackIntegrations.fetchHevyWorkouts(apiKey, maxPages);
+    const result = await api("/api/hevy/import", {method:"POST",body:JSON.stringify({workouts:batch.workouts})});
+    toast(result.imported ? `${result.imported} entrenamientos y ${result.strength_imported} marcas importados` : "Hevy ya estaba al día");
+    await load();
+  } finally { button.disabled = false; button.textContent = "Sincronizar ahora"; }
+}
+
+$("#hevyConnectButton").addEventListener("click", async event => {
+  const button = event.currentTarget, input = $("#hevyKeyInput"), candidate = input.value.trim();
+  button.disabled = true; button.textContent = "Validando...";
+  try {
+    await window.caltrackIntegrations.validateHevy(candidate);
+    state.integrations = await api("/api/integrations", {method:"POST",body:JSON.stringify({hevy_api_key:candidate})});
+    input.value = ""; renderConnections(); toast("Hevy conectado. Importando historial...");
+    await syncHevy();
+  } catch (error) { toast(error.message, true); }
+  finally { button.disabled = false; button.textContent = "Validar y guardar"; }
+});
+
+$("#hevySyncButton").addEventListener("click", () => syncHevy().catch(error => toast(error.message, true)));
+$("#hevyDisconnectButton").addEventListener("click", async () => {
+  if (!confirm("¿Desconectar Hevy? Los entrenamientos importados se conservarán.")) return;
+  state.integrations = await api("/api/integrations", {method:"POST",body:JSON.stringify({hevy_api_key:""})});
+  renderConnections(); toast("Hevy desconectado");
 });
 
 $("#bodyForm").addEventListener("submit", async event => {
@@ -234,21 +316,143 @@ $("#strengthForm").addEventListener("submit", async event => {
 
 $("#askForm").addEventListener("submit", async event => {
   event.preventDefault(); const form = event.currentTarget; setBusy(form, true);
-  try { const result = await api("/api/ask", {method:"POST", body:JSON.stringify({question:$("#askInput").value})}); $("#answer").textContent = result.answer; $("#answer").hidden = false; }
+  try {
+    const question = $("#askInput").value.trim();
+    const answer = state.integrations?.xai_api_key
+      ? await window.caltrackIntegrations.askCoach(question,state.data,state.integrations.xai_api_key)
+      : (await api("/api/ask", {method:"POST", body:JSON.stringify({question})})).answer;
+    $("#answer").textContent = answer; $("#answer").hidden = false;
+  }
   catch (error) { toast(error.message, true); }
   finally { setBusy(form, false); }
 });
 
-$("#photoInput").addEventListener("change", event => {
-  const file = event.target.files[0]; if (!file || !state.photoEntryId) return;
-  if (file.size > 8 * 1024 * 1024) { toast("La foto supera 8 MB", true); return; }
-  const reader = new FileReader();
-  reader.onload = async () => {
-    try { await api("/api/photo", {method:"POST", body:JSON.stringify({entry_id:state.photoEntryId, data_url:reader.result})}); toast("Foto añadida"); await load(); }
-    catch (error) { toast(error.message, true); }
-    finally { event.target.value = ""; state.photoEntryId = null; }
-  };
-  reader.readAsDataURL(file);
+function componentRow(item = {}) {
+  const value = (key, fallback = 0) => esc(item[key] ?? fallback);
+  return `<div class="analysis-component">
+    <div class="component-name"><input data-field="name" aria-label="Alimento" value="${value("name","")}" placeholder="Alimento"><input data-field="portion" aria-label="Porción" value="${value("portion","")}" placeholder="Porción"></div>
+    <label>kcal<input data-field="calories" type="number" min="0" step="1" value="${value("calories")}"></label>
+    <label>P<input data-field="protein_g" type="number" min="0" step="0.1" value="${value("protein_g")}"></label>
+    <label>C<input data-field="carbs_g" type="number" min="0" step="0.1" value="${value("carbs_g")}"></label>
+    <label>G<input data-field="fat_g" type="number" min="0" step="0.1" value="${value("fat_g")}"></label>
+    <label>F<input data-field="fiber_g" type="number" min="0" step="0.1" value="${value("fiber_g")}"></label>
+    <button class="tiny-button remove-component" type="button" aria-label="Quitar componente">×</button>
+  </div>`;
+}
+
+function readComponents() {
+  return [...document.querySelectorAll(".analysis-component")].map(row => {
+    const field = key => row.querySelector(`[data-field="${key}"]`).value;
+    return {
+      name:field("name").trim() || "Alimento", portion:field("portion").trim(),
+      calories:Number(field("calories") || 0), protein_g:Number(field("protein_g") || 0),
+      carbs_g:Number(field("carbs_g") || 0), fat_g:Number(field("fat_g") || 0), fiber_g:Number(field("fiber_g") || 0)
+    };
+  });
+}
+
+function photoTotals() {
+  const totals = readComponents().reduce((sum,item) => {
+    for (const key of ["calories","protein_g","carbs_g","fat_g","fiber_g"]) sum[key] += Number(item[key] || 0);
+    return sum;
+  },{calories:0,protein_g:0,carbs_g:0,fat_g:0,fiber_g:0});
+  $("#totalCalories").textContent = number(totals.calories);
+  $("#totalProtein").textContent = `${number(totals.protein_g,1)} g`;
+  $("#totalCarbs").textContent = `${number(totals.carbs_g,1)} g`;
+  $("#totalFat").textContent = `${number(totals.fat_g,1)} g`;
+  $("#totalFiber").textContent = `${number(totals.fiber_g,1)} g`;
+  return totals;
+}
+
+function renderPhotoAnalysis(result) {
+  state.photoAnalysis = result;
+  const form = $("#photoAnalysisForm");
+  form.elements.title.value = result.title || "Comida";
+  const hour = new Date().getHours();
+  form.elements.meal.value = hour < 11 ? "breakfast" : hour < 16 ? "lunch" : hour < 19 ? "snack" : "dinner";
+  $("#analysisComponents").innerHTML = (result.items.length ? result.items : [{}]).map(componentRow).join("");
+  const confidence = Math.round(Number(result.confidence || 0) * 100);
+  $("#analysisConfidence").textContent = `${confidence}% confianza`;
+  $("#analysisConfidence").hidden = false;
+  const assumptions = (result.assumptions || []).map(item => `<li>${esc(item)}</li>`).join("");
+  $("#analysisNotes").innerHTML = `${result.warning ? `<p class="analysis-warning">${esc(result.warning)}</p>` : ""}${assumptions ? `<details><summary>Supuestos de Grok</summary><ul>${assumptions}</ul></details>` : ""}`;
+  $("#photoAnalysisStatus").hidden = true; $("#photoNeedsKey").hidden = true; form.hidden = false;
+  photoTotals();
+}
+
+async function analyzeCurrentPhoto() {
+  const status = $("#photoAnalysisStatus");
+  $("#photoAnalysisForm").hidden = true; $("#photoNeedsKey").hidden = true; status.hidden = false;
+  status.innerHTML = `<span class="analysis-spinner" aria-hidden="true"></span><strong>Grok está mirando el plato</strong><p>Separando alimentos y calculando macros.</p>`;
+  try {
+    const result = await window.caltrackIntegrations.analyzeMeal(state.photoData,state.integrations.xai_api_key);
+    renderPhotoAnalysis(result);
+  } catch (error) {
+    status.innerHTML = `<strong>No se pudo analizar</strong><p>${esc(error.message)}</p><button id="retryAnalysisButton" class="secondary" type="button">Reintentar</button>`;
+    $("#retryAnalysisButton").addEventListener("click", analyzeCurrentPhoto);
+  }
+}
+
+async function startMealPhoto(file) {
+  if (!file) return;
+  try {
+    state.photoData = await window.caltrackIntegrations.compressImage(file);
+    state.photoAnalysis = null;
+    $("#mealPhotoPreview").src = state.photoData;
+    $("#analysisConfidence").hidden = true;
+    if (!$("#mealPhotoDialog").open) $("#mealPhotoDialog").showModal();
+    if (!state.integrations?.xai_api_key) {
+      $("#photoAnalysisStatus").hidden = true; $("#photoAnalysisForm").hidden = true; $("#photoNeedsKey").hidden = false;
+    } else await analyzeCurrentPhoto();
+  } catch (error) { toast(error.message, true); }
+}
+
+for (const id of ["photoCaptureInput","photoLibraryInput"]) {
+  $("#"+id).addEventListener("change", async event => {
+    const file = event.target.files[0]; event.target.value = ""; await startMealPhoto(file);
+  });
+}
+$("#cameraButton").addEventListener("click", () => $("#photoCaptureInput").click());
+$("#libraryButton").addEventListener("click", () => $("#photoLibraryInput").click());
+$("#dockCameraButton").addEventListener("click", () => $("#photoCaptureInput").click());
+$("#dockTextButton").addEventListener("click", () => { document.querySelector(".quick-entry").open = true; document.querySelector(".capture-card").scrollIntoView({behavior:"smooth"}); setTimeout(()=>$("#quickAddInput").focus(),300); });
+$("#dockToolsButton").addEventListener("click", () => $("#toolsDialog").showModal());
+
+$("#analysisComponents").addEventListener("input", photoTotals);
+$("#analysisComponents").addEventListener("click", event => {
+  const button = event.target.closest(".remove-component");
+  if (!button) return;
+  button.closest(".analysis-component").remove();
+  if (!document.querySelector(".analysis-component")) $("#analysisComponents").insertAdjacentHTML("beforeend",componentRow());
+  photoTotals();
+});
+$("#addComponentButton").addEventListener("click", () => { $("#analysisComponents").insertAdjacentHTML("beforeend",componentRow()); photoTotals(); });
+
+$("#photoAnalysisForm").addEventListener("submit", async event => {
+  event.preventDefault(); const form = event.currentTarget; setBusy(form,true);
+  try {
+    const components = readComponents(), totals = photoTotals();
+    if (!components.some(item => item.name.trim())) throw new Error("Añade al menos un alimento.");
+    const notes = [...(state.photoAnalysis?.assumptions || []),state.photoAnalysis?.warning].filter(Boolean).join(" ");
+    await api("/api/food", {method:"POST",body:JSON.stringify({
+      name:form.elements.title.value.trim(), meal:form.elements.meal.value, ...totals,
+      components, photo_path:state.photoData, source:"Grok", confidence:state.photoAnalysis?.confidence, note:notes
+    })});
+    $("#mealPhotoDialog").close(); state.photoData = null; state.photoAnalysis = null;
+    toast("Comida guardada"); await load();
+  } catch (error) { toast(error.message,true); }
+  finally { setBusy(form,false); }
+});
+
+$("#photoAttachInput").addEventListener("change", async event => {
+  const file = event.target.files[0]; event.target.value = "";
+  if (!file || !state.photoEntryId) return;
+  try {
+    const dataURL = await window.caltrackIntegrations.compressImage(file);
+    await api("/api/photo", {method:"POST", body:JSON.stringify({entry_id:state.photoEntryId,data_url:dataURL})});
+    toast("Foto añadida"); await load();
+  } catch (error) { toast(error.message,true); }
+  finally { state.photoEntryId = null; }
 });
 
 function downloadFile(name, content, type) {

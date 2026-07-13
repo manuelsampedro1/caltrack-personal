@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0d0f13">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
   <title>Privacidad de Caltrack</title>
   <meta name="description" content="Cómo Caltrack guarda y procesa comidas, fotos, datos de Apple Salud y entrenamientos.">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -15,7 +17,7 @@
       <div>
         <p class="eyebrow">CALTRACK</p>
         <h1>Privacidad</h1>
-        <p class="muted">Tus datos son tuyos. La app funciona de forma local y sin cuenta.</p>
+        <p class="muted">Tus datos son tuyos. La web funciona de forma local y sin cuenta.</p>
       </div>
       <a class="secondary" href="./">Volver a Caltrack</a>
     </header>
@@ -23,37 +25,36 @@
     <article class="legal-card card">
       <section>
         <h2>Datos en tu dispositivo</h2>
-        <p>Caltrack guarda localmente comidas, macros, fotos confirmadas de platos, check-ins corporales, fotos de progreso opcionales, objetivos, cierres diarios, recuperación y entrenamientos. Las claves personales de xAI y Hevy se guardan en Keychain y no se incluyen en las copias.</p>
-        <p>La versión web guarda su historial por separado en el navegador. No existe una cuenta de Caltrack ni una base de datos propia en internet.</p>
+        <p>La web de Caltrack guarda en el navegador comidas, macros, fotos confirmadas, medidas, objetivos y entrenamientos. Las claves personales de xAI y Hevy también quedan en el almacenamiento privado de ese navegador y no se incluyen en copias o exportaciones.</p>
+        <p>No existe una cuenta de Caltrack, una base de datos propia en internet ni un servidor que reciba tu historial. Borrar los datos del sitio en Safari elimina esta copia local.</p>
       </section>
 
       <section>
         <h2>Fotos y xAI</h2>
-        <p>Una foto de comida solo se envía a la API de xAI cuando eliges analizarla. Caltrack solicita que la petición no se conserve como historial y no adjunta datos de Apple Salud. Debes revisar y confirmar la estimación antes de guardarla.</p>
-        <p>El entrenador trabaja localmente por defecto. Si haces una pregunta a Grok, se envía un resumen limitado de hasta 30 días. No incluye fotos, claves, identificadores de Salud ni el detalle diario de hambre y energía.</p>
+        <p>Una foto de comida solo se envía directamente desde tu navegador a la API de xAI cuando eliges analizarla. Caltrack solicita que la petición no se conserve como historial. Debes revisar y confirmar la estimación antes de guardarla.</p>
+        <p>El entrenador trabaja localmente por defecto. Si conectas Grok y haces una pregunta, se envía un resumen limitado de objetivos, nutrición, medidas y entrenamientos recientes. No incluye fotos ni claves.</p>
         <p>Las fotos de progreso nunca se envían a xAI, Open Food Facts o Hevy.</p>
       </section>
 
       <section>
         <h2>Apple Salud</h2>
-        <p>Con tu permiso, Caltrack puede leer peso, grasa corporal, cintura, actividad, entrenamientos, sueño, frecuencia cardiaca en reposo y HRV. Estos datos se usan para mostrar tus tendencias y no se venden, comparten ni usan para publicidad.</p>
-        <p>La escritura de nutrición está desactivada por defecto. Si la activas, Caltrack puede guardar en Salud las calorías, proteína, carbohidratos, grasa y fibra de las comidas que confirmes. La app no lee nutrición creada por otras aplicaciones.</p>
+        <p>Safari y las webs instalables no pueden leer Apple Salud. En esta versión el peso y otras medidas se añaden manualmente. El cliente nativo opcional, si lo instalas en el futuro, solicita permisos de HealthKit por separado y mantiene sus datos en el iPhone.</p>
       </section>
 
       <section>
-        <h2>Hevy, Strava y productos</h2>
-        <p>Caltrack puede leer desde Salud resúmenes de entrenamientos creados por Hevy, Strava u otras apps. Si añades una clave de Hevy Pro, se consulta directamente la API de Hevy para obtener ejercicios, series, cargas, repeticiones y RPE.</p>
-        <p>Al buscar un producto, Caltrack envía únicamente el código de barras a Open Food Facts. No envía la imagen de cámara, tu historial, datos de Salud o claves.</p>
+        <h2>Hevy</h2>
+        <p>Si añades una clave de Hevy Pro, el navegador consulta directamente la API de Hevy para obtener sesiones, ejercicios, series, cargas, repeticiones y RPE. Caltrack no actúa como intermediario y conserva localmente los entrenamientos que importes.</p>
+        <p>Strava no ofrece en esta web una conexión directa. Puedes registrar esas sesiones manualmente o usar el puente opcional de Apple Salud.</p>
       </section>
 
       <section>
         <h2>Copias, widgets y notificaciones</h2>
-        <p>La copia JSON puede contener el historial y las fotos que hayas elegido guardar. El archivo queda bajo tu control. Los widgets reciben solo un resumen local del día y marcan sus métricas como sensibles. Los recordatorios son notificaciones locales del iPhone.</p>
+        <p>La copia JSON puede contener el historial y las fotos que hayas elegido guardar. El archivo queda bajo tu control. Nunca incluye las claves de xAI o Hevy.</p>
       </section>
 
       <section>
         <h2>Control y eliminación</h2>
-        <p>Puedes editar o borrar tus registros dentro de Caltrack. Al no existir una cuenta remota, eliminar la app borra sus datos locales del dispositivo. También puedes retirar permisos desde Ajustes o Apple Salud y revocar tus claves directamente en xAI o Hevy.</p>
+        <p>Puedes borrar registros dentro de Caltrack, desconectar integraciones y revocar tus claves directamente en xAI o Hevy. Al no existir una cuenta remota, borrar los datos del sitio elimina el historial guardado en ese navegador.</p>
         <p>Las estimaciones nutricionales no sustituyen consejo médico o nutricional.</p>
         <div class="legal-actions">
           <a class="secondary" href="support.html">Soporte</a>

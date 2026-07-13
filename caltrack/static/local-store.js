@@ -93,6 +93,23 @@ class LocalCaltrackStore {
     return {...this.defaults, ...(saved || {})};
   }
 
+  async integrations() {
+    const saved = await this.action("meta", "readonly", store => store.get("integrations"));
+    return {
+      id:"integrations", xai_api_key:"", hevy_api_key:"", hevy_last_sync:null,
+      ...(saved || {})
+    };
+  }
+
+  async configureIntegrations(values) {
+    const current = await this.integrations();
+    const next = {...current, ...values, id:"integrations"};
+    next.xai_api_key = String(next.xai_api_key || "").trim();
+    next.hevy_api_key = String(next.hevy_api_key || "").trim();
+    await this.put("meta", next);
+    return next;
+  }
+
   async configure(values) {
     const current = await this.settings();
     const next = {...current, ...values, id:"settings", configured:true};
@@ -168,8 +185,11 @@ class LocalCaltrackStore {
     const entry = {
       eaten_at:body.eaten_at || this.localNow(), meal:body.meal || this.mealFromText(body.text || ""),
       name:String(parsed.name || "").trim(), quantity:parsed.quantity ?? null, unit:parsed.unit || "",
-      calories:Number(parsed.calories || 0), protein_g:Number(parsed.protein_g || 0), source:"mobile",
-      note:parsed.note || "", photo_path:parsed.photo_path || null, created_at:this.localNow()
+      calories:Number(parsed.calories || 0), protein_g:Number(parsed.protein_g || 0),
+      carbs_g:Number(parsed.carbs_g || 0), fat_g:Number(parsed.fat_g || 0), fiber_g:Number(parsed.fiber_g || 0),
+      source:parsed.source || body.source || "mobile", note:parsed.note || "", photo_path:parsed.photo_path || null,
+      components:Array.isArray(parsed.components) ? parsed.components : [], confidence:parsed.confidence == null ? null : Number(parsed.confidence),
+      created_at:this.localNow()
     };
     if (!entry.name) throw new Error("El alimento necesita un nombre");
     if (entry.calories < 0 || entry.protein_g < 0) throw new Error("Calorías y proteína no pueden ser negativas");
@@ -187,9 +207,49 @@ class LocalCaltrackStore {
   }
 
   async addExercise(body) {
-    const item = {performed_at:body.performed_at || this.localNow(), name:String(body.name || "").trim(), duration_min:Number(body.duration_min || 0), calories_burned:Number(body.calories_burned || 0), note:body.note || ""};
+    const item = {
+      performed_at:body.performed_at || this.localNow(), name:String(body.name || "").trim(),
+      duration_min:Number(body.duration_min || 0), calories_burned:Number(body.calories_burned || 0),
+      note:body.note || "", source:body.source || "manual", external_id:body.external_id || null,
+      exercise_count:Number(body.exercise_count || 0), set_count:Number(body.set_count || 0),
+      total_volume_kg:Number(body.total_volume_kg || 0), details:Array.isArray(body.details) ? body.details : []
+    };
     if (!item.name) throw new Error("El entrenamiento necesita un nombre");
     item.id = await this.add("exercise", item); return item;
+  }
+
+  async importHevyWorkouts(workouts) {
+    if (!Array.isArray(workouts)) throw new Error("La respuesta de Hevy no es válida");
+    const [existingExercise, existingStrength] = await Promise.all([this.getAll("exercise"),this.getAll("strength")]);
+    const exerciseIDs = new Set(existingExercise.map(item => item.external_id).filter(Boolean));
+    const strengthIDs = new Set(existingStrength.map(item => item.external_id).filter(Boolean));
+    let imported = 0, strengthImported = 0;
+    for (const workout of workouts) {
+      const externalID = `hevy:${workout.id}`;
+      if (!exerciseIDs.has(externalID)) {
+        await this.addExercise({
+          performed_at:workout.start_time, name:workout.title || "Entrenamiento Hevy",
+          duration_min:workout.duration_min, calories_burned:0, source:"Hevy", external_id:externalID,
+          note:workout.summary, exercise_count:workout.exercise_count, set_count:workout.set_count,
+          total_volume_kg:workout.total_volume_kg, details:workout.exercises
+        });
+        exerciseIDs.add(externalID); imported += 1;
+      }
+      for (const [index, exercise] of (workout.exercises || []).entries()) {
+        if (!(exercise.best_weight_kg > 0) || !(exercise.best_reps > 0)) continue;
+        const strengthID = `${externalID}:${index}`;
+        if (strengthIDs.has(strengthID)) continue;
+        const entry = {
+          performed_at:workout.start_time, exercise:String(exercise.name || "Ejercicio"),
+          weight_kg:Number(exercise.best_weight_kg), reps:Number(exercise.best_reps),
+          note:`Importado de Hevy, ${exercise.set_count || 0} series`, external_id:strengthID,
+          estimated_1rm:Math.round(Number(exercise.best_weight_kg) * (1 + Number(exercise.best_reps) / 30) * 10) / 10
+        };
+        await this.add("strength", entry); strengthIDs.add(strengthID); strengthImported += 1;
+      }
+    }
+    await this.configureIntegrations({hevy_last_sync:new Date().toISOString()});
+    return {imported, strength_imported:strengthImported, total:workouts.length};
   }
 
   async addWeight(body) {
@@ -347,6 +407,9 @@ class LocalCaltrackStore {
   async route(path, options = {}) {
     const method = options.method || "GET", body = options.body ? JSON.parse(options.body) : {};
     if (path.startsWith("/api/dashboard")) return this.dashboard(7);
+    if (path === "/api/integrations" && method === "GET") return this.integrations();
+    if (path === "/api/integrations" && method === "POST") return this.configureIntegrations(body);
+    if (path === "/api/hevy/import" && method === "POST") return this.importHevyWorkouts(body.workouts);
     if (path === "/api/settings" && method === "POST") return this.configure(body);
     if (path === "/api/food" && method === "POST") return {ok:true,entry:await this.addFood(body)};
     if (path === "/api/exercise" && method === "POST") return {ok:true,exercise:await this.addExercise(body)};

@@ -217,6 +217,47 @@ final class CaltrackUITests: XCTestCase {
         XCTAssertTrue(save.isEnabled)
     }
 
+    func testPhotoAnalysisOffersClearlyLabeledLocalExampleWithoutAPI() {
+        let app = XCUIApplication()
+        app.launchArguments = [
+            "-preview-meal-analysis",
+            "-grok-missing-key-fixture",
+            "-UIPreferredContentSizeCategoryName",
+            "UICTContentSizeCategoryL"
+        ]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["No se pudo analizar"].waitForExistence(timeout: 6))
+        let example = app.buttons["showMealAnalysisExample"]
+        XCTAssertTrue(example.isHittable)
+        example.tap()
+
+        XCTAssertTrue(app.staticTexts["EJEMPLO LOCAL"].waitForExistence(timeout: 4))
+        XCTAssertTrue(app.staticTexts["Valores ficticios"].exists)
+        XCTAssertFalse(app.buttons["Guardar en el día"].exists)
+        let screenshot = XCTAttachment(screenshot: app.screenshot())
+        screenshot.name = "Caltrack local meal analysis example"
+        screenshot.lifetime = .keepAlways
+        add(screenshot)
+
+        let close = app.buttons["closeMealAnalysisExample"]
+        for _ in 0..<8 where !close.isHittable { app.swipeUp() }
+        XCTAssertTrue(close.isHittable)
+        close.tap()
+        XCTAssertTrue(app.staticTexts["No se pudo analizar"].waitForExistence(timeout: 4))
+    }
+
+    func testStorageFailureProtectsDataAndOffersSupport() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-simulate-storage-failure"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["No podemos abrir tus datos"].waitForExistence(timeout: 6))
+        XCTAssertTrue(app.staticTexts["Tus registros siguen en el iPhone. Cierra Caltrack y vuelve a abrirla. Si continúa, contacta con soporte antes de reinstalar."].exists)
+        XCTAssertTrue(app.buttons["Abrir soporte"].exists)
+        XCTAssertTrue(app.buttons["Política de privacidad"].exists)
+    }
+
     func testFrequentMealsAndSearch() {
         let app = XCUIApplication()
         app.launchArguments = ["-seed-superapp", "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryL"]

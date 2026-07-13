@@ -1,46 +1,30 @@
 # Siguiente paso
 
-- [ ] Escanear el QR privado con el iPhone y aceptar la importación.
-- [ ] Añadir Caltrack a la pantalla de inicio del iPhone.
-- [ ] Descargar una primera copia privada y guardarla en iCloud Drive.
-- [ ] Tras 14 días completos, revisar mantenimiento contra la tendencia real de peso.
-- [x] Integrar Apple Salud mediante el cliente iOS nativo.
-- [x] Renovar la firma y generar perfiles con HealthKit y App Groups para app y widget.
-- [ ] Conectar el iPhone de Manolo por cable o Wi-Fi y ejecutar la app nativa.
-- [x] Crear la ficha de Caltrack en App Store Connect con una cuenta Admin o App Manager.
-- [x] Preparar la ficha en español con ASO, privacidad, soporte y notas de revisión.
-- [x] Eliminar la transparencia del icono de App Store y proteger el release con un preflight.
-- [x] Subir la build 13 corregida a TestFlight interno y verificar su procesamiento.
-- [x] Completar capturas, privacidad, edad, precio gratis, disponibilidad global y vinculación de la build en la ficha.
-- [ ] Revocar la clave secundaria de App Store Connect expuesta por una traza y crear otra si sigue siendo necesaria.
-- [ ] Crear o facilitar una clave de xAI y guardarla desde Ajustes de Caltrack.
-- [ ] En Strava, activar `Gestionar apps y dispositivos > Salud > Enviar a Salud`.
-- [ ] En Hevy, conectar Apple Salud y mantener activado `Sync With` al guardar.
-- [x] Validar la API de Hevy Pro y mostrar entrenamientos reales en el simulador.
-- [x] Añadir tabs Hoy, Progreso y Entrenador.
-- [x] Añadir registro manual y edición de comidas.
-- [x] Añadir entrenador local y preguntas voluntarias con Grok.
-- [x] Añadir historial HealthKit, gasto estimado, backup, restauración y recordatorios locales.
-- [x] Añadir comidas frecuentes, repetición con un toque y búsqueda del historial.
-- [x] Añadir introducción opcional sin permisos automáticos.
-- [x] Añadir escritura opcional de calorías y macros en Apple Salud.
-- [x] Añadir escáner nativo de productos con Open Food Facts, cantidad editable y fallback manual.
-- [x] Añadir check-ins corporales manuales con foto privada, edición, galería y backup compatible.
-- [x] Añadir App Shortcuts para comida, producto, check-in y progreso, con descubrimiento en Ajustes.
-- [x] Añadir tendencias privadas de sueño, frecuencia cardiaca en reposo y HRV desde Apple Salud, sin score opaco.
-- [x] Añadir cierre diario y plan semanal adaptativo con evidencia, cambios de 100 kcal y confirmación explícita.
-- [x] Añadir widgets de inicio y bloqueo con calorías, proteína, privacidad y accesos rápidos.
-- [x] Añadir corrección por ingrediente para comidas analizadas con foto, con persistencia y backup compatible.
-- [x] Añadir fibra desde foto, código y manual, con objetivo, cobertura, gráfica, entrenador, widget y Salud.
-- [x] Paginar la primera importación de Hevy hasta 100 sesiones y mantener ligeras las siguientes sincronizaciones.
-- [ ] Regenerar la clave de Hevy compartida en el chat y pegar la nueva directamente en Caltrack desde el iPhone.
-- [ ] Probar una comida real, corregir porciones y comparar la estimación con la etiqueta o receta.
-- [ ] En un iPhone firmado, analizar una comida con varios ingredientes y comprobar que el desglose sigue editable tras cerrar y abrir la app.
-- [ ] En un iPhone firmado, activar la escritura nutricional y comprobar una comida real en Salud.
-- [ ] En un iPhone firmado, autorizar fibra dietética y comprobar que rechazar solo ese permiso no bloquea calorías y macros.
-- [ ] En un iPhone firmado, escanear un envase real y contrastar los macros con su etiqueta.
-- [ ] En un iPhone firmado, seleccionar una foto de progreso real y comprobar su restauración desde una copia.
-- [ ] En un iPhone firmado, invocar los cuatro App Shortcuts con Siri y asignar el más usado al botón Acción.
-- [ ] En un iPhone firmado, conceder sueño, frecuencia cardiaca en reposo y HRV, y contrastar la gráfica con Salud.
-- [ ] En un iPhone firmado, cerrar siete días reales y revisar la primera propuesta semanal antes de aplicarla.
-- [ ] En un iPhone firmado, añadir los widgets de Caltrack y comprobar Foto, Código, Peso y redacción en bloqueo.
+## Para usar Caltrack ahora
+
+- [ ] Abrir la web publicada en Safari y usar `Compartir > Añadir a pantalla de inicio`.
+- [ ] Crear una clave personal de xAI, pegarla en `Ajustes > Grok y Hevy` y validarla.
+- [ ] Regenerar la clave de Hevy compartida en el chat, pegar la nueva en la web y sincronizar.
+- [ ] Fotografiar una comida real, corregir las porciones y comparar la estimación con la etiqueta o receta.
+- [ ] Descargar una primera copia privada y guardarla en una ubicación controlada.
+- [ ] Tras 14 días completos, revisar el mantenimiento contra la tendencia real de peso.
+
+## Web completada
+
+- [x] Convertir la foto en la acción principal, con cámara trasera y fototeca.
+- [x] Analizar con Grok 4.5 y salida estructurada de alimentos, porciones y cinco métricas nutricionales.
+- [x] Permitir corregir, añadir y quitar componentes antes de guardar.
+- [x] Usar Grok para preguntas voluntarias y mantener un entrenador local sin clave.
+- [x] Conectar Hevy Pro directamente desde el navegador.
+- [x] Importar hasta 100 sesiones, marcas y volumen sin duplicados.
+- [x] Excluir las claves de xAI y Hevy de copias y exportaciones.
+- [x] Mantener historial, fotos, objetivos, cuerpo y fuerza en IndexedDB.
+- [x] Añadir instalación PWA, modo offline y barra rápida móvil.
+- [x] Documentar que Safari no puede leer Apple Salud.
+- [x] Probar móvil y escritorio con xAI y Hevy simulados, sin errores de navegador ni desbordamiento horizontal.
+
+## Cliente nativo opcional
+
+- [x] Integrar Apple Salud, Hevy, Strava, widgets, atajos, recuperación y nutrición en SwiftUI.
+- [x] Preparar una build interna de TestFlight y su ficha.
+- [ ] No continuar con App Review ni otra distribución nativa salvo petición explícita.

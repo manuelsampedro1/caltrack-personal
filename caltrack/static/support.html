@@ -4,8 +4,10 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0d0f13">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'">
   <title>Soporte de Caltrack</title>
-  <meta name="description" content="Ayuda para instalar, conectar y usar Caltrack en iPhone.">
+  <meta name="description" content="Ayuda para instalar, conectar y usar la web de Caltrack en iPhone.">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -24,26 +26,26 @@
       <section>
         <h2>Primeros pasos</h2>
         <ol>
-          <li>Abre Caltrack y completa la introducción o pulsa Omitir.</li>
-          <li>Conecta Apple Salud desde la tarjeta superior cuando quieras importar peso, actividad o entrenamientos.</li>
-          <li>Añade tu clave personal de xAI en Ajustes si quieres analizar comidas con una foto.</li>
+          <li>Abre Caltrack en Safari y usa Compartir, Añadir a pantalla de inicio para tenerlo como una app web.</li>
+          <li>Configura tus objetivos. Todo se guarda en ese navegador y no hace falta una cuenta.</li>
+          <li>Añade tu clave personal de xAI en Ajustes si quieres analizar comidas con una foto y hablar con Grok.</li>
           <li>Revisa siempre ingredientes, porciones y macros antes de guardar.</li>
         </ol>
       </section>
 
       <section>
         <h2>Entrenamientos</h2>
-        <p>Para Strava o Hevy, activa su sincronización con Apple Salud. Caltrack importará el resumen autorizado. Si usas Hevy Pro, puedes añadir su clave en Ajustes para recuperar ejercicios, series, cargas y RPE.</p>
+        <p>Si usas Hevy Pro, añade su clave en Ajustes. La web valida la conexión e importa hasta los 100 entrenamientos más recientes con ejercicios, series, cargas y RPE. Las siguientes sincronizaciones no crean duplicados.</p>
       </section>
 
       <section>
-        <h2>Permisos</h2>
-        <p>Caltrack no abre permisos al iniciar. Cámara, fotos, Salud y notificaciones aparecen solo después de una acción relacionada. Puedes revisarlos en Ajustes del iPhone. Si Salud no muestra datos, comprueba también la fuente dentro de la app Salud.</p>
+        <h2>Cámara y Apple Salud</h2>
+        <p>La cámara aparece solo cuando pulsas Fotografiar comida. Safari no permite a una web leer Apple Salud. Añade el peso manualmente desde Más o usa el cliente nativo opcional si necesitas HealthKit.</p>
       </section>
 
       <section>
         <h2>Copia y recuperación</h2>
-        <p>En Ajustes puedes descargar una copia JSON y guardarla en iCloud Drive. La restauración fusiona registros por identificador para evitar duplicados. Las claves de xAI y Hevy no se exportan.</p>
+        <p>En Ajustes puedes descargar una copia JSON y guardarla en una ubicación privada que controles. Restaurar sustituye la copia local de ese navegador. Las claves de xAI y Hevy no se exportan.</p>
       </section>
 
       <section>

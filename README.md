@@ -1,21 +1,22 @@
 # 🥩 Caltrack
 
-Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta, servidor ni suscripción.
+Caltrack es una web móvil instalable para registrar calorías, proteína, composición corporal y fuerza. Está inspirada por el [Caltrack de Pieter Levels](https://x.com/levelsio/status/2075642972243190039), pero no necesita VPS, cuenta ni servidor propio.
 
-El repositorio incluye también una app iOS nativa que se acerca todavía más al flujo original: foto de la comida, estimación editable con Grok Vision, escáner de productos envasados, lectura autorizada de composición y recuperación desde Apple Salud, y entrenamientos de Hevy o Strava.
+La web replica el flujo útil del tuit: fotografía de la comida, estimación editable con Grok, dashboard semanal, preguntas sobre el progreso e importación directa de Hevy. El repositorio conserva un cliente iOS opcional para HealthKit, pero TestFlight no es necesario para usar Caltrack.
 
 ## Usarla en iPhone
 
 1. Abre la web publicada en Safari.
 2. Completa tus rangos diarios. Peso y mantenimiento son opcionales.
-3. Pulsa `Instalar` o usa `Compartir > Añadir a pantalla de inicio`.
-4. Ábrela desde el icono de Caltrack como cualquier otra app.
+3. En Ajustes, conecta una clave personal de xAI para fotos y una de Hevy Pro para entrenamientos.
+4. Pulsa `Instalar` o usa `Compartir > Añadir a pantalla de inicio`.
+5. Ábrela desde el icono de Caltrack como cualquier otra app.
 
 Después de la primera visita funciona incluso sin conexión.
 
 ## Privacidad
 
-Comidas, peso, entrenamientos y fotos se guardan en el almacenamiento privado del navegador del dispositivo. No se envían a GitHub ni a ningún servidor.
+Comidas, peso, entrenamientos, fotos y claves se guardan en el almacenamiento privado del navegador del dispositivo. No se envían a GitHub ni a un servidor de Caltrack. Las fotos que eliges analizar van directamente a xAI y la sincronización de entrenamientos consulta directamente Hevy.
 
 Esto implica que Safari en el iPhone y el navegador del Mac tienen historiales separados. Para conservar o mover el historial:
 
@@ -24,7 +25,19 @@ Esto implica que Safari en el iPhone y el navegador del Mac tienen historiales s
 3. Guarda el JSON en iCloud Drive.
 4. Usa `Restaurar copia` en el nuevo dispositivo.
 
-La exportación CSV contiene las comidas y sirve para análisis o una hoja de cálculo. La copia JSON incluye el perfil, comidas, composición corporal, fuerza, entrenamientos y fotos.
+La exportación CSV contiene las comidas y sirve para análisis o una hoja de cálculo. La copia JSON incluye el perfil, comidas, composición corporal, fuerza, entrenamientos y fotos. Nunca incluye las claves de xAI o Hevy.
+
+## Foto con Grok
+
+`Fotografiar comida` abre la cámara trasera del iPhone. `Elegir foto` usa la fototeca. Grok devuelve plato, componentes, porciones, calorías, proteína, carbohidratos, grasa, fibra, confianza y supuestos.
+
+Nada se guarda automáticamente. Cada componente se puede corregir, añadir o quitar y los totales se recalculan en el navegador. No hace falta una clave de OpenAI, Caltrack usa xAI para visión y para las preguntas voluntarias al entrenador.
+
+## Hevy desde la web
+
+La clave de Hevy Pro se valida antes de guardarse. La primera sincronización importa hasta 100 sesiones con ejercicios, series, cargas, volumen y la mejor serie. Repetir la sincronización no duplica entrenamientos ni marcas.
+
+Hevy no aporta calorías fiables en este endpoint, así que Caltrack no inventa gasto energético. Safari tampoco permite leer Apple Salud. El peso se registra manualmente y HealthKit queda reservado al cliente nativo opcional.
 
 ## Registro rápido
 
@@ -49,8 +62,10 @@ Caltrack reconoce alimentos frecuentes en español e inglés. Si estima valores,
 - seguimiento de cinco marcas de fuerza
 - objetivo semanal de entrenamientos
 - fotos de comidas
+- análisis editable de fotos con Grok
+- importación directa e idempotente de Hevy Pro
 - análisis de adherencia de 14 días
-- preguntas sobre progreso
+- preguntas locales o con Grok sobre progreso
 - CSV y copia privada completa
 - modo offline
 - instalación en la pantalla de inicio
@@ -67,7 +82,7 @@ Abre `http://127.0.0.1:8765`.
 
 La publicación usa GitHub Pages mediante [pages.yml](.github/workflows/pages.yml). Cada push a `main` publica el contenido de `caltrack/static`.
 
-## App iOS con Grok y Salud
+## Cliente iOS opcional con Salud
 
 El proyecto nativo está en `ios/Caltrack.xcodeproj` y requiere iOS 17 o posterior.
 
@@ -161,15 +176,19 @@ Para regenerar el proyecto después de añadir archivos Swift:
 ruby ios/scripts/generate_project.rb
 ```
 
-### Release para TestFlight
+### Distribución nativa en pausa
+
+La web publicada es el producto principal y permanente. No caduca a los 90 días y no depende de TestFlight. No se prepara otra build ni se envía la app a revisión sin una petición explícita.
+
+El flujo de release nativo se conserva únicamente como referencia técnica:
 
 El flujo de distribución exige un repositorio limpio y credenciales `ASC_*` externas al proyecto. Para archivar y exportar la build declarada sin subirla:
 
 ```bash
-ios/scripts/release_testflight.sh 13 archive
+ios/scripts/release_testflight.sh 14 archive
 ```
 
-La acción `upload` valida y sube el mismo IPA cuando la ficha de App Store Connect ya existe. El script deja commit, versión, build y SHA-256 en `build/release-13/manifest.txt`.
+La acción `upload` valida y sube el mismo IPA cuando la ficha de App Store Connect ya existe. El script deja commit, versión, build y SHA-256 en `build/release-14/manifest.txt`.
 
 La ficha, la privacidad y los textos de TestFlight se configuran desde archivos versionados, sin enviar la app a revisión pública:
 
@@ -179,7 +198,7 @@ SKIP_APP_PRIVACY=1 ios/scripts/configure_app_store.rb
 
 El script mantiene el lanzamiento manual y configura español de España. La clave activa no tiene permiso para el endpoint de privacidad, por eso `SKIP_APP_PRIVACY=1` conserva las respuestas publicadas desde la sesión web. Sin esa variable, el script también intenta publicar la privacidad por API. Las credenciales `ASC_*` siguen fuera del repositorio. Las páginas públicas usadas por Apple son `privacy.html` y `support.html` dentro de GitHub Pages.
 
-Las nueve capturas reales de iPhone 6,5 pulgadas están versionadas en `ios/app_store/screenshots`. Para reemplazarlas en la ficha, verificar su orden y vincular la build 13 sin enviarla a revisión:
+Las nueve capturas reales de iPhone 6,5 pulgadas están versionadas en `ios/app_store/screenshots`. Para reemplazarlas en la ficha, verificar su orden y vincular la build disponible sin enviarla a revisión:
 
 ```bash
 ruby ios/scripts/finalize_app_store.rb

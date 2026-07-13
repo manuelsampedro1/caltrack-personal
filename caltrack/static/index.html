@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#0d0f13">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://api.x.ai https://api.hevyapp.com; object-src 'none'; base-uri 'none'; form-action 'self'">
   <title>Caltrack</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -25,21 +27,26 @@
     </header>
 
     <main>
-      <section class="composer card" aria-labelledby="logTitle">
+      <section class="composer capture-card card" aria-labelledby="logTitle">
         <div class="composer-copy">
-          <p class="eyebrow">REGISTRO RÁPIDO</p>
-          <h2 id="logTitle">¿Qué has comido?</h2>
-          <p>Escribe algo como <button class="text-example" data-example="comida 200 g pollo">“comida 200 g pollo”</button>. Si no lo conozco, añade kcal y proteína.</p>
+          <p class="eyebrow">REGISTRO CON GROK</p>
+          <h2 id="logTitle">Haz una foto. Revisa. Guarda.</h2>
+          <p>Grok separa los alimentos y estima calorías, proteína, carbohidratos, grasa y fibra. Tú confirmas cada valor.</p>
         </div>
-        <form id="quickAddForm" class="quick-add">
-          <label class="sr-only" for="quickAddInput">Alimento</label>
-          <input id="quickAddInput" autocomplete="off" placeholder="200 g pollo, o lasaña 420 kcal 24 g proteína" required>
-          <button class="primary" type="submit"><span>Registrar</span><kbd>↵</kbd></button>
-        </form>
+        <div class="capture-actions">
+          <button class="camera-button primary" id="cameraButton" type="button"><span class="camera-icon" aria-hidden="true">◎</span><span><strong>Fotografiar comida</strong><small>Abrir cámara</small></span></button>
+          <button class="library-button secondary" id="libraryButton" type="button"><span aria-hidden="true">▧</span><span>Elegir foto</span></button>
+        </div>
+        <div class="connection-line"><span id="grokCaptureState" class="connection-dot">Grok sin conectar</span><button class="text-button" id="openConnectionsButton" type="button">Configurar</button></div>
         <div id="assumption" class="assumption" hidden></div>
-        <p class="native-health-note"><strong>Apple Salud y Hevy:</strong> la conexión automática está disponible en la app nativa de iPhone. Esta web local no puede acceder a HealthKit.</p>
-        <details class="manual-entry">
-          <summary>Entrada exacta</summary>
+        <details class="manual-entry quick-entry">
+          <summary>Registrar por texto o macros exactos</summary>
+          <form id="quickAddForm" class="quick-add">
+            <label class="sr-only" for="quickAddInput">Alimento</label>
+            <input id="quickAddInput" autocomplete="off" placeholder="200 g pollo, o lasaña 420 kcal 24 g proteína" required>
+            <button class="primary" type="submit"><span>Registrar</span><kbd>↵</kbd></button>
+          </form>
+          <p class="quick-hint">Prueba <button class="text-example" data-example="comida 200 g pollo">“comida 200 g pollo”</button>.</p>
           <form id="manualForm" class="field-grid">
             <label>Nombre<input name="name" required placeholder="Lasaña casera"></label>
             <label>Comida<select name="meal"><option value="">Sin categoría</option><option value="breakfast">Desayuno</option><option value="lunch">Comida</option><option value="snack">Merienda</option><option value="dinner">Cena</option></select></label>
@@ -48,6 +55,7 @@
             <button class="secondary" type="submit">Guardar exacto</button>
           </form>
         </details>
+        <p class="native-health-note"><strong>Hevy funciona directamente en esta web.</strong> Apple Salud no da acceso a Safari, así que el peso se añade aquí o mediante el puente nativo opcional.</p>
       </section>
 
       <section class="weekly card" aria-labelledby="weekTitle">
@@ -70,7 +78,7 @@
       <section class="coach card" aria-labelledby="coachTitle">
         <div class="coach-score" id="coachScore">0</div>
         <div class="coach-body">
-          <p class="eyebrow">ANÁLISIS DE 14 DÍAS</p>
+          <div class="coach-kicker"><p class="eyebrow">ANÁLISIS DE 14 DÍAS</p><span id="coachMode" class="ai-mode">LOCAL</span></div>
           <h2 id="coachTitle">Tu progreso, basado en tus datos</h2>
           <p id="coachSummary" class="muted"></p>
           <ul id="coachObservations"></ul>
@@ -95,7 +103,7 @@
 
   <div id="toast" class="toast" role="status" hidden></div>
 
-  <dialog id="settingsDialog" class="dialog">
+  <dialog id="settingsDialog" class="dialog settings-dialog">
     <form method="dialog" class="dialog-head"><div><p class="eyebrow">TU PLAN</p><h2>Objetivos</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></form>
     <p class="muted dialog-intro">Configura rangos realistas. Caltrack premiará la constancia, no comer cada vez menos.</p>
     <form id="settingsForm" class="settings-form">
@@ -114,11 +122,45 @@
       <div class="plan-preview" id="planPreview"></div>
       <button class="primary full" type="submit">Guardar mi plan</button>
     </form>
+    <section class="connections-panel" id="connectionsPanel">
+      <div class="panel-head"><div><p class="eyebrow">CONEXIONES DIRECTAS</p><h3>Grok y Hevy</h3></div><span class="private-chip">solo este navegador</span></div>
+      <p class="muted connection-copy">Las claves se guardan en este dispositivo, no se suben a Caltrack y nunca entran en la copia de seguridad.</p>
+      <div class="connection-card">
+        <div class="connection-title"><div><strong>xAI Grok</strong><span>Fotos y preguntas al entrenador</span></div><span id="xaiStatus" class="status-badge">Sin conectar</span></div>
+        <label>Clave de xAI<input id="xaiKeyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="xai-..."></label>
+        <div class="connection-actions"><button id="xaiConnectButton" class="secondary" type="button">Validar y guardar</button><button id="xaiDisconnectButton" class="text-button danger" type="button" hidden>Desconectar</button></div>
+      </div>
+      <div class="connection-card">
+        <div class="connection-title"><div><strong>Hevy Pro</strong><span>Sesiones, ejercicios, series y cargas</span></div><span id="hevyStatus" class="status-badge">Sin conectar</span></div>
+        <label>Clave de Hevy<input id="hevyKeyInput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Clave de API"></label>
+        <div class="connection-actions"><button id="hevyConnectButton" class="secondary" type="button">Validar y guardar</button><button id="hevySyncButton" class="secondary" type="button" hidden>Sincronizar ahora</button><button id="hevyDisconnectButton" class="text-button danger" type="button" hidden>Desconectar</button></div>
+        <p id="hevyLastSync" class="connection-meta"></p>
+      </div>
+    </section>
     <section class="backup-panel">
       <div><h3>Copia de seguridad</h3><p>Descarga todos tus datos y fotos en un único archivo privado.</p></div>
       <div class="backup-actions"><button id="backupButton" class="secondary" type="button">Descargar copia</button><button id="restoreButton" class="secondary" type="button">Restaurar copia</button></div>
     </section>
     <p class="health-note">Esto organiza tus propios datos, no sustituye consejo médico o nutricional. Evita déficits agresivos si afectan a tu energía, sueño o recuperación.</p>
+  </dialog>
+
+  <dialog id="mealPhotoDialog" class="dialog meal-photo-dialog">
+    <form method="dialog" class="dialog-head"><div><p class="eyebrow">FOTO CON GROK</p><h2>Revisa la estimación</h2></div><button class="icon-button" value="cancel" aria-label="Cerrar">×</button></form>
+    <div class="photo-analysis-layout">
+      <div class="photo-preview-wrap"><img id="mealPhotoPreview" alt="Foto de la comida seleccionada"><span id="analysisConfidence" class="confidence-chip" hidden></span></div>
+      <div id="photoAnalysisStatus" class="analysis-status" role="status"><span class="analysis-spinner" aria-hidden="true"></span><strong>Preparando la foto</strong><p>El análisis suele tardar unos segundos.</p></div>
+      <div id="photoNeedsKey" class="analysis-status" hidden><strong>Conecta xAI para analizarla</strong><p>La foto se enviará directamente a Grok. Caltrack no tiene servidor ni recibe tu clave.</p><button id="photoOpenSettingsButton" class="primary" type="button">Abrir conexiones</button></div>
+      <form id="photoAnalysisForm" class="photo-analysis-form" hidden>
+        <div class="photo-main-fields"><label>Nombre de la comida<input name="title" required></label><label>Momento<select name="meal"><option value="">Sin categoría</option><option value="breakfast">Desayuno</option><option value="lunch">Comida</option><option value="snack">Merienda</option><option value="dinner">Cena</option></select></label></div>
+        <div class="component-head"><div><p class="eyebrow">COMPONENTES</p><p>Edita porciones o macros si Grok no ha acertado.</p></div><button id="addComponentButton" class="text-button" type="button">+ componente</button></div>
+        <div id="analysisComponents" class="analysis-components"></div>
+        <div class="macro-total" aria-live="polite">
+          <div><strong id="totalCalories">0</strong><span>kcal</span></div><div><strong id="totalProtein">0</strong><span>proteína</span></div><div><strong id="totalCarbs">0</strong><span>carbos</span></div><div><strong id="totalFat">0</strong><span>grasa</span></div><div><strong id="totalFiber">0</strong><span>fibra</span></div>
+        </div>
+        <div id="analysisNotes" class="analysis-notes"></div>
+        <button class="primary full save-photo-meal" type="submit">Guardar comida</button>
+      </form>
+    </div>
   </dialog>
 
   <dialog id="toolsDialog" class="dialog compact-dialog">
@@ -145,9 +187,18 @@
     </div>
   </dialog>
 
-  <input id="photoInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+  <nav class="mobile-dock" aria-label="Registro rápido">
+    <button id="dockTextButton" type="button"><span aria-hidden="true">⌨</span>Texto</button>
+    <button id="dockCameraButton" class="dock-camera" type="button"><span aria-hidden="true">◎</span><strong>Foto</strong></button>
+    <button id="dockToolsButton" type="button"><span aria-hidden="true">＋</span>Más</button>
+  </nav>
+
+  <input id="photoCaptureInput" type="file" accept="image/jpeg,image/png,image/webp" capture="environment" hidden>
+  <input id="photoLibraryInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
+  <input id="photoAttachInput" type="file" accept="image/jpeg,image/png,image/webp" hidden>
   <input id="restoreInput" type="file" accept="application/json,.json" hidden>
   <script src="local-store.js" defer></script>
+  <script src="integrations.js" defer></script>
   <script src="app.js" defer></script>
 </body>
 </html>

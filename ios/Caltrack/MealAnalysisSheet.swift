@@ -15,6 +15,8 @@ struct MealAnalysisSheet: View {
     @State private var phase: Phase = .loading
     @State private var editable = EditableMeal()
     @State private var hasStarted = false
+    @State private var showingExample = false
+    @State private var lastFailureMessage = ""
 
     var body: some View {
         NavigationStack {
@@ -22,13 +24,25 @@ struct MealAnalysisSheet: View {
                 CaltrackTheme.canvas.ignoresSafeArea()
                 ScrollView {
                     VStack(spacing: 16) {
-                        Image(uiImage: image)
+                        Image(uiImage: showingExample ? MealAnalysisFixture.image : image)
                             .resizable()
                             .scaledToFill()
                             .frame(height: 240)
                             .frame(maxWidth: .infinity)
                             .clipped()
                             .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                            .overlay(alignment: .topLeading) {
+                                if showingExample {
+                                    Text("EJEMPLO LOCAL")
+                                        .font(.caption2.bold())
+                                        .tracking(1.1)
+                                        .foregroundStyle(.black)
+                                        .padding(.horizontal, 10)
+                                        .padding(.vertical, 7)
+                                        .background(CaltrackTheme.amber, in: Capsule())
+                                        .padding(12)
+                                }
+                            }
 
                         switch phase {
                         case .loading:
@@ -78,11 +92,14 @@ struct MealAnalysisSheet: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack {
                         VStack(alignment: .leading, spacing: 3) {
-                            Eyebrow(text: "Estimación de Grok")
+                            Eyebrow(text: showingExample ? "Ejemplo local" : "Estimación de Grok")
                             Text(analysis.title).font(.title3.weight(.bold))
                         }
                         Spacer()
-                        MetricPill(text: "\(Int(analysis.confidence * 100))% confianza", color: analysis.confidence >= 0.75 ? CaltrackTheme.green.opacity(0.22) : CaltrackTheme.coral.opacity(0.2))
+                        MetricPill(
+                            text: showingExample ? "Valores ficticios" : "\(Int(analysis.confidence * 100))% confianza",
+                            color: showingExample ? CaltrackTheme.amber.opacity(0.22) : (analysis.confidence >= 0.75 ? CaltrackTheme.green.opacity(0.22) : CaltrackTheme.coral.opacity(0.2))
+                        )
                     }
                     Label(
                         analysis.items.count == 1 ? "1 componente detectado" : "\(analysis.items.count) componentes detectados",
@@ -94,6 +111,11 @@ struct MealAnalysisSheet: View {
                         Label(analysis.warning, systemImage: "exclamationmark.triangle.fill")
                             .font(.caption)
                             .foregroundStyle(CaltrackTheme.coral)
+                    }
+                    if showingExample {
+                        Text("Este plato y sus valores son una demostración guardada dentro de Caltrack. No corresponden a tu foto y no se enviarán ni guardarán.")
+                            .font(.caption)
+                            .foregroundStyle(CaltrackTheme.muted)
                     }
                 }
             }
@@ -126,19 +148,35 @@ struct MealAnalysisSheet: View {
                 Text("La foto no permite medir cantidades exactas ni ingredientes ocultos. Corrige cualquier dato dudoso.")
                     .font(.caption2)
                     .foregroundStyle(CaltrackTheme.muted)
-                Button {
-                    guard editable.isValid else { return }
-                    onSave(editable, image.jpegData(compressionQuality: 0.72))
-                    dismiss()
-                } label: {
-                    Text("Guardar en el día")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 50)
-                        .foregroundStyle(.black)
-                        .background(editable.isValid ? CaltrackTheme.green : CaltrackTheme.muted, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                if showingExample {
+                    Button {
+                        showingExample = false
+                        editable = EditableMeal()
+                        phase = .failed(lastFailureMessage)
+                    } label: {
+                        Text("Volver a mi foto")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .foregroundStyle(.black)
+                            .background(CaltrackTheme.green, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .accessibilityIdentifier("closeMealAnalysisExample")
+                } else {
+                    Button {
+                        guard editable.isValid else { return }
+                        onSave(editable, image.jpegData(compressionQuality: 0.72))
+                        dismiss()
+                    } label: {
+                        Text("Guardar en el día")
+                            .font(.headline)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .foregroundStyle(.black)
+                            .background(editable.isValid ? CaltrackTheme.green : CaltrackTheme.muted, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .disabled(!editable.isValid)
                 }
-                .disabled(!editable.isValid)
             }
         }
     }
@@ -154,10 +192,16 @@ struct MealAnalysisSheet: View {
                     .font(.subheadline)
                     .foregroundStyle(CaltrackTheme.muted)
                     .multilineTextAlignment(.center)
-                Button("Registrar manualmente") { phase = .manual }
+                Button("Ver ejemplo local") { showExample() }
                     .buttonStyle(.borderedProminent)
-                    .tint(CaltrackTheme.green)
+                    .tint(CaltrackTheme.amber)
                     .foregroundStyle(.black)
+                    .accessibilityIdentifier("showMealAnalysisExample")
+                Button("Registrar manualmente") {
+                    showingExample = false
+                    phase = .manual
+                }
+                    .buttonStyle(.bordered)
                 Button("Reintentar") {
                     phase = .loading
                     Task { await analyze() }
@@ -186,6 +230,12 @@ struct MealAnalysisSheet: View {
 
     private func analyze() async {
 #if DEBUG
+        if ProcessInfo.processInfo.arguments.contains("-grok-missing-key-fixture") {
+            let message = GrokError.missingAPIKey.localizedDescription
+            lastFailureMessage = message
+            phase = .failed(message)
+            return
+        }
         if ProcessInfo.processInfo.arguments.contains("-grok-analysis-fixture") {
             let analysis = MealAnalysisFixture.analysis
             editable = EditableMeal(analysis: analysis)
@@ -200,13 +250,21 @@ struct MealAnalysisSheet: View {
             phase = .result(analysis)
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {
-            phase = .failed(error.localizedDescription)
+            lastFailureMessage = error.localizedDescription
+            phase = .failed(lastFailureMessage)
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
     }
+
+    private func showExample() {
+        let analysis = MealAnalysisFixture.analysis
+        editable = EditableMeal(analysis: analysis)
+        showingExample = true
+        phase = .result(analysis)
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+    }
 }
 
-#if DEBUG
 enum MealAnalysisFixture {
     static let analysis = FoodAnalysis(
         title: "Pollo, arroz y verduras",
@@ -247,7 +305,6 @@ enum MealAnalysisFixture {
         }
     }
 }
-#endif
 
 private extension View {
     func fieldStyle() -> some View {
