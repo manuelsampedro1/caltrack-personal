@@ -34,6 +34,7 @@ struct DashboardView: View {
     @AppStorage("fiberTarget") private var fiberTarget = 25.0
     @AppStorage("healthConnected") private var healthConnected = false
     @AppStorage("hevyConnected") private var hevyConnected = false
+    @AppStorage("hevyBackfillCompleted") private var hevyBackfillCompleted = false
     @AppStorage("grokConnected") private var grokConnected = false
     @AppStorage("healthNutritionEnabled") private var healthNutritionEnabled = false
     @AppStorage("planGoalMode") private var planGoalModeRaw = PlanGoalMode.notSet.rawValue
@@ -1095,7 +1096,8 @@ struct DashboardView: View {
                 persistHealthRecovery()
                 persistHealthWorkouts()
             }
-            if await syncHevy() { workoutMessage = "Actualizado ahora" }
+            let hasHevyKey = KeychainStore.read(account: HevyService.apiKeyAccount) != nil
+            if await syncHevy(), !hasHevyKey { workoutMessage = "Actualizado ahora" }
         } catch {
             workoutMessage = "No se pudo sincronizar Salud: \(error.localizedDescription)"
         }
@@ -1141,9 +1143,13 @@ struct DashboardView: View {
     private func syncHevy() async -> Bool {
         guard let apiKey = KeychainStore.read(account: HevyService.apiKeyAccount) else { return true }
         do {
-            let imported = try await HevyService().fetchRecentWorkouts(apiKey: apiKey)
+            let isInitialBackfill = !hevyBackfillCompleted
+            let batch = try await HevyService().fetchWorkoutBatch(
+                apiKey: apiKey,
+                maxPages: isInitialBackfill ? 10 : 1
+            )
             var stored = (try? modelContext.fetch(FetchDescriptor<WorkoutEntry>())) ?? workouts
-            for dto in imported {
+            for dto in batch.workouts {
                 let candidate = dto.makeEntry()
                 if let existing = stored.first(where: { $0.externalID == candidate.externalID }) {
                     update(existing, from: candidate)
@@ -1157,6 +1163,12 @@ struct DashboardView: View {
                 }
             }
             try modelContext.save()
+            hevyBackfillCompleted = true
+            if isInitialBackfill, batch.isTruncated {
+                workoutMessage = "Hevy actualizado. Importados los 100 entrenamientos más recientes."
+            } else {
+                workoutMessage = "Hevy actualizado ahora"
+            }
             return true
         } catch {
             workoutMessage = "No se pudo sincronizar Hevy: \(error.localizedDescription)"

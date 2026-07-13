@@ -26,6 +26,7 @@
 - [x] Añadir widgets de inicio y bloqueo con calorías, proteína, privacidad y accesos rápidos.
 - [x] Añadir corrección por ingrediente para comidas analizadas con foto, con persistencia y backup compatible.
 - [x] Añadir fibra desde foto, código y manual, con objetivo, cobertura, gráfica, entrenador, widget y Salud.
+- [x] Paginar la primera importación de Hevy hasta 100 sesiones y mantener ligeras las siguientes sincronizaciones.
 - [ ] Regenerar la clave de Hevy compartida en el chat y pegar la nueva directamente en Caltrack desde el iPhone.
 - [ ] Probar una comida real, corregir porciones y comparar la estimación con la etiqueta o receta.
 - [ ] En un iPhone firmado, analizar una comida con varios ingredientes y comprobar que el desglose sigue editable tras cerrar y abrir la app.

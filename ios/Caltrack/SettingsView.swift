@@ -20,6 +20,7 @@ struct SettingsView: View {
     @AppStorage("proteinMax") private var proteinMax = 190.0
     @AppStorage("fiberTarget") private var fiberTarget = 25.0
     @AppStorage("hevyConnected") private var hevyConnected = false
+    @AppStorage("hevyBackfillCompleted") private var hevyBackfillCompleted = false
     @AppStorage("grokConnected") private var grokConnected = false
     @AppStorage("reminderEnabled") private var reminderEnabled = false
     @AppStorage("reminderHour") private var reminderHour = 21
@@ -131,13 +132,14 @@ struct SettingsView: View {
                             KeychainStore.remove(account: HevyService.apiKeyAccount)
                             hevyKey = ""
                             hevyConnected = false
+                            hevyBackfillCompleted = false
                             hevyMessage = "Hevy desconectado"
                         }
                     }
                 } header: {
                     Text("Hevy Pro")
                 } footer: {
-                    Text("Añade rutina, ejercicios, series, repeticiones, cargas, RPE y volumen. La clave se valida antes de guardarse y permanece en Keychain.")
+                    Text("La primera sincronización recupera hasta 100 entrenamientos. Después solo consulta los más recientes. La clave se valida antes de guardarse y permanece en Keychain.")
                 }
 
                 Section("Strava") {
@@ -440,6 +442,7 @@ struct SettingsView: View {
             try KeychainStore.save(candidate, account: HevyService.apiKeyAccount)
             hevyKey = ""
             hevyConnected = true
+            hevyBackfillCompleted = false
             hevyMessage = workouts.first.map { "Conectado. Último: \($0.title)" } ?? "Conectado. Todavía no hay entrenamientos"
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {

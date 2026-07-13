@@ -9,12 +9,44 @@ struct HevyService {
     }
 
     func fetchRecentWorkouts(apiKey: String, pageSize: Int = 10) async throws -> [HevyWorkoutDTO] {
+        try await fetchWorkoutBatch(apiKey: apiKey, pageSize: pageSize, maxPages: 1).workouts
+    }
+
+    func fetchWorkoutBatch(apiKey: String, pageSize: Int = 10, maxPages: Int = 10) async throws -> HevyWorkoutBatch {
         guard !apiKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw HevyError.missingAPIKey
         }
+        let safePageSize = min(max(pageSize, 1), 10)
+        let safeMaxPages = min(max(maxPages, 1), 25)
+        var workouts = [HevyWorkoutDTO]()
+        var identifiers = Set<String>()
+        var totalPages: Int?
+        var pagesFetched = 0
+
+        for page in 1...safeMaxPages {
+            let response = try await fetchWorkoutPage(apiKey: apiKey, page: page, pageSize: safePageSize)
+            pagesFetched += 1
+            totalPages = response.pageCount ?? totalPages
+            for workout in response.workouts where identifiers.insert(workout.id).inserted {
+                workouts.append(workout)
+            }
+            if response.workouts.isEmpty { break }
+            if let pageCount = response.pageCount, page >= pageCount { break }
+            if response.pageCount == nil, response.workouts.count < safePageSize { break }
+        }
+
+        return HevyWorkoutBatch(
+            workouts: workouts,
+            pagesFetched: pagesFetched,
+            totalPages: totalPages,
+            isTruncated: totalPages.map { pagesFetched < $0 } ?? (pagesFetched == safeMaxPages && workouts.count == safePageSize * safeMaxPages)
+        )
+    }
+
+    private func fetchWorkoutPage(apiKey: String, page: Int, pageSize: Int) async throws -> HevyWorkoutsResponse {
         var components = URLComponents(string: "https://api.hevyapp.com/v1/workouts")!
         components.queryItems = [
-            URLQueryItem(name: "page", value: "1"),
+            URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "pageSize", value: String(pageSize))
         ]
         var request = URLRequest(url: components.url!)
@@ -29,10 +61,14 @@ struct HevyService {
             if http.statusCode == 403 { throw HevyError.proRequired }
             throw HevyError.api("Hevy devolvió el código \(http.statusCode).")
         }
-        return try Self.decodeWorkouts(data)
+        return try Self.decodeWorkoutPage(data)
     }
 
     static func decodeWorkouts(_ data: Data) throws -> [HevyWorkoutDTO] {
+        try decodeWorkoutPage(data).workouts
+    }
+
+    static func decodeWorkoutPage(_ data: Data) throws -> HevyWorkoutsResponse {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .custom { decoder in
             let value = try decoder.singleValueContainer().decode(String.self)
@@ -43,12 +79,26 @@ struct HevyService {
             if let date = standard.date(from: value) { return date }
             throw DecodingError.dataCorruptedError(in: try decoder.singleValueContainer(), debugDescription: "Fecha de Hevy no válida")
         }
-        return try decoder.decode(HevyWorkoutsResponse.self, from: data).workouts
+        return try decoder.decode(HevyWorkoutsResponse.self, from: data)
     }
 }
 
-struct HevyWorkoutsResponse: Decodable {
+struct HevyWorkoutBatch: Equatable {
     let workouts: [HevyWorkoutDTO]
+    let pagesFetched: Int
+    let totalPages: Int?
+    let isTruncated: Bool
+}
+
+struct HevyWorkoutsResponse: Decodable {
+    let page: Int?
+    let pageCount: Int?
+    let workouts: [HevyWorkoutDTO]
+
+    enum CodingKeys: String, CodingKey {
+        case page, workouts
+        case pageCount = "page_count"
+    }
 }
 
 struct HevyWorkoutDTO: Decodable, Equatable {

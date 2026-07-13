@@ -149,7 +149,7 @@ El sueño se atribuye al día de despertar, une intervalos solapados y elige una
 
 - Strava: activa `Ajustes > Gestionar apps y dispositivos > Salud > Enviar a Salud`. Caltrack importará tipo de actividad, duración, distancia, calorías y fuente desde HealthKit.
 - Hevy: conecta Hevy con Apple Salud para importar el resumen de cada sesión.
-- Hevy Pro: añade la clave de la API oficial en Ajustes de Caltrack para recuperar ejercicios, series, repeticiones, cargas, RPE, volumen y mejores series.
+- Hevy Pro: añade la clave de la API oficial en Ajustes de Caltrack para recuperar ejercicios, series, repeticiones, cargas, RPE, volumen y mejores series. La primera sincronización recupera hasta los 100 entrenamientos más recientes. Después consulta una sola página para mantener el historial al día sin multiplicar peticiones.
 
 Caltrack detecta sesiones equivalentes de Salud y Hevy para no duplicarlas.
 

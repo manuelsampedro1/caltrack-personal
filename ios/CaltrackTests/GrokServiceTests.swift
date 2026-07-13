@@ -105,6 +105,45 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(entry.externalID, "hevy:workout-1")
     }
 
+    func testHevyPaginationStopsAtPageCountAndDeduplicates() async throws {
+        HevyURLProtocolStub.configure(responses: [
+            1: hevyPage(page: 1, pageCount: 2, workouts: [hevyWorkout(id: "one", day: 12), hevyWorkout(id: "two", day: 10)]),
+            2: hevyPage(page: 2, pageCount: 2, workouts: [hevyWorkout(id: "two", day: 10), hevyWorkout(id: "three", day: 8)])
+        ])
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [HevyURLProtocolStub.self]
+        let session = URLSession(configuration: configuration)
+        defer { session.invalidateAndCancel() }
+
+        let batch = try await HevyService(session: session).fetchWorkoutBatch(apiKey: "test-key", pageSize: 2, maxPages: 10)
+
+        XCTAssertEqual(batch.workouts.map(\.id), ["one", "two", "three"])
+        XCTAssertEqual(batch.pagesFetched, 2)
+        XCTAssertEqual(batch.totalPages, 2)
+        XCTAssertFalse(batch.isTruncated)
+        XCTAssertEqual(HevyURLProtocolStub.pages, [1, 2])
+        XCTAssertEqual(HevyURLProtocolStub.pageSizes, [2, 2])
+    }
+
+    func testHevyPaginationReportsSafeBackfillLimit() async throws {
+        HevyURLProtocolStub.configure(responses: [
+            1: hevyPage(page: 1, pageCount: 4, workouts: [hevyWorkout(id: "one", day: 12)]),
+            2: hevyPage(page: 2, pageCount: 4, workouts: [hevyWorkout(id: "two", day: 10)])
+        ])
+        let configuration = URLSessionConfiguration.ephemeral
+        configuration.protocolClasses = [HevyURLProtocolStub.self]
+        let session = URLSession(configuration: configuration)
+        defer { session.invalidateAndCancel() }
+
+        let batch = try await HevyService(session: session).fetchWorkoutBatch(apiKey: "test-key", pageSize: 1, maxPages: 2)
+
+        XCTAssertEqual(batch.workouts.map(\.id), ["one", "two"])
+        XCTAssertEqual(batch.pagesFetched, 2)
+        XCTAssertEqual(batch.totalPages, 4)
+        XCTAssertTrue(batch.isTruncated)
+        XCTAssertEqual(HevyURLProtocolStub.pages, [1, 2])
+    }
+
     func testHevyDeduplicationNeedsSourceAndCloseStartTime() {
         let start = Date(timeIntervalSince1970: 1_700_000_000)
         XCTAssertTrue(WorkoutMatch.representsSameSession(sourceName: "Hevy", sourceBundle: "com.hevyapp.hevy", startDate: start, hevyStartDate: start.addingTimeInterval(300)))
@@ -664,4 +703,60 @@ final class GrokServiceTests: XCTestCase {
             )
         }
     }
+
+    private func hevyPage(page: Int, pageCount: Int, workouts: [String]) -> Data {
+        Data("{\"page\":\(page),\"page_count\":\(pageCount),\"workouts\":[\(workouts.joined(separator: ","))]}".utf8)
+    }
+
+    private func hevyWorkout(id: String, day: Int) -> String {
+        "{\"id\":\"\(id)\",\"title\":\"Sesión \(id)\",\"start_time\":\"2026-07-\(String(format: "%02d", day))T08:00:00Z\",\"end_time\":\"2026-07-\(String(format: "%02d", day))T09:00:00Z\",\"exercises\":[]}"
+    }
+}
+
+private final class HevyURLProtocolStub: URLProtocol {
+    private static let lock = NSLock()
+    private static var responseByPage = [Int: Data]()
+    private static var recordedPages = [Int]()
+    private static var recordedPageSizes = [Int]()
+
+    static var pages: [Int] {
+        lock.withLock { recordedPages }
+    }
+
+    static var pageSizes: [Int] {
+        lock.withLock { recordedPageSizes }
+    }
+
+    static func configure(responses: [Int: Data]) {
+        lock.withLock {
+            responseByPage = responses
+            recordedPages = []
+            recordedPageSizes = []
+        }
+    }
+
+    override class func canInit(with request: URLRequest) -> Bool { true }
+
+    override class func canonicalRequest(for request: URLRequest) -> URLRequest { request }
+
+    override func startLoading() {
+        let components = URLComponents(url: request.url!, resolvingAgainstBaseURL: false)
+        let page = Int(components?.queryItems?.first(where: { $0.name == "page" })?.value ?? "") ?? 0
+        let pageSize = Int(components?.queryItems?.first(where: { $0.name == "pageSize" })?.value ?? "") ?? 0
+        let data = Self.lock.withLock { () -> Data? in
+            Self.recordedPages.append(page)
+            Self.recordedPageSizes.append(pageSize)
+            return Self.responseByPage[page]
+        }
+        guard let data, let url = request.url else {
+            client?.urlProtocol(self, didFailWithError: URLError(.badServerResponse))
+            return
+        }
+        let response = HTTPURLResponse(url: url, statusCode: 200, httpVersion: nil, headerFields: ["Content-Type": "application/json"])!
+        client?.urlProtocol(self, didReceive: response, cacheStoragePolicy: .notAllowed)
+        client?.urlProtocol(self, didLoad: data)
+        client?.urlProtocolDidFinishLoading(self)
+    }
+
+    override func stopLoading() {}
 }

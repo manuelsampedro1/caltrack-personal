@@ -155,3 +155,9 @@ La referencia inicial es 25 g al día, basada en la ingesta adecuada para adulto
 Grok añade `fiber_g` a la misma salida estructurada. Open Food Facts aporta `fiber_100g` cuando existe. HealthKit recibe `dietaryFiber` si está autorizado. En una actualización, Caltrack pide el permiso nuevo al guardar en contexto; rechazar solo fibra no bloquea los cuatro nutrientes anteriores.
 
 La base y el backup v1 conservan compatibilidad mediante campos opcionales. La migración v1.9 a v1.10 mantiene las comidas anteriores con fibra desconocida, sin reescribir su historia.
+
+### Hevy sin pérdida silenciosa ni exceso de peticiones
+
+La primera conexión recupera hasta diez páginas oficiales de diez entrenamientos, 100 sesiones en total. Las siguientes sincronizaciones consultan solo la primera página porque el historial ya está persistido y las sesiones se actualizan por su identificador estable. Cambiar o eliminar la clave reinicia la carga inicial.
+
+El cliente respeta `page_count`, elimina IDs repetidos entre páginas y conserva compatibilidad con respuestas sin metadatos. Si la cuenta tiene más de 100 sesiones, la app lo dice en lugar de sugerir que importó todo. No se añade un proceso de fondo, servidor ni acceso directo a Strava.
