@@ -9,9 +9,9 @@
 
 ## Fase 2: Artefacto
 
-- [ ] Ejecutar pruebas desde el SHA de release.
-- [ ] Archivar y exportar IPA.
-- [ ] Verificar firma, entitlements, versión y checksum.
+- [x] Ejecutar pruebas desde el SHA de release.
+- [x] Archivar y exportar IPA.
+- [x] Verificar firma, entitlements, versión y checksum.
 
 ## Fase 3: App Store Connect
 
