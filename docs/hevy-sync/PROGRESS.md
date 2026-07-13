@@ -1,6 +1,6 @@
 # Progreso de sincronización de Hevy
 
-## Estado: validación en curso
+## Estado: completado y publicado
 
 ## Evidencia
 
@@ -10,8 +10,9 @@
 - 35 pruebas unitarias y 14 pruebas UI sin fallos, 49 en total.
 - Paginación, límite, deduplicación y respuesta legacy cubiertos.
 - Release 1.11 (12) firmada, sin warnings, con HealthKit y App Group verificados.
+- Commit funcional `0cac5d043764f9935e39e53421908ba7e076a604` publicado por GitHub Actions, ejecución `29216444934` terminada con éxito.
+- URL pública comprobada con HTTP 200 tras el despliegue.
 
-## Pendiente
+## Pendiente fuera de automatización
 
-- Publicación.
 - Validación con el iPhone cuando vuelva a estar disponible.

@@ -18,4 +18,4 @@
 
 - [x] Probar paginación, deduplicación, límite y compatibilidad.
 - [x] Ejecutar suite y build firmado.
-- [ ] Publicar y verificar Pages.
+- [x] Publicar y verificar Pages.
