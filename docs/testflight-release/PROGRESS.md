@@ -14,6 +14,8 @@
 - HealthKit y App Group presentes, `get-task-allow` desactivado y perfiles Store sin dispositivos.
 - SHA-256 del IPA: `2485fb78503dc0b94c1b069db479c9a0ccdaf0400299973e1081c154d1bb8283`.
 - La validación remota llega a Apple y solo falla al asociar el bundle porque la ficha aún no existe.
+- Build 13 preparada con manifiesto de privacidad en app y widget.
+- 36 pruebas unitarias pasan, incluida la verificación del manifiesto y export compliance.
 
 ## Bloqueos externos actuales
 
@@ -24,4 +26,5 @@
 ## Siguiente acción segura
 
 - Con una cuenta Admin o App Manager, crear una app iOS llamada `Caltrack`, idioma `Español (España)`, bundle ID `com.manuelsampedro.caltrack` y SKU `caltrack-personal-ios`.
-- Después ejecutar `ios/scripts/release_testflight.sh 12 upload` con la credencial activa no expuesta.
+- Regenerar el IPA como build 13 con el manifiesto de privacidad y export compliance incluidos.
+- Después ejecutar `ios/scripts/release_testflight.sh 13 upload` con la credencial activa no expuesta.

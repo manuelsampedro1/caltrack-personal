@@ -166,10 +166,10 @@ ruby ios/scripts/generate_project.rb
 El flujo de distribución exige un repositorio limpio y credenciales `ASC_*` externas al proyecto. Para archivar y exportar la build declarada sin subirla:
 
 ```bash
-ios/scripts/release_testflight.sh 12 archive
+ios/scripts/release_testflight.sh 13 archive
 ```
 
-La acción `upload` valida y sube el mismo IPA cuando la ficha de App Store Connect ya existe. El script deja commit, versión, build y SHA-256 en `build/release-12/manifest.txt`.
+La acción `upload` valida y sube el mismo IPA cuando la ficha de App Store Connect ya existe. El script deja commit, versión, build y SHA-256 en `build/release-13/manifest.txt`.
 
 La foto elegida se envía directamente a `api.x.ai` para el análisis. Los datos de Salud no se envían a xAI. Consulta [PRIVACY.md](PRIVACY.md).
 

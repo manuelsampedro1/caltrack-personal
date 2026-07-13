@@ -12,6 +12,9 @@
 - [x] Ejecutar pruebas desde el SHA de release.
 - [x] Archivar y exportar IPA.
 - [x] Verificar firma, entitlements, versión y checksum.
+- [x] Añadir manifiesto de privacidad a app y widget.
+- [x] Declarar export compliance exento.
+- [ ] Regenerar y verificar la build 13.
 
 ## Fase 3: App Store Connect
 

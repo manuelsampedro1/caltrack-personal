@@ -479,6 +479,28 @@ final class GrokServiceTests: XCTestCase {
         XCTAssertEqual(CaltrackShortcuts.appShortcuts.count, 4)
     }
 
+    func testReleasePrivacyManifestAndExportComplianceAreBundled() throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "PrivacyInfo", withExtension: "xcprivacy"))
+        let data = try Data(contentsOf: url)
+        let root = try XCTUnwrap(PropertyListSerialization.propertyList(from: data, format: nil) as? [String: Any])
+
+        XCTAssertEqual(root["NSPrivacyTracking"] as? Bool, false)
+        let collected = try XCTUnwrap(root["NSPrivacyCollectedDataTypes"] as? [[String: Any]])
+        let collectedTypes = Set(collected.compactMap { $0["NSPrivacyCollectedDataType"] as? String })
+        XCTAssertEqual(collectedTypes, [
+            "NSPrivacyCollectedDataTypePhotosorVideos",
+            "NSPrivacyCollectedDataTypeOtherUserContent",
+            "NSPrivacyCollectedDataTypeHealth",
+            "NSPrivacyCollectedDataTypeFitness"
+        ])
+        XCTAssertTrue(collected.allSatisfy { $0["NSPrivacyCollectedDataTypeTracking"] as? Bool == false })
+
+        let accessed = try XCTUnwrap(root["NSPrivacyAccessedAPITypes"] as? [[String: Any]])
+        let defaults = try XCTUnwrap(accessed.first { $0["NSPrivacyAccessedAPIType"] as? String == "NSPrivacyAccessedAPICategoryUserDefaults" })
+        XCTAssertEqual(Set(defaults["NSPrivacyAccessedAPITypeReasons"] as? [String] ?? []), ["CA92.1", "1C8F.1"])
+        XCTAssertEqual(Bundle.main.object(forInfoDictionaryKey: "ITSAppUsesNonExemptEncryption") as? Bool, false)
+    }
+
     func testRecoverySleepAggregationMergesDuplicatesAndChoosesBestSource() throws {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = try XCTUnwrap(TimeZone(secondsFromGMT: 0))

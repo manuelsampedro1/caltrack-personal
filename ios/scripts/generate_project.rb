@@ -42,6 +42,9 @@ source_refs = Dir[File.join(root, 'Caltrack', '*.swift')].sort.map { |path| app_
 app.add_file_references(source_refs)
 assets = app_group.new_file('Assets.xcassets')
 app.resources_build_phase.add_file_reference(assets)
+privacy_manifest = app_group.new_file('PrivacyInfo.xcprivacy')
+app.resources_build_phase.add_file_reference(privacy_manifest)
+widget.resources_build_phase.add_file_reference(privacy_manifest)
 app_group.new_file('Caltrack.entitlements')
 
 widget_group = project.main_group.new_group('CaltrackWidgets', 'CaltrackWidgets')
@@ -72,13 +75,14 @@ app.build_configurations.each do |config|
   settings['ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME'] = 'AccentColor'
   settings['CODE_SIGN_ENTITLEMENTS'] = 'Caltrack/Caltrack.entitlements'
   settings['CODE_SIGN_STYLE'] = 'Automatic'
-  settings['CURRENT_PROJECT_VERSION'] = '12'
+  settings['CURRENT_PROJECT_VERSION'] = '13'
   settings['DEVELOPMENT_TEAM'] = '6BG94RDHDG'
   settings['GENERATE_INFOPLIST_FILE'] = 'YES'
   settings['INFOPLIST_KEY_CFBundleDisplayName'] = 'Caltrack'
   settings['INFOPLIST_KEY_NSCameraUsageDescription'] = 'Caltrack usa la cámara para analizar una comida cuando decides fotografiarla.'
   settings['INFOPLIST_KEY_NSHealthShareUsageDescription'] = 'Caltrack lee el peso, la composición corporal, la actividad, la recuperación y los entrenamientos que autorices para reunir tu progreso en un solo lugar.'
   settings['INFOPLIST_KEY_NSHealthUpdateUsageDescription'] = 'Caltrack guarda en Salud las calorías y macros de las comidas que confirmes cuando activas esta opción.'
+  settings['INFOPLIST_KEY_ITSAppUsesNonExemptEncryption'] = 'NO'
   settings['INFOPLIST_KEY_UIApplicationSceneManifest_Generation'] = 'YES'
   settings['INFOPLIST_KEY_UILaunchScreen_Generation'] = 'YES'
   settings['INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone'] = 'UIInterfaceOrientationPortrait'
@@ -97,7 +101,7 @@ widget.build_configurations.each do |config|
   settings['APPLICATION_EXTENSION_API_ONLY'] = 'YES'
   settings['CODE_SIGN_ENTITLEMENTS'] = 'CaltrackWidgets/CaltrackWidgets.entitlements'
   settings['CODE_SIGN_STYLE'] = 'Automatic'
-  settings['CURRENT_PROJECT_VERSION'] = '12'
+  settings['CURRENT_PROJECT_VERSION'] = '13'
   settings['DEVELOPMENT_TEAM'] = '6BG94RDHDG'
   settings['GENERATE_INFOPLIST_FILE'] = 'NO'
   settings['INFOPLIST_FILE'] = 'CaltrackWidgets/Info.plist'

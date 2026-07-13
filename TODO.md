@@ -7,7 +7,7 @@
 - [x] Integrar Apple Salud mediante el cliente iOS nativo.
 - [x] Renovar la firma y generar perfiles con HealthKit y App Groups para app y widget.
 - [ ] Conectar el iPhone de Manolo por cable o Wi-Fi y ejecutar la app nativa.
-- [ ] Crear la ficha de Caltrack en App Store Connect con una cuenta Admin o App Manager y subir la build 12 a TestFlight interno.
+- [ ] Crear la ficha de Caltrack en App Store Connect con una cuenta Admin o App Manager y subir la build 13 a TestFlight interno.
 - [ ] Revocar la clave secundaria de App Store Connect expuesta por una traza y crear otra si sigue siendo necesaria.
 - [ ] Crear o facilitar una clave de xAI y guardarla desde Ajustes de Caltrack.
 - [ ] En Strava, activar `Gestionar apps y dispositivos > Salud > Enviar a Salud`.

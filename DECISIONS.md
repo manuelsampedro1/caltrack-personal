@@ -167,3 +167,9 @@ El cliente respeta `page_count`, elimina IDs repetidos entre páginas y conserva
 Caltrack no se archiva desde un árbol sucio. El script de release exige un commit limpio, comprueba que la build solicitada coincide con el proyecto y genera un manifiesto con SHA del commit y checksum del IPA. Las claves de App Store Connect siguen fuera del repo.
 
 La creación de la ficha y la subida quedan separadas. Así se puede verificar el artefacto completo sin usar una credencial filtrada ni fingir que una build local ya está distribuida.
+
+### Privacidad conservadora en el binario
+
+El manifiesto declara cero tracking y ningún uso publicitario. Incluye los dos motivos aprobados de `UserDefaults`, datos privados de la propia app y datos compartidos con la extensión mediante App Group. Como el usuario puede enviar voluntariamente una foto o un resumen al entrenador de xAI, se declaran foto, contenido, salud y fitness como vinculados y usados solo para funcionalidad.
+
+Caltrack usa HTTPS y Keychain proporcionados por iOS, no implementa criptografía propia. `ITSAppUsesNonExemptEncryption` queda en `NO` para evitar preguntas repetidas de export compliance sin ocultar el uso de las APIs seguras del sistema.

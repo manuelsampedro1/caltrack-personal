@@ -35,3 +35,14 @@ Fuentes:
 ## Incidente de credencial
 
 Una traza de Fastlane mostró material privado de una clave secundaria. Esa clave queda fuera de uso y debe revocarse. La credencial activa usada por Xcode es otra y no apareció en la traza.
+
+## Privacidad y export compliance
+
+Apple exige motivos aprobados para `UserDefaults` desde mayo de 2024. Caltrack usa preferencias privadas y un App Group, por lo que declara `CA92.1` y `1C8F.1`. También declara de forma conservadora foto, contenido, salud y fitness porque una pregunta voluntaria a xAI puede incluir esos datos.
+
+Caltrack no implementa cifrado propio. HTTPS y Keychain son APIs de Apple, por lo que la build declara `ITSAppUsesNonExemptEncryption` en `NO`.
+
+Fuentes:
+
+- <https://developer.apple.com/documentation/bundleresources/privacy-manifest-files>
+- <https://developer.apple.com/documentation/BundleResources/Information-Property-List/ITSAppUsesNonExemptEncryption>
