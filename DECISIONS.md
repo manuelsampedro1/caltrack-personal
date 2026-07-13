@@ -161,3 +161,9 @@ La base y el backup v1 conservan compatibilidad mediante campos opcionales. La m
 La primera conexión recupera hasta diez páginas oficiales de diez entrenamientos, 100 sesiones en total. Las siguientes sincronizaciones consultan solo la primera página porque el historial ya está persistido y las sesiones se actualizan por su identificador estable. Cambiar o eliminar la clave reinicia la carga inicial.
 
 El cliente respeta `page_count`, elimina IDs repetidos entre páginas y conserva compatibilidad con respuestas sin metadatos. Si la cuenta tiene más de 100 sesiones, la app lo dice en lugar de sugerir que importó todo. No se añade un proceso de fondo, servidor ni acceso directo a Strava.
+
+### Release reproducible antes de TestFlight
+
+Caltrack no se archiva desde un árbol sucio. El script de release exige un commit limpio, comprueba que la build solicitada coincide con el proyecto y genera un manifiesto con SHA del commit y checksum del IPA. Las claves de App Store Connect siguen fuera del repo.
+
+La creación de la ficha y la subida quedan separadas. Así se puede verificar el artefacto completo sin usar una credencial filtrada ni fingir que una build local ya está distribuida.

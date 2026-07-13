@@ -161,6 +161,16 @@ Para regenerar el proyecto después de añadir archivos Swift:
 ruby ios/scripts/generate_project.rb
 ```
 
+### Release para TestFlight
+
+El flujo de distribución exige un repositorio limpio y credenciales `ASC_*` externas al proyecto. Para archivar y exportar la build declarada sin subirla:
+
+```bash
+ios/scripts/release_testflight.sh 12 archive
+```
+
+La acción `upload` valida y sube el mismo IPA cuando la ficha de App Store Connect ya existe. El script deja commit, versión, build y SHA-256 en `build/release-12/manifest.txt`.
+
 La foto elegida se envía directamente a `api.x.ai` para el análisis. Los datos de Salud no se envían a xAI. Consulta [PRIVACY.md](PRIVACY.md).
 
 No hace falta una clave de OpenAI. Caltrack utiliza una única API de IA, xAI Grok, para visión, salida nutricional estructurada y preguntas voluntarias al entrenador. El cálculo de objetivos, adherencia, tendencias y avisos básicos se ejecuta localmente.
