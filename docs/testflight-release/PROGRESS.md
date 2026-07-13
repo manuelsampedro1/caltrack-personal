@@ -16,6 +16,12 @@
 - La validación remota llega a Apple y solo falla al asociar el bundle porque la ficha aún no existe.
 - Build 13 preparada con manifiesto de privacidad en app y widget.
 - 36 pruebas unitarias pasan, incluida la verificación del manifiesto y export compliance.
+- Suite completa build 13: 36 pruebas unitarias y 14 UI, 50 sin fallos.
+- Archive y export build 13 correctos desde `1e082a8381c254e47ef2b498502d30aa1b98d6c3`.
+- IPA build 13 con Apple Distribution, HealthKit, App Group, privacidad en ambos bundles y cero warnings.
+- `ITSAppUsesNonExemptEncryption=false` comprobado dentro del IPA.
+- SHA-256 definitivo: `36c63f8a3f7eeb748e1c951ef35950ce57a27980d462f761610d8b990733f1ed`.
+- La build 12 anterior queda reemplazada por la 13 y no debe subirse.
 
 ## Bloqueos externos actuales
 
@@ -26,5 +32,4 @@
 ## Siguiente acción segura
 
 - Con una cuenta Admin o App Manager, crear una app iOS llamada `Caltrack`, idioma `Español (España)`, bundle ID `com.manuelsampedro.caltrack` y SKU `caltrack-personal-ios`.
-- Regenerar el IPA como build 13 con el manifiesto de privacidad y export compliance incluidos.
 - Después ejecutar `ios/scripts/release_testflight.sh 13 upload` con la credencial activa no expuesta.
